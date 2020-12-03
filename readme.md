@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/FastyBird/mqtt-plugin.svg?style=flat-square)](https://travis-ci.com/FastyBird/mqtt-plugin)
 [![Code coverage](https://img.shields.io/coveralls/FastyBird/mqtt-plugin.svg?style=flat-square)](https://coveralls.io/r/FastyBird/mqtt-plugin)
-![PHP from Travis config](https://img.shields.io/travis/php-v/fastybird/mqtt-plugin?style=flat-square)
+![PHP](https://img.shields.io/packagist/php-v/fastybird/mqtt-plugin?style=flat-square)
 [![Licence](https://img.shields.io/packagist/l/FastyBird/mqtt-plugin.svg?style=flat-square)](https://packagist.org/packages/FastyBird/mqtt-plugin)
 [![Downloads total](https://img.shields.io/packagist/dt/FastyBird/mqtt-plugin.svg?style=flat-square)](https://packagist.org/packages/FastyBird/mqtt-plugin)
 [![Latest stable](https://img.shields.io/packagist/v/FastyBird/mqtt-plugin.svg?style=flat-square)](https://packagist.org/packages/FastyBird/mqtt-plugin)
