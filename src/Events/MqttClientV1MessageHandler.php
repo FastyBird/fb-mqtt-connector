@@ -83,7 +83,7 @@ class MqttClientV1MessageHandler
 
 			} catch (Exceptions\ParseMessageException $ex) {
 				$this->logger->debug(
-					'[MQTT_CLIENT_V1] Received message could not be successfully parsed to entity.',
+					'[FB:PLUGIN:MQTT] Received message could not be successfully parsed to entity.',
 					[
 						'exception' => [
 							'message' => $ex->getMessage(),

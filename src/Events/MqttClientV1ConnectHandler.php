@@ -78,10 +78,10 @@ class MqttClientV1ConnectHandler
 				->subscribe($topic)
 				->done(
 					function (Mqtt\Subscription $subscription): void {
-						$this->logger->info(sprintf('[MQTT_CLIENT_V1] Subscribed to: %s', $subscription->getFilter()));
+						$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Subscribed to: %s', $subscription->getFilter()));
 					},
 					function (Throwable $ex): void {
-						$this->logger->error('[MQTT_CLIENT_V1] ' . $ex->getMessage(), [
+						$this->logger->error('[FB:PLUGIN:MQTT] ' . $ex->getMessage(), [
 							'exception' => [
 								'message' => $ex->getMessage(),
 								'code'    => $ex->getCode(),

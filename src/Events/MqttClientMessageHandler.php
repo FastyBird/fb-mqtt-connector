@@ -63,7 +63,7 @@ class MqttClientMessageHandler
 	public function __invoke(Mqtt\Message $message, MQTTClient\Client\IClient $client): void
 	{
 		// Broker send message
-		$this->logger->info(sprintf('[MQTT_CLIENT] Received message in topic: %s with payload %s', $message->getTopic(), $message->getPayload()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Received message in topic: %s with payload %s', $message->getTopic(), $message->getPayload()), [
 			'server'  => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),
@@ -87,7 +87,7 @@ class MqttClientMessageHandler
 				switch ($param3) {
 					// Notice
 					case 'N':
-						$this->logger->notice('[MQTT_CLIENT] ' . $payload);
+						$this->logger->notice('[FB:PLUGIN:MQTT] ' . $payload);
 
 						// Nev device connected message
 						if (strpos($message->getPayload(), self::NEW_CLIENT_MESSAGE_PAYLOAD) !== false) {
@@ -105,16 +105,16 @@ class MqttClientMessageHandler
 
 					// Error
 					case 'E':
-						$this->logger->error('[MQTT_CLIENT] ' . $payload);
+						$this->logger->error('[FB:PLUGIN:MQTT] ' . $payload);
 						break;
 
 					// Information
 					case 'I':
-						$this->logger->info('[MQTT_CLIENT] ' . $payload);
+						$this->logger->info('[FB:PLUGIN:MQTT] ' . $payload);
 						break;
 
 					default:
-						$this->logger->debug('[MQTT_CLIENT] ' . $param3 . ': ' . $payload);
+						$this->logger->debug('[FB:PLUGIN:MQTT] ' . $param3 . ': ' . $payload);
 						break;
 				}
 			}

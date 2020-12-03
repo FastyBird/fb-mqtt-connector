@@ -51,7 +51,7 @@ class MqttClientWarningHandler
 	public function __invoke(Throwable $ex, MQTTClient\Client\IClient $client): void
 	{
 		// Broker warning occur
-		$this->logger->warning(sprintf('[MQTT_CLIENT] There was an error  %s', $ex->getMessage()), [
+		$this->logger->warning(sprintf('[FB:PLUGIN:MQTT] There was an error  %s', $ex->getMessage()), [
 			'server' => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),

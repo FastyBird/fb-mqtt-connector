@@ -51,7 +51,7 @@ class MqttClientCloseHandler
 	public function __invoke(Mqtt\Connection $connection, MQTTClient\Client\IClient $client): void
 	{
 		// Network connection closed
-		$this->logger->info(sprintf('[MQTT_CLIENT] Connection to MQTT broker: %s was closed', $client->getUri()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Connection to MQTT broker: %s was closed', $client->getUri()), [
 			'server'      => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),

@@ -27,7 +27,7 @@ final class MqttClientV1ConnectHandlerTest extends BaseMockeryTestCase
 		$logger
 			->shouldReceive('info')
 			->withArgs(function (string $message): bool {
-				Assert::true(Utils\Strings::startsWith($message, '[MQTT_CLIENT_V1] Subscribed to: /fb/v1/+'));
+				Assert::true(Utils\Strings::startsWith($message, '[FB:PLUGIN:MQTT] Subscribed to: /fb/v1/+'));
 
 				return true;
 			});
@@ -60,7 +60,7 @@ final class MqttClientV1ConnectHandlerTest extends BaseMockeryTestCase
 		$logger
 			->shouldReceive('error')
 			->withArgs(function (string $message): bool {
-				Assert::same($message, '[MQTT_CLIENT_V1] Went wrong');
+				Assert::same($message, '[FB:PLUGIN:MQTT] Went wrong');
 
 				return true;
 			});

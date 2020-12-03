@@ -51,7 +51,7 @@ class MqttClientOpenHandler
 	public function __invoke(Mqtt\Connection $connection, MQTTClient\Client\IClient $client): void
 	{
 		// Network connection established
-		$this->logger->info(sprintf('[MQTT_CLIENT] Established connection to MQTT broker: %s', $client->getUri()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Established connection to MQTT broker: %s', $client->getUri()), [
 			'server'      => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),

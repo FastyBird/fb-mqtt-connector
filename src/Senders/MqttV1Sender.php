@@ -458,7 +458,7 @@ final class MqttV1Sender implements ISender
 		);
 
 		$this->logger->info(sprintf(
-			'[MQTT_CLIENT_V1] Published message to topic: %s',
+			'[FB:PLUGIN:MQTT] Published message to topic: %s',
 			$message->getTopic()
 		), [
 			'topic'   => $message->getTopic(),

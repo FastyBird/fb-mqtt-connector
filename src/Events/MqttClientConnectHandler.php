@@ -53,7 +53,7 @@ class MqttClientConnectHandler
 	public function __invoke(Mqtt\Connection $connection, MQTTClient\Client\IClient $client): void
 	{
 		// Broker connected
-		$this->logger->info(sprintf('[MQTT_CLIENT] Connected to MQTT broker with client id %s', $connection->getClientID()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Connected to MQTT broker with client id %s', $connection->getClientID()), [
 			'server'      => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),
@@ -71,10 +71,10 @@ class MqttClientConnectHandler
 			->subscribe($topic)
 			->done(
 				function (Mqtt\Subscription $subscription): void {
-					$this->logger->info(sprintf('[MQTT_CLIENT] Subscribed to: %s', $subscription->getFilter()));
+					$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Subscribed to: %s', $subscription->getFilter()));
 				},
 				function (Throwable $ex): void {
-					$this->logger->error('[MQTT_CLIENT] ' . $ex->getMessage(), [
+					$this->logger->error('[FB:PLUGIN:MQTT] ' . $ex->getMessage(), [
 						'exception' => [
 							'message' => $ex->getMessage(),
 							'code'    => $ex->getCode(),

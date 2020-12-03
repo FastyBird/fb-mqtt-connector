@@ -51,7 +51,7 @@ class MqttClientDisconnectHandler
 	public function __invoke(Mqtt\Connection $connection, MQTTClient\Client\IClient $client): void
 	{
 		// Broker disconnected
-		$this->logger->info(sprintf('[MQTT_CLIENT] Disconnected from MQTT broker with client id %s', $connection->getClientID()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Disconnected from MQTT broker with client id %s', $connection->getClientID()), [
 			'server'      => [
 				'uri'  => $client->getUri(),
 				'port' => $client->getPort(),

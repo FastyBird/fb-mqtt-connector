@@ -63,19 +63,19 @@ final class Client
 			$this->mqttClient->connect()
 				->otherwise(function (Throwable $ex): void {
 					// Log error action reason
-					$this->logger->error('[ERROR] FB MQTT node - MQTT client', [
+					$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
 						'exception' => [
 							'message' => $ex->getMessage(),
 							'code'    => $ex->getCode(),
 						],
 					]);
 
-					$this->mqttClient->getLoop()->stop();
+					$this->loop->stop();
 				});
 
 		} catch (Throwable $ex) {
 			// Log error action reason
-			$this->logger->error('[ERROR] FB MQTT node - MQTT client', [
+			$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
 				'exception' => [
 					'message' => $ex->getMessage(),
 					'code'    => $ex->getCode(),
