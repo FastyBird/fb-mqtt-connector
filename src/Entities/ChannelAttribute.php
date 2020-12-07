@@ -55,14 +55,6 @@ final class ChannelAttribute extends Attribute
 	}
 
 	/**
-	 * @return string
-	 */
-	public function getChannel(): string
-	{
-		return $this->channel;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public function toArray(): array
@@ -70,6 +62,14 @@ final class ChannelAttribute extends Attribute
 		return array_merge([
 			'channel' => $this->getChannel(),
 		], parent::toArray());
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getChannel(): string
+	{
+		return $this->channel;
 	}
 
 	/**

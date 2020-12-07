@@ -62,7 +62,8 @@ class MqttClientCloseHandler
 			],
 		]);
 
-		$client->getLoop()->stop();
+		$client->getLoop()
+			->stop();
 	}
 
 }

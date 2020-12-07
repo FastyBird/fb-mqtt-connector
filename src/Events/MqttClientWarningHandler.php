@@ -62,7 +62,8 @@ class MqttClientWarningHandler
 			],
 		]);
 
-		$client->getLoop()->stop();
+		$client->getLoop()
+			->stop();
 	}
 
 }

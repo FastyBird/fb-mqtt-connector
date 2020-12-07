@@ -160,16 +160,6 @@ final class V1Validator
 	 *
 	 * @return bool
 	 */
-	public function validateChildDevicePart(string $topic): bool
-	{
-		return preg_match(self::DEVICE_CHILD_PARTIAL_REGEXP, $topic) === 1;
-	}
-
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateDeviceAttribute(string $topic): bool
 	{
 		if (preg_match(self::DEVICE_ATTRIBUTE_REGEXP, $topic) === 1) {
@@ -177,6 +167,16 @@ final class V1Validator
 		}
 
 		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_ATTRIBUTE_REGEXP, $topic) === 1;
+	}
+
+	/**
+	 * @param string $topic
+	 *
+	 * @return bool
+	 */
+	public function validateChildDevicePart(string $topic): bool
+	{
+		return preg_match(self::DEVICE_CHILD_PARTIAL_REGEXP, $topic) === 1;
 	}
 
 	/**

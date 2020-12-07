@@ -214,6 +214,67 @@ final class MqttV1Sender implements ISender
 	}
 
 	/**
+	 * @param string $topic
+	 * @param string|null $payload
+	 * @param int $qos
+	 * @param bool $retained
+	 *
+	 * @return Promise\ExtendedPromiseInterface
+	 */
+	private function sendToDevice(
+		string $topic,
+		?string $payload,
+		int $qos = MqttPlugin\Constants::MQTT_API_QOS_1,
+		bool $retained = false
+	): Promise\ExtendedPromiseInterface {
+		$message = new Mqtt\DefaultMessage(
+			$topic,
+			$payload ?? '',
+			$qos,
+			$retained
+		);
+
+		$this->logger->info(sprintf(
+			'[FB:PLUGIN:MQTT] Published message to topic: %s',
+			$message->getTopic()
+		), [
+			'topic'   => $message->getTopic(),
+			'payload' => $message->getPayload(),
+			'qos'     => $message->getQosLevel(),
+		]);
+
+		return $this->mqttClient
+			->publish($message);
+	}
+
+	/**
+	 * @param string $topic
+	 * @param string $device
+	 * @param string $channel
+	 * @param string $property
+	 * @param string|null $parentDevice
+	 *
+	 * @return string
+	 */
+	private function buildChannelPropertyTopic(
+		string $topic,
+		string $device,
+		string $channel,
+		string $property,
+		?string $parentDevice = null
+	): string {
+		if ($parentDevice !== null) {
+			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
+		}
+
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
+		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
+		$topic = str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
+
+		return $topic;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function sendChannelConfiguration(
@@ -239,6 +300,31 @@ final class MqttV1Sender implements ISender
 	}
 
 	/**
+	 * @param string $topic
+	 * @param string $device
+	 * @param string $channel
+	 * @param string|null $parentDevice
+	 *
+	 * @return string
+	 */
+	private function buildChannelControlTopic(
+		string $topic,
+		string $device,
+		string $channel,
+		?string $parentDevice = null
+	): string {
+		if ($parentDevice !== null) {
+			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
+		}
+
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
+		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
+		$topic = str_replace(self::CONTROL_REPLACE_STRING, Entities\ChannelControl::CONFIG, $topic);
+
+		return $topic;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function sendDeviceProperty(
@@ -256,6 +342,30 @@ final class MqttV1Sender implements ISender
 			),
 			$payload
 		);
+	}
+
+	/**
+	 * @param string $topic
+	 * @param string $device
+	 * @param string $property
+	 * @param string|null $parentDevice
+	 *
+	 * @return string
+	 */
+	private function buildDevicePropertyTopic(
+		string $topic,
+		string $device,
+		string $property,
+		?string $parentDevice = null
+	): string {
+		if ($parentDevice !== null) {
+			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
+		}
+
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
+		$topic = str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
+
+		return $topic;
 	}
 
 	/**
@@ -280,6 +390,30 @@ final class MqttV1Sender implements ISender
 		} catch (Utils\JsonException $ex) {
 			throw new Exceptions\InvalidArgumentException('Provided payload could not be json-encoded');
 		}
+	}
+
+	/**
+	 * @param string $topic
+	 * @param string $device
+	 * @param string $control
+	 * @param string|null $parentDevice
+	 *
+	 * @return string
+	 */
+	private function buildDeviceControlTopic(
+		string $topic,
+		string $device,
+		string $control,
+		?string $parentDevice = null
+	): string {
+		if ($parentDevice !== null) {
+			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
+		}
+
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
+		$topic = str_replace(self::CONTROL_REPLACE_STRING, $control, $topic);
+
+		return $topic;
 	}
 
 	/**
@@ -334,140 +468,6 @@ final class MqttV1Sender implements ISender
 			),
 			'true'
 		);
-	}
-
-	/**
-	 * @param string $topic
-	 * @param string $device
-	 * @param string $channel
-	 * @param string $property
-	 * @param string|null $parentDevice
-	 *
-	 * @return string
-	 */
-	private function buildChannelPropertyTopic(
-		string $topic,
-		string $device,
-		string $channel,
-		string $property,
-		?string $parentDevice = null
-	): string {
-		if ($parentDevice !== null) {
-			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
-		}
-
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
-		$topic = str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
-
-		return $topic;
-	}
-
-	/**
-	 * @param string $topic
-	 * @param string $device
-	 * @param string $channel
-	 * @param string|null $parentDevice
-	 *
-	 * @return string
-	 */
-	private function buildChannelControlTopic(
-		string $topic,
-		string $device,
-		string $channel,
-		?string $parentDevice = null
-	): string {
-		if ($parentDevice !== null) {
-			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
-		}
-
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
-		$topic = str_replace(self::CONTROL_REPLACE_STRING, Entities\ChannelControl::CONFIG, $topic);
-
-		return $topic;
-	}
-
-	/**
-	 * @param string $topic
-	 * @param string $device
-	 * @param string $property
-	 * @param string|null $parentDevice
-	 *
-	 * @return string
-	 */
-	private function buildDevicePropertyTopic(
-		string $topic,
-		string $device,
-		string $property,
-		?string $parentDevice = null
-	): string {
-		if ($parentDevice !== null) {
-			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
-		}
-
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
-
-		return $topic;
-	}
-
-	/**
-	 * @param string $topic
-	 * @param string $device
-	 * @param string $control
-	 * @param string|null $parentDevice
-	 *
-	 * @return string
-	 */
-	private function buildDeviceControlTopic(
-		string $topic,
-		string $device,
-		string $control,
-		?string $parentDevice = null
-	): string {
-		if ($parentDevice !== null) {
-			$topic = str_replace(self::PARENT_REPLACE_STRING, $parentDevice, $topic);
-		}
-
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::CONTROL_REPLACE_STRING, $control, $topic);
-
-		return $topic;
-	}
-
-	/**
-	 * @param string $topic
-	 * @param string|null $payload
-	 * @param int $qos
-	 * @param bool $retained
-	 *
-	 * @return Promise\ExtendedPromiseInterface
-	 */
-	private function sendToDevice(
-		string $topic,
-		?string $payload,
-		int $qos = MqttPlugin\Constants::MQTT_API_QOS_1,
-		bool $retained = false
-	): Promise\ExtendedPromiseInterface {
-		$message = new Mqtt\DefaultMessage(
-			$topic,
-			$payload ?? '',
-			$qos,
-			$retained
-		);
-
-		$this->logger->info(sprintf(
-			'[FB:PLUGIN:MQTT] Published message to topic: %s',
-			$message->getTopic()
-		), [
-			'topic'   => $message->getTopic(),
-			'payload' => $message->getPayload(),
-			'qos'     => $message->getQosLevel(),
-		]);
-
-		return $this->mqttClient
-			->publish($message);
 	}
 
 }

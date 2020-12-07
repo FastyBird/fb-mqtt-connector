@@ -66,11 +66,47 @@ abstract class Control extends Entity
 	}
 
 	/**
+	 * @return string[]
+	 */
+	protected function getAllowedControls(): array
+	{
+		return [];
+	}
+
+	/**
+	 * @return mixed[]
+	 */
+	public function toArray(): array
+	{
+		$return = array_merge([
+			'control' => $this->getControl(),
+		], parent::toArray());
+
+		if ($this->getValue() !== self::NOT_CONFIGURED) {
+			$return['value'] = $this->getValue();
+		}
+
+		if ($this->isConfiguration() && $this->getSchema() !== self::NOT_CONFIGURED) {
+			$return['schema'] = $this->getSchema();
+		}
+
+		return $return;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getControl(): string
 	{
 		return $this->control;
+	}
+
+	/**
+	 * @return mixed[]|string|null
+	 */
+	public function getValue()
+	{
+		return $this->value;
 	}
 
 	/**
@@ -95,9 +131,13 @@ abstract class Control extends Entity
 	/**
 	 * @return mixed[]|string|null
 	 */
-	public function getValue()
+	public function getSchema()
 	{
-		return $this->value;
+		if (!$this->isConfiguration()) {
+			throw new Exceptions\InvalidStateException(sprintf('Schema could be get only for "%s" control type', self::CONFIG));
+		}
+
+		return $this->schema;
 	}
 
 	/**
@@ -113,51 +153,11 @@ abstract class Control extends Entity
 	}
 
 	/**
-	 * @return mixed[]|string|null
-	 */
-	public function getSchema()
-	{
-		if (!$this->isConfiguration()) {
-			throw new Exceptions\InvalidStateException(sprintf('Schema could be get only for "%s" control type', self::CONFIG));
-		}
-
-		return $this->schema;
-	}
-
-	/**
 	 * @return bool
 	 */
 	public function isConfiguration(): bool
 	{
 		return $this->control === self::CONFIG;
-	}
-
-	/**
-	 * @return mixed[]
-	 */
-	public function toArray(): array
-	{
-		$return = array_merge([
-			'control' => $this->getControl(),
-		], parent::toArray());
-
-		if ($this->getValue() !== self::NOT_CONFIGURED) {
-			$return['value'] = $this->getValue();
-		}
-
-		if ($this->isConfiguration() && $this->getSchema() !== self::NOT_CONFIGURED) {
-			$return['schema'] = $this->getSchema();
-		}
-
-		return $return;
-	}
-
-	/**
-	 * @return string[]
-	 */
-	protected function getAllowedControls(): array
-	{
-		return [];
 	}
 
 }

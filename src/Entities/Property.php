@@ -52,32 +52,6 @@ abstract class Property extends Entity
 	}
 
 	/**
-	 * @return string
-	 */
-	public function getProperty(): string
-	{
-		return $this->property;
-	}
-
-	/**
-	 * @param string $value
-	 *
-	 * @return void
-	 */
-	public function setValue(string $value): void
-	{
-		$this->value = $value;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getValue(): string
-	{
-		return $this->value;
-	}
-
-	/**
 	 * @param PropertyAttribute $attribute
 	 *
 	 * @return void
@@ -87,21 +61,6 @@ abstract class Property extends Entity
 		if (!$this->attributes->contains($attribute)) {
 			$this->attributes->attach($attribute);
 		}
-	}
-
-	/**
-	 * @return PropertyAttribute[]
-	 */
-	public function getAttributes(): array
-	{
-		$data = [];
-
-		/** @var PropertyAttribute $item */
-		foreach ($this->attributes as $item) {
-			$data[] = $item;
-		}
-
-		return $data;
 	}
 
 	/**
@@ -122,6 +81,47 @@ abstract class Property extends Entity
 		}
 
 		return $return;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getProperty(): string
+	{
+		return $this->property;
+	}
+
+	/**
+	 * @return PropertyAttribute[]
+	 */
+	public function getAttributes(): array
+	{
+		$data = [];
+
+		/** @var PropertyAttribute $item */
+		foreach ($this->attributes as $item) {
+			$data[] = $item;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getValue(): string
+	{
+		return $this->value;
+	}
+
+	/**
+	 * @param string $value
+	 *
+	 * @return void
+	 */
+	public function setValue(string $value): void
+	{
+		$this->value = $value;
 	}
 
 }

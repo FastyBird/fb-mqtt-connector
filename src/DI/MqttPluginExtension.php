@@ -35,6 +35,24 @@ class MqttPluginExtension extends DI\CompilerExtension
 {
 
 	/**
+	 * @param Nette\Configurator $config
+	 * @param string $extensionName
+	 *
+	 * @return void
+	 */
+	public static function register(
+		Nette\Configurator $config,
+		string $extensionName = 'fbMqttPlugin'
+	): void {
+		$config->onCompile[] = function (
+			Nette\Configurator $config,
+			DI\Compiler $compiler
+		) use ($extensionName): void {
+			$compiler->addExtension($extensionName, new MqttPluginExtension());
+		};
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function loadConfiguration(): void
@@ -112,24 +130,6 @@ class MqttPluginExtension extends DI\CompilerExtension
 			$mqttClientService->addSetup('$onConnect[]', [$builder->getDefinitionByType(Events\MqttClientV1ConnectHandler::class)]);
 			$mqttClientService->addSetup('$onMessage[]', [$builder->getDefinitionByType(Events\MqttClientV1MessageHandler::class)]);
 		}
-	}
-
-	/**
-	 * @param Nette\Configurator $config
-	 * @param string $extensionName
-	 *
-	 * @return void
-	 */
-	public static function register(
-		Nette\Configurator $config,
-		string $extensionName = 'fbMqttPlugin'
-	): void {
-		$config->onCompile[] = function (
-			Nette\Configurator $config,
-			DI\Compiler $compiler
-		) use ($extensionName): void {
-			$compiler->addExtension($extensionName, new MqttPluginExtension());
-		};
 	}
 
 }

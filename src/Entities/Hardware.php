@@ -65,6 +65,16 @@ final class Hardware extends Entity
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public function toArray(): array
+	{
+		return array_merge([
+			$this->getParameter() => $this->getValue(),
+		], parent::toArray());
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getParameter(): string
@@ -78,16 +88,6 @@ final class Hardware extends Entity
 	public function getValue(): string
 	{
 		return $this->value;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function toArray(): array
-	{
-		return array_merge([
-			$this->getParameter() => $this->getValue(),
-		], parent::toArray());
 	}
 
 }

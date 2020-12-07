@@ -45,14 +45,6 @@ class ChannelControl extends Control
 	}
 
 	/**
-	 * @return string
-	 */
-	public function getChannel(): string
-	{
-		return $this->channel;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public function toArray(): array
@@ -60,6 +52,14 @@ class ChannelControl extends Control
 		return array_merge([
 			'channel' => $this->getChannel(),
 		], parent::toArray());
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getChannel(): string
+	{
+		return $this->channel;
 	}
 
 	/**

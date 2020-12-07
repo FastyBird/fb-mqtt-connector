@@ -64,19 +64,11 @@ abstract class Attribute extends Entity
 	}
 
 	/**
-	 * @return string
+	 * @return string[]
 	 */
-	public function getAttribute(): string
+	protected function getAllowedAttributes(): array
 	{
-		return $this->attribute;
-	}
-
-	/**
-	 * @return string|string[]
-	 */
-	public function getValue()
-	{
-		return $this->value;
+		return [];
 	}
 
 	/**
@@ -90,11 +82,19 @@ abstract class Attribute extends Entity
 	}
 
 	/**
-	 * @return string[]
+	 * @return string
 	 */
-	protected function getAllowedAttributes(): array
+	public function getAttribute(): string
 	{
-		return [];
+		return $this->attribute;
+	}
+
+	/**
+	 * @return string|string[]
+	 */
+	public function getValue()
+	{
+		return $this->value;
 	}
 
 }

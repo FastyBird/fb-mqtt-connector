@@ -22,7 +22,7 @@ $ composer require fastybird/mqtt-plugin
 
 ## Documentation
 
-Learn how to build handle MQTT messages in [documentation](https://github.com/FastyBird/mqtt-plugin/blob/master/docs/en/index.md).
+Learn how to send & receive MQTT messages in [documentation](https://github.com/FastyBird/mqtt-plugin/blob/master/docs/en/index.md).
 
 ***
 Homepage [https://www.fastybird.com](https://www.fastybird.com) and repository [https://github.com/FastyBird/mqtt-plugin](https://github.com/FastyBird/mqtt-plugin).

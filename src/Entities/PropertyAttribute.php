@@ -83,6 +83,17 @@ final class PropertyAttribute
 	}
 
 	/**
+	 * @return mixed[]
+	 */
+	public function toArray(): array
+	{
+		return [
+			'attribute' => $this->getAttribute(),
+			'value'     => $this->getValue(),
+		];
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getAttribute(): string
@@ -107,17 +118,6 @@ final class PropertyAttribute
 		}
 
 		return $this->value;
-	}
-
-	/**
-	 * @return mixed[]
-	 */
-	public function toArray(): array
-	{
-		return [
-			'attribute' => $this->getAttribute(),
-			'value'     => $this->getValue(),
-		];
 	}
 
 }

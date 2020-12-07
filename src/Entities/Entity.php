@@ -50,17 +50,21 @@ abstract class Entity implements IEntity
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getDevice(): string
+	public function toArray(): array
 	{
-		return $this->device;
+		return [
+			'device'   => $this->getDevice(),
+			'parent'   => $this->getParent(),
+			'retained' => $this->isRetained(),
+		];
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public function setParent(?string $parent): void
+	public function getDevice(): string
 	{
-		$this->parent = $parent;
+		return $this->device;
 	}
 
 	/**
@@ -74,9 +78,9 @@ abstract class Entity implements IEntity
 	/**
 	 * {@inheritDoc}
 	 */
-	public function setRetained(bool $retained): void
+	public function setParent(?string $parent): void
 	{
-		$this->retained = $retained;
+		$this->parent = $parent;
 	}
 
 	/**
@@ -90,13 +94,9 @@ abstract class Entity implements IEntity
 	/**
 	 * {@inheritDoc}
 	 */
-	public function toArray(): array
+	public function setRetained(bool $retained): void
 	{
-		return [
-			'device'   => $this->getDevice(),
-			'parent'   => $this->getParent(),
-			'retained' => $this->isRetained(),
-		];
+		$this->retained = $retained;
 	}
 
 }

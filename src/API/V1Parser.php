@@ -160,6 +160,74 @@ final class V1Parser
 	}
 
 	/**
+	 * @param string $payload
+	 * @param string $attribute
+	 *
+	 * @return string|string[]
+	 */
+	private function parseAttributePayload(
+		string $payload,
+		string $attribute
+	) {
+		if ($attribute === Entities\Attribute::NAME) {
+			$payload = $this->cleanName($payload);
+
+		} else {
+			$payload = $this->cleanPayload($payload);
+
+			if (
+				$attribute === Entities\Attribute::PROPERTIES
+				|| $attribute === Entities\Attribute::CHANNELS
+				|| $attribute === Entities\Attribute::EXTENSIONS
+				|| $attribute === Entities\Attribute::CONTROL
+			) {
+				$payload = array_filter(
+					array_map('trim', explode(',', strtolower($payload))),
+					function ($item): bool {
+						return $item !== '';
+					}
+				);
+
+				$payload = array_values($payload);
+				$payload = array_unique($payload);
+			}
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * @param string $payload
+	 *
+	 * @return string
+	 */
+	private function cleanName(string $payload): string
+	{
+		$cleaned = preg_replace('/[^A-Za-z0-9.,_ -]/', '', $payload);
+
+		return is_string($cleaned) ? $cleaned : '';
+	}
+
+	/**
+	 * @param string $payload
+	 *
+	 * @return string
+	 */
+	private function cleanPayload(string $payload): string
+	{
+		// Remove all characters except A-Z, a-z, 0-9, dots, commas, [, ], hyphens and spaces
+		// Note that the hyphen must go last not to be confused with a range (A-Z)
+		// and the dot, being special, is escaped with \
+		$payload = preg_replace('/[^A-Za-z0-9.:, -_°%µ³\/\"]/', '', $payload);
+
+		if (!is_string($payload)) {
+			return '';
+		}
+
+		return $payload;
+	}
+
+	/**
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $isChild
@@ -246,167 +314,6 @@ final class V1Parser
 	}
 
 	/**
-	 * @param string $topic
-	 * @param string $payload
-	 * @param bool $isChild
-	 *
-	 * @return Entities\DeviceControl
-	 */
-	private function parseDeviceControl(
-		string $topic,
-		string $payload,
-		bool $isChild = false
-	): Entities\DeviceControl {
-		if ($isChild) {
-			preg_match(V1Validator::DEVICE_CHILD_CONTROL_REGEXP, $topic, $matches);
-			[, $parent, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
-
-		} else {
-			preg_match(V1Validator::DEVICE_CONTROL_REGEXP, $topic, $matches);
-			[, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null];
-			$parent = null;
-		}
-
-		$control = new Entities\DeviceControl($device, $property, $parent);
-
-		if ($attribute === null) {
-			$control->setValue($payload);
-
-			return $control;
-
-		} elseif ($attribute === 'schema') {
-			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
-		}
-
-		return $control;
-	}
-
-	/**
-	 * @param string $device
-	 * @param string|null $parent
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\ChannelAttribute
-	 */
-	private function parseChannelAttribute(
-		string $device,
-		?string $parent,
-		string $topic,
-		string $payload
-	): Entities\ChannelAttribute {
-		preg_match(V1Validator::CHANNEL_ATTRIBUTE_REGEXP, $topic, $matches);
-		[, , $channel, $attribute] = $matches;
-
-		return new Entities\ChannelAttribute(
-			$device,
-			$channel,
-			$attribute,
-			$this->parseAttributePayload($payload, $attribute),
-			$parent
-		);
-	}
-
-	/**
-	 * @param string $device
-	 * @param string|null $parent
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\ChannelProperty
-	 */
-	private function parseChannelProperty(
-		string $device,
-		?string $parent,
-		string $topic,
-		string $payload
-	): Entities\ChannelProperty {
-		preg_match(V1Validator::CHANNEL_PROPERTY_REGEXP, $topic, $matches);
-		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
-
-		$entity = new Entities\ChannelProperty($device, $channel, $property, $parent);
-
-		if ($attribute !== null) {
-			$attribute = $this->parsePropertyAttribute($payload, $attribute);
-
-			$entity->addAttribute($attribute);
-
-		} else {
-			$entity->setValue($payload);
-		}
-
-		return $entity;
-	}
-
-	/**
-	 * @param string $device
-	 * @param string|null $parent
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\ChannelControl
-	 */
-	private function parseChannelControl(
-		string $device,
-		?string $parent,
-		string $topic,
-		string $payload
-	): Entities\ChannelControl {
-		preg_match(V1Validator::CHANNEL_CONTROL_REGEXP, $topic, $matches);
-		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
-
-		$control = new Entities\ChannelControl($device, $channel, $property, $parent);
-
-		if ($attribute === null) {
-			$control->setValue($payload);
-
-			return $control;
-
-		} elseif ($attribute === 'schema') {
-			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
-		}
-
-		return $control;
-	}
-
-	/**
-	 * @param string $payload
-	 * @param string $attribute
-	 *
-	 * @return string|string[]
-	 */
-	private function parseAttributePayload(
-		string $payload,
-		string $attribute
-	) {
-		if ($attribute === Entities\Attribute::NAME) {
-			$payload = $this->cleanName($payload);
-
-		} else {
-			$payload = $this->cleanPayload($payload);
-
-			if (
-				$attribute === Entities\Attribute::PROPERTIES
-				|| $attribute === Entities\Attribute::CHANNELS
-				|| $attribute === Entities\Attribute::EXTENSIONS
-				|| $attribute === Entities\Attribute::CONTROL
-			) {
-				$payload = array_filter(
-					array_map('trim', explode(',', strtolower($payload))),
-					function ($item): bool {
-						return $item !== '';
-					}
-				);
-
-				$payload = array_values($payload);
-				$payload = array_unique($payload);
-			}
-		}
-
-		return $payload;
-	}
-
-	/**
 	 * @param string $payload
 	 * @param string $attribute
 	 *
@@ -490,6 +397,42 @@ final class V1Parser
 		}
 
 		return new Entities\PropertyAttribute($attribute, $payload);
+	}
+
+	/**
+	 * @param string $topic
+	 * @param string $payload
+	 * @param bool $isChild
+	 *
+	 * @return Entities\DeviceControl
+	 */
+	private function parseDeviceControl(
+		string $topic,
+		string $payload,
+		bool $isChild = false
+	): Entities\DeviceControl {
+		if ($isChild) {
+			preg_match(V1Validator::DEVICE_CHILD_CONTROL_REGEXP, $topic, $matches);
+			[, $parent, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
+
+		} else {
+			preg_match(V1Validator::DEVICE_CONTROL_REGEXP, $topic, $matches);
+			[, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null];
+			$parent = null;
+		}
+
+		$control = new Entities\DeviceControl($device, $property, $parent);
+
+		if ($attribute === null) {
+			$control->setValue($payload);
+
+			return $control;
+
+		} elseif ($attribute === 'schema') {
+			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
+		}
+
+		return $control;
 	}
 
 	/**
@@ -589,34 +532,91 @@ final class V1Parser
 	}
 
 	/**
+	 * @param string $device
+	 * @param string|null $parent
+	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return string
+	 * @return Entities\ChannelAttribute
 	 */
-	private function cleanPayload(string $payload): string
-	{
-		// Remove all characters except A-Z, a-z, 0-9, dots, commas, [, ], hyphens and spaces
-		// Note that the hyphen must go last not to be confused with a range (A-Z)
-		// and the dot, being special, is escaped with \
-		$payload = preg_replace('/[^A-Za-z0-9.:, -_°%µ³\/\"]/', '', $payload);
+	private function parseChannelAttribute(
+		string $device,
+		?string $parent,
+		string $topic,
+		string $payload
+	): Entities\ChannelAttribute {
+		preg_match(V1Validator::CHANNEL_ATTRIBUTE_REGEXP, $topic, $matches);
+		[, , $channel, $attribute] = $matches;
 
-		if (!is_string($payload)) {
-			return '';
-		}
-
-		return $payload;
+		return new Entities\ChannelAttribute(
+			$device,
+			$channel,
+			$attribute,
+			$this->parseAttributePayload($payload, $attribute),
+			$parent
+		);
 	}
 
 	/**
+	 * @param string $device
+	 * @param string|null $parent
+	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return string
+	 * @return Entities\ChannelProperty
 	 */
-	private function cleanName(string $payload): string
-	{
-		$cleaned = preg_replace('/[^A-Za-z0-9.,_ -]/', '', $payload);
+	private function parseChannelProperty(
+		string $device,
+		?string $parent,
+		string $topic,
+		string $payload
+	): Entities\ChannelProperty {
+		preg_match(V1Validator::CHANNEL_PROPERTY_REGEXP, $topic, $matches);
+		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
 
-		return is_string($cleaned) ? $cleaned : '';
+		$entity = new Entities\ChannelProperty($device, $channel, $property, $parent);
+
+		if ($attribute !== null) {
+			$attribute = $this->parsePropertyAttribute($payload, $attribute);
+
+			$entity->addAttribute($attribute);
+
+		} else {
+			$entity->setValue($payload);
+		}
+
+		return $entity;
+	}
+
+	/**
+	 * @param string $device
+	 * @param string|null $parent
+	 * @param string $topic
+	 * @param string $payload
+	 *
+	 * @return Entities\ChannelControl
+	 */
+	private function parseChannelControl(
+		string $device,
+		?string $parent,
+		string $topic,
+		string $payload
+	): Entities\ChannelControl {
+		preg_match(V1Validator::CHANNEL_CONTROL_REGEXP, $topic, $matches);
+		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
+
+		$control = new Entities\ChannelControl($device, $channel, $property, $parent);
+
+		if ($attribute === null) {
+			$control->setValue($payload);
+
+			return $control;
+
+		} elseif ($attribute === 'schema') {
+			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
+		}
+
+		return $control;
 	}
 
 }
