@@ -91,31 +91,7 @@ class MqttClientMessageHandler
 
 						// Nev device connected message
 						if (strpos($message->getPayload(), self::NEW_CLIENT_MESSAGE_PAYLOAD) !== false) {
-							[
-								,
-								,
-								,
-								,
-								,
-								$ipAddress,
-								,
-								$deviceId,
-								,
-								,
-								$username,
-							] = explode(' ', $message->getPayload()) + [
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-								null,
-							];
+							[, , , , , $ipAddress, , $deviceId, , , $username] = explode(' ', $message->getPayload()) + [null, null, null, null, null, null, null, null, null, null, null];
 
 							// Check for correct data
 							if ($username !== null && $deviceId !== null && $ipAddress !== null) {
