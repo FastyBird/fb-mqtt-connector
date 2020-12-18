@@ -16,7 +16,7 @@
 namespace FastyBird\MqttPlugin\Events;
 
 use BinSoul\Net\Mqtt;
-use FastyBird\MqttPlugin;
+use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Entities;
 use IPub\MQTTClient;
 use Nette;
@@ -40,17 +40,17 @@ class MqttClientMessageHandler
 	 */
 	private const NEW_CLIENT_MESSAGE_PAYLOAD = 'New client connected from';
 
-	/** @var MqttPlugin\Handler */
-	private $client;
+	/** @var Consumers\ExchangeConsumer */
+	private Consumers\ExchangeConsumer $consumer;
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		MqttPlugin\Handler $client,
+		Consumers\ExchangeConsumer $consumer,
 		?Log\LoggerInterface $logger = null
 	) {
-		$this->client = $client;
+		$this->consumer = $consumer;
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
@@ -98,7 +98,7 @@ class MqttClientMessageHandler
 								$entity = new Entities\DeviceProperty($deviceId, 'ip-address');
 								$entity->setValue($ipAddress);
 
-								$this->client->handleMessage($entity);
+								$this->consumer->consume($entity);
 							}
 						}
 						break;

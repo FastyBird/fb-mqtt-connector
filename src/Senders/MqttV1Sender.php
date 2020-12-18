@@ -170,10 +170,10 @@ final class MqttV1Sender implements ISender
 		. 'set';
 
 	/** @var MQTTClient\Client\IClient */
-	private $mqttClient;
+	private MQTTClient\Client\IClient $mqttClient;
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
 		MQTTClient\Client\IClient $mqttClient,

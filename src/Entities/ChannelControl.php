@@ -31,7 +31,7 @@ class ChannelControl extends Control
 	];
 
 	/** @var string */
-	private $channel;
+	private string $channel;
 
 	public function __construct(
 		string $device,

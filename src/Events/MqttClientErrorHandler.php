@@ -34,7 +34,7 @@ class MqttClientErrorHandler
 	use Nette\SmartObject;
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
 		?Log\LoggerInterface $logger = null

@@ -36,7 +36,7 @@ abstract class Attribute extends Entity
 	public const CONTROL = 'control';
 
 	/** @var string */
-	private $attribute;
+	private string $attribute;
 
 	/** @var string|string[] */
 	private $value;

@@ -33,7 +33,7 @@ final class ChannelAttribute extends Attribute
 	];
 
 	/** @var string */
-	private $channel;
+	private string $channel;
 
 	/**
 	 * @param string $device

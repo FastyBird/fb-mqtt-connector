@@ -35,7 +35,7 @@ final class V1Parser
 	use Nette\SmartObject;
 
 	/** @var V1Validator */
-	private $validator;
+	private V1Validator $validator;
 
 	public function __construct(
 		V1Validator $validator

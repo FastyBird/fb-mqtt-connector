@@ -17,6 +17,7 @@ namespace FastyBird\MqttPlugin\DI;
 
 use FastyBird\MqttPlugin;
 use FastyBird\MqttPlugin\API;
+use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Events;
 use FastyBird\MqttPlugin\Senders;
 use IPub\MQTTClient;
@@ -63,7 +64,7 @@ class MqttPluginExtension extends DI\CompilerExtension
 			->setType(MqttPlugin\Client::class);
 
 		$builder->addDefinition(null)
-			->setType(MqttPlugin\Handler::class);
+			->setType(Consumers\ExchangeConsumer::class);
 
 		// MQTT API
 		$builder->addDefinition(null)
@@ -129,6 +130,21 @@ class MqttPluginExtension extends DI\CompilerExtension
 			$mqttClientService->addSetup('$onMessage[]', [$builder->getDefinitionByType(Events\MqttClientMessageHandler::class)]);
 			$mqttClientService->addSetup('$onConnect[]', [$builder->getDefinitionByType(Events\MqttClientV1ConnectHandler::class)]);
 			$mqttClientService->addSetup('$onMessage[]', [$builder->getDefinitionByType(Events\MqttClientV1MessageHandler::class)]);
+		}
+
+		/** @var string $messagesConsumerServiceName */
+		$messagesConsumerServiceName = $builder->getByType(Consumers\ExchangeConsumer::class, true);
+
+		/** @var DI\Definitions\ServiceDefinition $messagesConsumerService */
+		$messagesConsumerService = $builder->getDefinition($messagesConsumerServiceName);
+
+		$consumerHandlersServices = $builder->findByType(Consumers\IMessageHandler::class);
+
+		foreach ($consumerHandlersServices as $consumerHandlersService) {
+			$messagesConsumerService->addSetup('?->addHandler(?)', [
+				'@self',
+				$consumerHandlersService,
+			]);
 		}
 	}
 

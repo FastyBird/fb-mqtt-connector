@@ -65,10 +65,10 @@ final class PropertyAttribute
 	];
 
 	/** @var string */
-	private $attribute;
+	private string $attribute;
 
 	/** @var string|null */
-	private $value = null;
+	private ?string $value = null;
 
 	public function __construct(
 		string $attribute,

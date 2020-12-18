@@ -31,13 +31,13 @@ abstract class Property extends Entity
 	private const NOT_CONFIGURED = 'N/A';
 
 	/** @var string */
-	private $property;
+	private string $property;
 
 	/** @var string */
-	private $value = self::NOT_CONFIGURED;
+	private string $value = self::NOT_CONFIGURED;
 
 	/** @var SplObjectStorage */
-	private $attributes;
+	private SplObjectStorage $attributes;
 
 	public function __construct(
 		string $device,

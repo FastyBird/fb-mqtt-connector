@@ -31,13 +31,13 @@ abstract class Entity implements IEntity
 	use Nette\SmartObject;
 
 	/** @var string */
-	private $device;
+	private string $device;
 
 	/** @var string|null */
-	private $parent;
+	private ?string $parent;
 
 	/** @var bool */
-	private $retained = false;
+	private bool $retained = false;
 
 	public function __construct(
 		string $device,

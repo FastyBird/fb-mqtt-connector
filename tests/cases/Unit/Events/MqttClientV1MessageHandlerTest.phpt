@@ -5,6 +5,7 @@ namespace Tests\Cases;
 use BinSoul\Net\Mqtt;
 use FastyBird\MqttPlugin;
 use FastyBird\MqttPlugin\API;
+use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Entities;
 use FastyBird\MqttPlugin\Events;
 use IPub\MQTTClient;
@@ -35,9 +36,9 @@ final class MqttClientV1MessageHandlerTest extends BaseMockeryTestCase
 			'Custom name'
 		);
 
-		$handler = Mockery::mock(MqttPlugin\Handler::class);
-		$handler
-			->shouldReceive('handleMessage')
+		$consumer = Mockery::mock(Consumers\ExchangeConsumer::class);
+		$consumer
+			->shouldReceive('consume')
 			->withArgs(function ($entity): bool {
 				Assert::true($entity instanceof Entities\IEntity);
 
@@ -46,7 +47,7 @@ final class MqttClientV1MessageHandlerTest extends BaseMockeryTestCase
 			->times(1);
 
 		$subscriber = new Events\MqttClientV1MessageHandler(
-			$handler,
+			$consumer,
 			$validator,
 			$parser,
 			$logger

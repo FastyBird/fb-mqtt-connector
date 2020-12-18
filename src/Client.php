@@ -35,13 +35,13 @@ final class Client
 	use Nette\SmartObject;
 
 	/** @var MQTTClient\Client\IClient */
-	private $mqttClient;
+	private MQTTClient\Client\IClient $mqttClient;
 
 	/** @var EventLoop\LoopInterface */
-	private $loop;
+	private EventLoop\LoopInterface $loop;
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
 		MQTTClient\Client\IClient $mqttClient,

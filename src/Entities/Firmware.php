@@ -39,10 +39,10 @@ final class Firmware extends Entity
 	];
 
 	/** @var string */
-	private $parameter;
+	private string $parameter;
 
 	/** @var string */
-	private $value;
+	private string $value;
 
 	public function __construct(
 		string $device,

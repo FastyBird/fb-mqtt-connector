@@ -4,6 +4,7 @@ namespace Tests\Cases;
 
 use FastyBird\MqttPlugin;
 use FastyBird\MqttPlugin\API;
+use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Events;
 use FastyBird\MqttPlugin\Senders;
 use Tester\Assert;
@@ -23,6 +24,8 @@ final class ServicesTest extends BaseTestCase
 
 		Assert::notNull($container->getByType(API\V1Parser::class));
 		Assert::notNull($container->getByType(API\V1Validator::class));
+
+		Assert::notNull($container->getByType(Consumers\ExchangeConsumer::class));
 
 		Assert::notNull($container->getByType(Events\MqttClientCloseHandler::class));
 		Assert::notNull($container->getByType(Events\MqttClientConnectHandler::class));

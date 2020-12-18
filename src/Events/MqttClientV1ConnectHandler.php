@@ -53,7 +53,7 @@ class MqttClientV1ConnectHandler
 	];
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
 		?Log\LoggerInterface $logger = null

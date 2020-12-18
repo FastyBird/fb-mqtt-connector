@@ -43,7 +43,7 @@ abstract class Control extends Entity
 	private const NOT_CONFIGURED = 'N/A';
 
 	/** @var string */
-	private $control;
+	private string $control;
 
 	/** @var mixed[]|string|null */
 	private $value = self::NOT_CONFIGURED;

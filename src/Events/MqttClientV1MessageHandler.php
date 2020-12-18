@@ -16,8 +16,8 @@
 namespace FastyBird\MqttPlugin\Events;
 
 use BinSoul\Net\Mqtt;
-use FastyBird\MqttPlugin;
 use FastyBird\MqttPlugin\API;
+use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Exceptions;
 use IPub\MQTTClient;
 use Nette;
@@ -36,25 +36,25 @@ class MqttClientV1MessageHandler
 
 	use Nette\SmartObject;
 
-	/** @var MqttPlugin\Handler */
-	private $client;
+	/** @var Consumers\ExchangeConsumer */
+	private Consumers\ExchangeConsumer $consumer;
 
 	/** @var API\V1Validator */
-	private $validator;
+	private API\V1Validator $validator;
 
 	/** @var API\V1Parser */
-	private $parser;
+	private API\V1Parser $parser;
 
 	/** @var Log\LoggerInterface */
-	private $logger;
+	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		MqttPlugin\Handler $client,
+		Consumers\ExchangeConsumer $consumer,
 		API\V1Validator $validator,
 		API\V1Parser $parser,
 		?Log\LoggerInterface $logger = null
 	) {
-		$this->client = $client;
+		$this->consumer = $consumer;
 		$this->validator = $validator;
 		$this->parser = $parser;
 		$this->logger = $logger ?? new Log\NullLogger();
@@ -95,7 +95,7 @@ class MqttClientV1MessageHandler
 				return;
 			}
 
-			$this->client->handleMessage($entity);
+			$this->consumer->consume($entity);
 		}
 	}
 
