@@ -31,11 +31,12 @@
   "minimum-stability" : "dev",
 
   "require" : {
-    "php" : ">=7.4.0",
+    "php": ">=7.4.0",
     "cweagans/composer-patches": "^1.6",
-    "nette/bootstrap" : "^3.0",
-    "nette/di" : "^3.0",
-    "ipub/mqtt-client": "^1.0"
+    "fastybird/application-events": "@dev",
+    "ipub/mqtt-client": "^1.0",
+    "nette/bootstrap": "^3.0",
+    "nette/di": "^3.0"
   },
 
   "require-dev" : {

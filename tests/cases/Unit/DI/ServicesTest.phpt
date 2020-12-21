@@ -7,6 +7,7 @@ use FastyBird\MqttPlugin\API;
 use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Events;
 use FastyBird\MqttPlugin\Senders;
+use FastyBird\MqttPlugin\Subscribers;
 use Tester\Assert;
 
 require_once __DIR__ . '/../../../bootstrap.php';
@@ -38,6 +39,8 @@ final class ServicesTest extends BaseTestCase
 		Assert::notNull($container->getByType(Events\MqttClientWarningHandler::class));
 
 		Assert::notNull($container->getByType(Senders\MqttV1Sender::class));
+
+		Assert::notNull($container->getByType(Subscribers\ApplicationSubscriber::class));
 
 		Assert::notNull($container->getByType(MqttPlugin\Client::class));
 	}

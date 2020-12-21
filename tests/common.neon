@@ -14,6 +14,7 @@ php:
 	date.timezone: Europe/Prague
 
 extensions:
+	contributteEvents	: Contributte\EventDispatcher\DI\EventDispatcherExtension
 	ipubMqttClient		: IPub\MQTTClient\DI\MQTTClientExtension
 
 ipubMqttClient:

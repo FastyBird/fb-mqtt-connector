@@ -20,6 +20,7 @@ use FastyBird\MqttPlugin\API;
 use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Events;
 use FastyBird\MqttPlugin\Senders;
+use FastyBird\MqttPlugin\Subscribers;
 use IPub\MQTTClient;
 use Nette;
 use Nette\DI;
@@ -104,6 +105,10 @@ class MqttPluginExtension extends DI\CompilerExtension
 		// Senders
 		$builder->addDefinition($this->prefix('sender'))
 			->setType(Senders\MqttV1Sender::class);
+
+		// Subscribers
+		$builder->addDefinition($this->prefix('subscribers.application'))
+			->setType(Subscribers\ApplicationSubscriber::class);
 	}
 
 	/**
