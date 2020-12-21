@@ -3,7 +3,6 @@
 namespace Tests\Cases;
 
 use BinSoul\Net\Mqtt;
-use FastyBird\MqttPlugin;
 use FastyBird\MqttPlugin\API;
 use FastyBird\MqttPlugin\Consumers;
 use FastyBird\MqttPlugin\Entities;

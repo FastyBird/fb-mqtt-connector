@@ -60,49 +60,49 @@ class MqttPluginExtension extends DI\CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('client'))
 			->setType(MqttPlugin\Client::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('consumer'))
 			->setType(Consumers\ExchangeConsumer::class);
 
 		// MQTT API
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('api.parser'))
 			->setType(API\V1Parser::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('api.validator'))
 			->setType(API\V1Validator::class);
 
 		// Events
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.close'))
 			->setType(Events\MqttClientCloseHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.connect'))
 			->setType(Events\MqttClientConnectHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.disconnect'))
 			->setType(Events\MqttClientDisconnectHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.error'))
 			->setType(Events\MqttClientErrorHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.open'))
 			->setType(Events\MqttClientOpenHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.warning'))
 			->setType(Events\MqttClientWarningHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.message'))
 			->setType(Events\MqttClientMessageHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.v1.connect'))
 			->setType(Events\MqttClientV1ConnectHandler::class);
 
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('events.mqtt.v1.message'))
 			->setType(Events\MqttClientV1MessageHandler::class);
 
 		// Senders
-		$builder->addDefinition(null)
+		$builder->addDefinition($this->prefix('sender'))
 			->setType(Senders\MqttV1Sender::class);
 	}
 
