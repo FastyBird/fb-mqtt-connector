@@ -33,7 +33,7 @@ final class ExchangeConsumer implements IExchangeConsumer
 
 	use Nette\SmartObject;
 
-	/** @var SplObjectStorage */
+	/** @var SplObjectStorage<IMessageHandler, null> */
 	private SplObjectStorage $handlers;
 
 	public function __construct()

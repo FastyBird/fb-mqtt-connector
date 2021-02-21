@@ -36,7 +36,7 @@ abstract class Property extends Entity
 	/** @var string */
 	private string $value = self::NOT_CONFIGURED;
 
-	/** @var SplObjectStorage */
+	/** @var SplObjectStorage<PropertyAttribute, null> */
 	private SplObjectStorage $attributes;
 
 	public function __construct(
