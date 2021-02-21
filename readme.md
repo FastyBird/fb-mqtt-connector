@@ -1,6 +1,6 @@
 # FastyBird MQTT plugin
 
-[![Build Status](https://badgen.net/github/checks/FastyBird/mqtt-plugin/master?cache=300&style=flast-square)](https://travis-ci.com/FastyBird/mqtt-plugin)
+[![Build Status](https://badgen.net/github/checks/FastyBird/mqtt-plugin/master?cache=300&style=flast-square)](https://github.com/FastyBird/mqtt-plugin/actions)
 [![Code coverage](https://badgen.net/coveralls/c/github/FastyBird/mqtt-plugin?cache=300&style=flast-square)](https://coveralls.io/r/FastyBird/mqtt-plugin)
 ![PHP](https://badgen.net/packagist/php/FastyBird/mqtt-plugin?cache=300&style=flast-square)
 [![Licence](https://badgen.net/packagist/license/FastyBird/mqtt-plugin?cache=300&style=flast-square)](https://packagist.org/packages/FastyBird/mqtt-plugin)
