@@ -6,23 +6,23 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttPlugin\Entities;
+namespace FastyBird\MqttConnectorPlugin\Entities;
 
-use FastyBird\MqttPlugin;
-use FastyBird\MqttPlugin\Exceptions;
+use FastyBird\MqttConnectorPlugin;
+use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette;
 
 /**
  * Device or channel property attribute
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -114,7 +114,7 @@ final class PropertyAttribute
 			$this->attribute === self::SETTABLE
 			|| $this->attribute === self::QUERYABLE
 		) {
-			return $this->value === MqttPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE;
+			return $this->value === MqttConnectorPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE;
 		}
 
 		return $this->value;

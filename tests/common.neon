@@ -1,10 +1,10 @@
 #
-# MQTT plugin DI configuration
+# Plugin DI configuration
 #
 # @license		More in license.md
 # @copyright	https://www.fastybird.com
 # @author		Adam Kadlec <adam.kadlec@fastybird.com>
-# @package		FastyBird:WebServer!
+# @package		FastyBird:MqttConnectorPlugin!
 # @subpackage	config
 # @since		0.1.0
 #
@@ -12,12 +12,3 @@
 
 php:
 	date.timezone: Europe/Prague
-
-extensions:
-	contributteEvents	: Contributte\EventDispatcher\DI\EventDispatcherExtension
-	ipubMqttClient		: IPub\MQTTClient\DI\MQTTClientExtension
-
-ipubMqttClient:
-	connection:
-		username: mqttuser
-		password: secretPassword

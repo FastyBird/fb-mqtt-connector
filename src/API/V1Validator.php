@@ -6,22 +6,22 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     API
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttPlugin\API;
+namespace FastyBird\MqttConnectorPlugin\API;
 
-use FastyBird\MqttPlugin;
+use FastyBird\MqttConnectorPlugin;
 use Nette;
 
 /**
  * API v1 topic validator
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     API
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -83,7 +83,7 @@ final class V1Validator
 	public function validate(string $topic): bool
 	{
 		// Check if message is sent from broker
-		if (strpos(trim($topic, MqttPlugin\Constants::MQTT_TOPIC_DELIMITER), MqttPlugin\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
+		if (strpos(trim($topic, MqttConnectorPlugin\Constants::MQTT_TOPIC_DELIMITER), MqttConnectorPlugin\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
 			return false;
 		}
 

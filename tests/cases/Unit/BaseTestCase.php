@@ -2,7 +2,7 @@
 
 namespace Tests\Cases;
 
-use FastyBird\MqttPlugin;
+use FastyBird\MqttConnectorPlugin;
 use Nette;
 use Nette\DI;
 use Ninjify\Nunjuck\TestCase\BaseMockeryTestCase;
@@ -44,7 +44,7 @@ abstract class BaseTestCase extends BaseMockeryTestCase
 			$config->addConfig($additionalConfig);
 		}
 
-		MqttPlugin\DI\MqttPluginExtension::register($config);
+		MqttConnectorPlugin\DI\MqttConnectorPluginExtension::register($config);
 
 		return $config->createContainer();
 	}

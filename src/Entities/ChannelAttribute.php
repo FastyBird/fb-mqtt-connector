@@ -6,19 +6,19 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  * @since          0.1.0
  *
  * @date           05.03.20
  */
 
-namespace FastyBird\MqttPlugin\Entities;
+namespace FastyBird\MqttConnectorPlugin\Entities;
 
 /**
  * Channel attribute
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

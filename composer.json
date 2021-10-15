@@ -1,7 +1,7 @@
 {
-  "name" : "fastybird/mqtt-plugin",
+  "name" : "fastybird/mqtt-connector-plugin",
   "type" : "library",
-  "description" : "FastyBird MQTT plugin",
+  "description" : "FastyBird MQTT connector plugin",
   "keywords" : [
     "fastybird",
     "fb",
@@ -31,30 +31,31 @@
   "minimum-stability" : "dev",
 
   "require" : {
-    "php": ">=7.4.0",
-    "cweagans/composer-patches": "^1.6",
-    "fastybird/application-events": "@dev",
-    "ipub/mqtt-client": "^1.0",
-    "nette/bootstrap": "^3.0",
-    "nette/di": "^3.0"
+    "php": ">=7.4.0|>=8.0.0",
+    "binsoul/net-mqtt": "^0.8",
+    "cweagans/composer-patches": "^1.7",
+    "nette/bootstrap": "^3.1",
+    "nette/di": "^3.0",
+    "psr/log": "^1.1",
+    "react/socket": "^1.9"
   },
 
   "require-dev" : {
-    "mockery/mockery" : "^1.3",
-    "ninjify/nunjuck" : "^0.3",
-    "ninjify/qa" : "^0.10",
-    "pds/skeleton" : "~1.0",
-    "phpstan/extension-installer" : "^1.0",
-    "phpstan/phpstan" : "^0.12",
-    "phpstan/phpstan-deprecation-rules" : "^0.12",
-    "phpstan/phpstan-nette" : "^0.12",
+    "mockery/mockery": "^1.4",
+    "ninjify/nunjuck": "^0.3",
+    "ninjify/qa": "^0.12",
+    "pds/skeleton": "~1.0",
+    "phpstan/extension-installer": "^1.1",
+    "phpstan/phpstan": "^0.12",
+    "phpstan/phpstan-deprecation-rules": "^0.12",
+    "phpstan/phpstan-nette": "^0.12",
     "phpstan/phpstan-strict-rules" : "^0.12",
-    "tracy/tracy" : "~2.4"
+    "tracy/tracy": "^2.8"
   },
 
   "autoload" : {
     "psr-4" : {
-      "FastyBird\\MqttPlugin\\" : "src/"
+      "FastyBird\\MqttConnectorPlugin\\" : "src/"
     }
   },
 

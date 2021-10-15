@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttPlugin\Exceptions;
+use FastyBird\MqttConnectorPlugin\Exceptions;
 
 return [
 	'attr-unknown'       => [

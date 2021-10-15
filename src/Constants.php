@@ -6,19 +6,19 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     common
  * @since          0.1.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\MqttPlugin;
+namespace FastyBird\MqttConnectorPlugin;
 
 /**
  * Service constants
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     common
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -45,11 +45,6 @@ final class Constants
 	 * MQTT protocol api prefixes
 	 */
 	public const MQTT_API_V1_VERSION_PREFIX = self::MQTT_TOPIC_DELIMITER . self::MQTT_API_VERSION_V1;
-
-	/**
-	 * MQTT internal stat topic
-	 */
-	public const MQTT_SYSTEM_TOPIC = '$SYS/broker/log/#';
 
 	/**
 	 * MQTT message QOS values

@@ -2,12 +2,11 @@
 
 namespace Tests\Cases;
 
-use FastyBird\MqttPlugin;
-use FastyBird\MqttPlugin\API;
-use FastyBird\MqttPlugin\Consumers;
-use FastyBird\MqttPlugin\Events;
-use FastyBird\MqttPlugin\Senders;
-use FastyBird\MqttPlugin\Subscribers;
+use FastyBird\MqttConnectorPlugin;
+use FastyBird\MqttConnectorPlugin\API;
+use FastyBird\MqttConnectorPlugin\Consumers;
+use FastyBird\MqttConnectorPlugin\Handlers;
+use FastyBird\MqttConnectorPlugin\Publishers;
 use Tester\Assert;
 
 require_once __DIR__ . '/../../../bootstrap.php';
@@ -26,23 +25,17 @@ final class ServicesTest extends BaseTestCase
 		Assert::notNull($container->getByType(API\V1Parser::class));
 		Assert::notNull($container->getByType(API\V1Validator::class));
 
-		Assert::notNull($container->getByType(Consumers\ExchangeConsumer::class));
+		Assert::notNull($container->getByType(Consumers\Consumer::class));
 
-		Assert::notNull($container->getByType(Events\MqttClientCloseHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientConnectHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientDisconnectHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientErrorHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientMessageHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientOpenHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientV1ConnectHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientV1MessageHandler::class));
-		Assert::notNull($container->getByType(Events\MqttClientWarningHandler::class));
+		Assert::notNull($container->getByType(Handlers\ClientHandler::class));
+		Assert::null($container->getByType(Handlers\CommonHandler::class, false));
+		Assert::null($container->getByType(Handlers\ApiV1Handler::class, false));
 
-		Assert::notNull($container->getByType(Senders\MqttV1Sender::class));
+		Assert::notNull($container->getByType(Publishers\Publisher::class));
+		Assert::null($container->getByType(Publishers\ApiV1Publisher::class, false));
 
-		Assert::notNull($container->getByType(Subscribers\ApplicationSubscriber::class));
-
-		Assert::notNull($container->getByType(MqttPlugin\Client::class));
+		Assert::notNull($container->getByType(MqttConnectorPlugin\Client\Client::class));
+		Assert::notNull($container->getByType(MqttConnectorPlugin\Client\MqttClientFactory::class));
 	}
 
 }

@@ -2,8 +2,8 @@
 
 namespace Tests\Cases;
 
-use FastyBird\MqttPlugin\API;
-use FastyBird\MqttPlugin\Entities;
+use FastyBird\MqttConnectorPlugin\API;
+use FastyBird\MqttConnectorPlugin\Entities;
 use Ninjify\Nunjuck\TestCase\BaseTestCase;
 use Tester\Assert;
 

@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttPlugin\Entities;
-use FastyBird\MqttPlugin\Exceptions;
+use FastyBird\MqttConnectorPlugin\Entities;
+use FastyBird\MqttConnectorPlugin\Exceptions;
 
 return [
 	'ctrl-' . Entities\Control::RESET               => [

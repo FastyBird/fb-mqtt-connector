@@ -6,22 +6,22 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  * @since          0.1.0
  *
  * @date           25.02.20
  */
 
-namespace FastyBird\MqttPlugin\Entities;
+namespace FastyBird\MqttConnectorPlugin\Entities;
 
-use FastyBird\MqttPlugin\Exceptions;
+use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette\Utils;
 
 /**
  * Device control attribute
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

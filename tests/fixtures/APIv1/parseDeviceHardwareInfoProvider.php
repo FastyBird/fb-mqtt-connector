@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttPlugin\Entities;
+use FastyBird\MqttConnectorPlugin\Entities;
 
 return [
 	'hw-' . Entities\Hardware::MAC_ADDRESS        => [

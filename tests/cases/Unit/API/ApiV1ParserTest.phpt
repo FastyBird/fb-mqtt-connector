@@ -2,8 +2,8 @@
 
 namespace Tests\Cases;
 
-use FastyBird\MqttPlugin\API;
-use FastyBird\MqttPlugin\Entities;
+use FastyBird\MqttConnectorPlugin\API;
+use FastyBird\MqttConnectorPlugin\Entities;
 use Tester\Assert;
 
 require_once __DIR__ . '/../../../bootstrap.php';

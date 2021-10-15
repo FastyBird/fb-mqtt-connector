@@ -6,25 +6,25 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     API
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttPlugin\API;
+namespace FastyBird\MqttConnectorPlugin\API;
 
-use FastyBird\MqttPlugin;
-use FastyBird\MqttPlugin\Entities;
-use FastyBird\MqttPlugin\Exceptions;
+use FastyBird\MqttConnectorPlugin;
+use FastyBird\MqttConnectorPlugin\Entities;
+use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette;
 use Nette\Utils;
 
 /**
  * API v1 topic parser
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     API
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -299,7 +299,7 @@ final class V1Parser
 			$parent = null;
 		}
 
-		$entity = new Entities\DeviceProperty($device, $property, $parent);
+		$entity = new Entities\DeviceProperty((string) $device, (string) $property, $parent);
 
 		if ($attribute !== null) {
 			$attribute = $this->parsePropertyAttribute($payload, $attribute);
@@ -333,7 +333,7 @@ final class V1Parser
 			$attribute === Entities\PropertyAttribute::SETTABLE
 			|| $attribute === Entities\PropertyAttribute::QUERYABLE
 		) {
-			$payload = $payload === MqttPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE ? MqttPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE : MqttPlugin\Constants::PAYLOAD_BOOL_FALSE_VALUE;
+			$payload = $payload === MqttConnectorPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE ? MqttConnectorPlugin\Constants::PAYLOAD_BOOL_TRUE_VALUE : MqttConnectorPlugin\Constants::PAYLOAD_BOOL_FALSE_VALUE;
 
 		} elseif ($attribute === Entities\PropertyAttribute::NAME) {
 			$payload = $this->cleanName($payload);
@@ -342,7 +342,6 @@ final class V1Parser
 			if (!in_array($payload, Entities\PropertyAttribute::DATATYPE_ALLOWED_PAYLOADS, true)) {
 				throw new Exceptions\ParseMessageException('Provided payload is not valid');
 			}
-
 		} elseif ($attribute === Entities\PropertyAttribute::FORMAT) {
 			if (Utils\Strings::contains($payload, ':')) {
 				[$start, $end] = explode(':', $payload) + [null, null];
@@ -385,15 +384,14 @@ final class V1Parser
 
 				$payload = implode(',', $payload);
 
-			} elseif ($payload === MqttPlugin\Constants::VALUE_NOT_SET || $payload === '') {
+			} elseif ($payload === MqttConnectorPlugin\Constants::VALUE_NOT_SET || $payload === '') {
 				$payload = null;
 
 			} elseif (!in_array($payload, Entities\PropertyAttribute::FORMAT_ALLOWED_PAYLOADS, true)) {
 				throw new Exceptions\ParseMessageException('Provided payload is not valid');
 			}
-
 		} else {
-			$payload = $payload === MqttPlugin\Constants::VALUE_NOT_SET || $payload === '' ? null : $payload;
+			$payload = $payload === MqttConnectorPlugin\Constants::VALUE_NOT_SET || $payload === '' ? null : $payload;
 		}
 
 		return new Entities\PropertyAttribute($attribute, $payload);
@@ -421,7 +419,7 @@ final class V1Parser
 			$parent = null;
 		}
 
-		$control = new Entities\DeviceControl($device, $property, $parent);
+		$control = new Entities\DeviceControl((string) $device, (string) $property, $parent);
 
 		if ($attribute === null) {
 			$control->setValue($payload);
@@ -429,7 +427,7 @@ final class V1Parser
 			return $control;
 
 		} elseif ($attribute === 'schema') {
-			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
+			$control->setSchema($this->parseControlSchema($payload, (string) $property, $attribute));
 		}
 
 		return $control;
@@ -490,18 +488,21 @@ final class V1Parser
 									$formattedRow->offsetSet($field, null);
 								}
 							}
+
 							break;
 
 						case Entities\Control::DATA_TYPE_TEXT:
 							if ($row->offsetExists('default')) {
 								$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
 							}
+
 							break;
 
 						case Entities\Control::DATA_TYPE_BOOLEAN:
 							if ($row->offsetExists('default')) {
 								$formattedRow->offsetSet('default', (bool) $row->offsetGet('default'));
 							}
+
 							break;
 
 						case Entities\Control::DATA_TYPE_SELECT:
@@ -518,6 +519,7 @@ final class V1Parser
 							if ($row->offsetExists('default')) {
 								$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
 							}
+
 							break;
 					}
 
@@ -574,7 +576,7 @@ final class V1Parser
 		preg_match(V1Validator::CHANNEL_PROPERTY_REGEXP, $topic, $matches);
 		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
 
-		$entity = new Entities\ChannelProperty($device, $channel, $property, $parent);
+		$entity = new Entities\ChannelProperty($device, (string) $channel, (string) $property, $parent);
 
 		if ($attribute !== null) {
 			$attribute = $this->parsePropertyAttribute($payload, $attribute);
@@ -605,7 +607,7 @@ final class V1Parser
 		preg_match(V1Validator::CHANNEL_CONTROL_REGEXP, $topic, $matches);
 		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
 
-		$control = new Entities\ChannelControl($device, $channel, $property, $parent);
+		$control = new Entities\ChannelControl($device, (string) $channel, (string) $property, $parent);
 
 		if ($attribute === null) {
 			$control->setValue($payload);
@@ -613,7 +615,7 @@ final class V1Parser
 			return $control;
 
 		} elseif ($attribute === 'schema') {
-			$control->setSchema($this->parseControlSchema($payload, $property, $attribute));
+			$control->setSchema($this->parseControlSchema($payload, (string) $property, $attribute));
 		}
 
 		return $control;

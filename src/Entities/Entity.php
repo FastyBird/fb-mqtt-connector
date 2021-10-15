@@ -6,21 +6,21 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttPlugin\Entities;
+namespace FastyBird\MqttConnectorPlugin\Entities;
 
 use Nette;
 
 /**
  * Base data entity
  *
- * @package        FastyBird:MqttPlugin!
+ * @package        FastyBird:MqttConnectorPlugin!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
