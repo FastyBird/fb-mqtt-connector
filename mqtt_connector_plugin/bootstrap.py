@@ -21,6 +21,8 @@ MQTT connector plugin DI container
 # pylint: disable=no-value-for-parameter
 
 # Library dependencies
+import logging
+
 from kink import di
 
 # Library libs
@@ -36,12 +38,12 @@ from mqtt_connector_plugin.publishers.publisher import MessagesPublisher
 from mqtt_connector_plugin.subscriptions.repository import SubscriptionsRepository
 
 
-def create_container() -> None:
+def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> None:
     """Create FB MQTT connector services"""
     di[SubscriptionsRepository] = SubscriptionsRepository()
     di["fb-mqtt-connector-plugin_subscription-repository"] = di[SubscriptionsRepository]
 
-    di[Logger] = Logger()
+    di[Logger] = Logger(logger=logger)
     di["fb-mqtt-connector-plugin_logger"] = di[Logger]
 
     # Clients handlers
