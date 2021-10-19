@@ -24,7 +24,8 @@ MQTT connector plugin DI container
 from kink import di
 
 # Library libs
-from mqtt_connector_plugin.client import Client
+from mqtt_connector_plugin.client import MqttClient
+from mqtt_connector_plugin.connector import MqttConnector
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
 from mqtt_connector_plugin.handlers.apiv1 import ApiV1Handler
 from mqtt_connector_plugin.handlers.common import CommonHandler
@@ -60,15 +61,15 @@ def create_container() -> None:
     di[MessagesHandler] = MessagesHandler()  # Messages handler proxy
     di["fb-mqtt-connector-plugin_mqtt-handler-proxy"] = di[MessagesHandler]
 
-    di[Client] = Client(
+    di[MqttClient] = MqttClient(
         messages_handler=di[MessagesHandler],
         logger=di[Logger],
     )
-    di["fb-mqtt-connector-plugin_clients-proxy"] = di[Client]
+    di["fb-mqtt-connector-plugin_clients-proxy"] = di[MqttClient]
 
     # MQTT messages publishers
     di[ApiV1Publisher] = ApiV1Publisher(
-        client=di[Client],
+        client=di[MqttClient],
         logger=di[Logger],
     )
     di["fb-mqtt-connector-plugin_publisher-api-v1"] = di[ApiV1Publisher]
@@ -81,3 +82,10 @@ def create_container() -> None:
         logger=di[Logger],
     )
     di["fb-mqtt-connector-plugin_consumer-proxy"] = di[MessagesConsumer]
+
+    di[MqttConnector] = MqttConnector(
+        mqtt_client=di[MqttClient],
+        consumer=di[MessagesConsumer],
+        logger=di[Logger],
+    )
+    di["fb-mqtt-connector-plugin_connector"] = di[MqttConnector]

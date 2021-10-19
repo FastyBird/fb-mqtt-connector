@@ -24,7 +24,7 @@ from typing import Dict, Set
 from kink import inject
 
 # Library libs
-from mqtt_connector_plugin.client import Client
+from mqtt_connector_plugin.client import MqttClient
 from mqtt_connector_plugin.logger import Logger
 from mqtt_connector_plugin.publishers.base import BasePublisher
 from mqtt_connector_plugin.entities.entities import ControlEntity
@@ -55,11 +55,11 @@ class ApiV1Publisher(BasePublisher):
     __CHANNEL_CHILD_CONTROL_TOPIC = \
         "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
 
-    __client: Client
+    __client: MqttClient
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, client: Client, logger: Logger) -> None:
+    def __init__(self, client: MqttClient, logger: Logger) -> None:
         """Configure mqtt client"""
         BasePublisher.__init__(self, logger=logger)
 

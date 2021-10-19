@@ -90,7 +90,7 @@ class ClientSettings:
 
 
 @inject
-class Client:
+class MqttClient:
     """
     MQTT clients proxy
 

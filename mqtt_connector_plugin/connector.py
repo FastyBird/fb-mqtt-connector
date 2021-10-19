@@ -17,19 +17,18 @@ MQTT connector plugin
 """
 
 # Library dependencies
-import logging
 from threading import Thread
 from time import sleep
 from typing import List
 from kink import inject
 
 # Library libs
-from mqtt_connector_plugin.client import Client, ClientSettings
+from mqtt_connector_plugin.client import MqttClient, ClientSettings
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
 from mqtt_connector_plugin.logger import Logger
 
 
-class FbMqttConnector(Thread):
+class MqttConnector(Thread):
     """
     MQTT connector
 
@@ -40,7 +39,7 @@ class FbMqttConnector(Thread):
     """
     __stopped: bool = False
 
-    __mqtt_client: Client
+    __mqtt_client: MqttClient
 
     __consumer: MessagesConsumer
 
@@ -51,7 +50,7 @@ class FbMqttConnector(Thread):
     @inject
     def __init__(
         self,
-        mqtt_client: Client,
+        mqtt_client: MqttClient,
         consumer: MessagesConsumer,
         logger: Logger,
     ) -> None:
@@ -66,9 +65,6 @@ class FbMqttConnector(Thread):
         self.__consumer = consumer
 
         self.__logger = logger
-
-        # Start thread
-        self.start()
 
     # -----------------------------------------------------------------------------
 
@@ -91,16 +87,6 @@ class FbMqttConnector(Thread):
         self.__stopped = True
 
         self.__logger.info("Connector FB MQTT has been stopped.")
-
-    # -----------------------------------------------------------------------------
-
-    def clone(self) -> "FbMqttConnector":
-        """Clone connector"""
-        return FbMqttConnector(
-            mqtt_client=self.__mqtt_client,
-            consumer=self.__consumer,
-            logger=self.__logger,
-        )
 
     # -----------------------------------------------------------------------------
 
@@ -138,9 +124,3 @@ class FbMqttConnector(Thread):
         self.__mqtt_client.stop()
 
         self.__logger.info("MQTT connector was closed")
-
-    # -----------------------------------------------------------------------------
-
-    def set_logger(self, logger: logging.Logger) -> None:
-        """Configure custom logger handler"""
-        self.__logger.set_logger(logger=logger)

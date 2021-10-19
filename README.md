@@ -25,7 +25,7 @@ This is a combined plugin for [Nette framework](https://nette.org) and [Python](
 The best way to install **fastybird/mqtt-connector-plugin** is using [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require fastybird/mqtt-connector-plugin
+composer require fastybird/mqtt-connector-plugin
 ```
 
 ### Python based project:
@@ -33,7 +33,7 @@ $ composer require fastybird/mqtt-connector-plugin
 The best way to install **fastybird-mqtt-connector-plugin** is using [Pip](https://pip.pypa.io/en/stable/):
 
 ```sh
-$ pip install fastybird-mqtt-connector-plugin
+pip install fastybird-mqtt-connector-plugin
 ```
 
 ## Documentation
