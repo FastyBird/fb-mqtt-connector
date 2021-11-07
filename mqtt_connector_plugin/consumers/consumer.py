@@ -20,7 +20,7 @@ MQTT messages consumers
 
 # App dependencies
 from abc import ABC, abstractmethod
-from typing import List, Set
+from typing import List, Set, Optional
 from queue import Queue, Full as QueueFull
 from kink import inject
 
@@ -65,7 +65,7 @@ class MessagesConsumer:
     def __init__(
         self,
         logger: Logger,
-        consumers: List[IConsumer] or None = None,
+        consumers: Optional[List[IConsumer]] = None,
     ):
         if consumers is None:
             self.__consumers = set()

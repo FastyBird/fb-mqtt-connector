@@ -20,7 +20,7 @@ MQTT v1 convention parser
 
 # Library dependencies
 import re
-from typing import List
+from typing import List, Optional
 
 # Library libs
 from mqtt_connector_plugin.api.v1validator import V1Validator
@@ -50,42 +50,42 @@ class V1Parser:
     @classmethod
     def parse_message(cls, topic: str, payload: str, retained: bool = False) -> BaseEntity:
         """Parse received message topic & value"""
-        if V1Validator.validate(topic) is False:
+        if V1Validator.validate(topic=topic) is False:
             raise ParseMessageException("Provided topic is not valid")
 
-        is_child: bool = V1Validator.validate_child_device_part(topic)
+        is_child: bool = V1Validator.validate_child_device_part(topic=topic)
 
-        if V1Validator.validate_device_attribute(topic):
+        if V1Validator.validate_device_attribute(topic=topic):
             entity = cls.parse_device_attribute(topic=topic, payload=payload, is_child=is_child)
             entity.retained = retained
 
             return entity
 
-        if V1Validator.validate_device_hardware_info(topic):
+        if V1Validator.validate_device_hardware_info(topic=topic):
             entity = cls.parse_device_hardware_info(topic=topic, payload=payload, is_child=is_child)
             entity.retained = retained
 
             return entity
 
-        if V1Validator.validate_device_firmware_info(topic):
+        if V1Validator.validate_device_firmware_info(topic=topic):
             entity = cls.parse_device_firmware_info(topic=topic, payload=payload, is_child=is_child)
             entity.retained = retained
 
             return entity
 
-        if V1Validator.validate_device_property(topic):
+        if V1Validator.validate_device_property(topic=topic):
             entity = cls.parse_device_property(topic=topic, payload=payload, is_child=is_child)
             entity.retained = retained
 
             return entity
 
-        if V1Validator.validate_device_control(topic):
+        if V1Validator.validate_device_control(topic=topic):
             entity = cls.parse_device_control(topic=topic, payload=payload, is_child=is_child)
             entity.retained = retained
 
             return entity
 
-        if V1Validator.validate_channel_part(topic):
+        if V1Validator.validate_channel_part(topic=topic):
             if is_child:
                 result: List[tuple] = re.findall(V1Validator.CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP, topic)
                 parent, device, channel = result.pop()
@@ -113,13 +113,13 @@ class V1Parser:
         cls,
         device: str,
         channel: str,
-        parent: str or None,
+        parent: Optional[str],
         topic: str,
         payload: str,
         retained: bool = False,
     ) -> BaseEntity:
         """Parse received message topic & value for device channel"""
-        if V1Validator.validate_channel_attribute(topic):
+        if V1Validator.validate_channel_attribute(topic=topic):
             entity = cls.parse_channel_attribute(
                 device=device,
                 parent=parent,
@@ -131,7 +131,7 @@ class V1Parser:
 
             return entity
 
-        if V1Validator.validate_channel_property(topic):
+        if V1Validator.validate_channel_property(topic=topic):
             entity = cls.parse_channel_property(
                 device=device,
                 parent=parent,
@@ -143,7 +143,7 @@ class V1Parser:
 
             return entity
 
-        if V1Validator.validate_channel_control(topic):
+        if V1Validator.validate_channel_control(topic=topic):
             entity = cls.parse_channel_control(
                 device=device,
                 parent=parent,
@@ -281,7 +281,7 @@ class V1Parser:
     @staticmethod
     def parse_channel_attribute(
         device: str,
-        parent: str or None,
+        parent: Optional[str],
         channel: str,
         topic: str,
         payload: str,
@@ -303,7 +303,7 @@ class V1Parser:
     @staticmethod
     def parse_channel_property(
         device: str,
-        parent: str or None,
+        parent: Optional[str],
         channel: str,
         topic: str,
         payload: str,
@@ -332,7 +332,7 @@ class V1Parser:
     @staticmethod
     def parse_channel_control(
         device: str,
-        parent: str or None,
+        parent: Optional[str],
         channel: str,
         topic: str,
         payload: str,

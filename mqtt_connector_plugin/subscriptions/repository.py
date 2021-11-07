@@ -19,7 +19,7 @@ MQTT connector plugin subscriptions subscriptions repository
 """
 
 # Library dependencies
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 # Library libs
 from mqtt_connector_plugin.subscriptions.entities import SubscriptionEntity
@@ -40,7 +40,7 @@ class SubscriptionsRepository:
 
     # -----------------------------------------------------------------------------
 
-    def get_by_id(self, mid: int) -> SubscriptionEntity or None:
+    def get_by_id(self, mid: int) -> Optional[SubscriptionEntity]:
         """Get topic subscription by message identifier"""
         if mid in self.__items.keys():
             return self.__items[mid]

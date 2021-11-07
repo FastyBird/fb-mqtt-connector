@@ -137,7 +137,7 @@ class CommonHandler(BaseHandler):
                     if ip_address and device_id and username:
                         entity = DevicePropertyEntity(
                             device=device_id,
-                            name=DevicePropertyName(DevicePropertyName.IP_ADDRESS).value,
+                            name=DevicePropertyName.IP_ADDRESS.value,
                         )
                         entity.value = ip_address
 

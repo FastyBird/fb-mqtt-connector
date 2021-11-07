@@ -20,7 +20,7 @@ MQTT connector plugin MQTT clients container
 import random
 import string
 from time import sleep
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 from kink import inject
 from paho.mqtt.client import Client as PahoClient, MQTTMessageInfo
 
@@ -41,7 +41,7 @@ class ClientSettings:
     __connector_id: str
     __broker_host: str = "127.0.0.1"
     __broker_port: int = 1883
-    __client_id: str or None = None
+    __client_id: Optional[str] = None
 
     # -----------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ class ClientSettings:
         connector_id: str,
         broker_host: str = "127.0.0.1",
         broker_port: int = 1883,
-        client_id: str or None = None,
+        client_id: Optional[str] = None,
     ) -> None:
         self.__connector_id = connector_id
         self.__broker_host = broker_host

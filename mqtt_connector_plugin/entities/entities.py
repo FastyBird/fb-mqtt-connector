@@ -22,7 +22,7 @@ MQTT connector plugin entities
 import json
 import re
 from abc import ABC
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional, Union
 from fastnumbers import fast_real
 from modules_metadata.types import DataType, ControlName
 
@@ -54,12 +54,12 @@ class BaseEntity(ABC):
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
     __device: str
-    __parent: str or None = None
+    __parent: Optional[str] = None
     __retained: bool = False
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, parent: Optional[str] = None) -> None:
         self.__device = device
         self.__parent = parent
 
@@ -73,7 +73,7 @@ class BaseEntity(ABC):
     # -----------------------------------------------------------------------------
 
     @property
-    def parent(self) -> str or None:
+    def parent(self) -> Optional[str]:
         """Entity parent device identifier"""
         return self.__parent
 
@@ -93,7 +93,7 @@ class BaseEntity(ABC):
 
     # -----------------------------------------------------------------------------
 
-    def to_dict(self) -> Dict[str, str or bool or None]:
+    def to_dict(self) -> Dict[str, Union[str, bool, None]]:
         """Entity to dictionary converter"""
         return {
             "device": self.device,
@@ -119,11 +119,11 @@ class AttributeEntity(BaseEntity):
     CONTROLS = "controls"
 
     __attribute: str
-    __value: str or List[str]
+    __value: Union[str, List[str]]
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, attribute: str, value: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, attribute: str, value: str, parent: Optional[str] = None) -> None:
         if attribute not in self.allowed_attributes:
             raise InvalidArgumentException(f"Provided attribute '{attribute}' is not in allowed range")
 
@@ -142,7 +142,7 @@ class AttributeEntity(BaseEntity):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> str or List[str]:
+    def value(self) -> Union[str, List[str]]:
         """Entity value"""
         return self.__value
 
@@ -163,7 +163,7 @@ class AttributeEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __parse_value(self, value: str) -> str or List[str]:
+    def __parse_value(self, value: str) -> Union[str, List[str]]:
         """Parse value against entity attribute type"""
         if self.attribute == self.NAME:
             return clean_name(value)
@@ -220,7 +220,7 @@ class ChannelAttributeEntity(AttributeEntity):
         channel: str,
         attribute: str,
         value: str,
-        parent: str or None = None,
+        parent: Optional[str] = None,
     ) -> None:
         super().__init__(device=device, attribute=attribute, value=value, parent=parent)
 
@@ -273,7 +273,7 @@ class HardwareEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parameter: str, value: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, parameter: str, value: str, parent: Optional[str] = None) -> None:
         if parameter not in self.allowed_parameters:
             raise InvalidArgumentException(f"Provided hardware attribute '{parameter}' is not in allowed range")
 
@@ -335,7 +335,7 @@ class FirmwareEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parameter: str, value: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, parameter: str, value: str, parent: Optional[str] = None) -> None:
         if parameter not in self.allowed_parameters:
             raise InvalidArgumentException(f"Provided firmware attribute '{parameter}' is not in allowed range")
 
@@ -387,12 +387,12 @@ class PropertyEntity(BaseEntity):
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
     __name: str
-    __value: str or None = None
+    __value: Optional[str] = None
     __attributes: Set["PropertyAttributeEntity"] = set()
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, name: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, name: str, parent: Optional[str] = None) -> None:
         super().__init__(device=device, parent=parent)
 
         self.__name = name
@@ -407,7 +407,7 @@ class PropertyEntity(BaseEntity):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> str or None:
+    def value(self) -> Optional[str]:
         """Entity value"""
         return self.__value
 
@@ -520,7 +520,7 @@ class ChannelPropertyEntity(PropertyEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, channel: str, name: str, parent: str or None = None) -> None:
+    def __init__(self, device: str, channel: str, name: str, parent: Optional[str] = None) -> None:
         super().__init__(device=device, name=name, parent=parent)
 
         self.__channel = channel
@@ -563,11 +563,11 @@ class PropertyAttributeEntity(ABC):
     ]
 
     __attribute: str
-    __value: str or None = None
+    __value: Optional[str] = None
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, attribute: str, value: str or None = None) -> None:
+    def __init__(self, attribute: str, value: Optional[str] = None) -> None:
         if attribute not in self.allowed_attributes:
             raise InvalidArgumentException(f"Provided property parameter '{attribute}' is not in allowed range")
 
@@ -584,7 +584,7 @@ class PropertyAttributeEntity(ABC):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> str or bool or None:
+    def value(self) -> Union[str, bool, None]:
         """Entity value"""
         if self.__value is None:
             return None
@@ -626,9 +626,9 @@ class ControlEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
-    CONFIG = ControlName(ControlName.CONFIGURE).value
-    RESET = ControlName(ControlName.RESET).value
-    REBOOT = ControlName(ControlName.REBOOT).value
+    CONFIG = ControlName.CONFIGURE.value
+    RESET = ControlName.RESET.value
+    REBOOT = ControlName.REBOOT.value
     RECONNECT = "reconnect"
     FACTORY_RESET = "factory-reset"
     OTA = "ota"
@@ -640,10 +640,10 @@ class ControlEntity(BaseEntity):
     TYPE_TEXT = "text"
 
     __control: str
-    __value: str or Dict[str, str or int or float or bool or None] or None = None
-    __schema: Set[Dict[str, str or int or float or bool]] or None = None
+    __value: Union[str, Dict[str, Union[str, int, float, bool, None]], None] = None
+    __schema: Optional[Set[Dict[str, Union[str, int, float, bool]]]] = None
 
-    def __init__(self, device: str, control: str, parent: str or None = None):
+    def __init__(self, device: str, control: str, parent: Optional[str] = None):
         if control not in self.allowed_controls:
             raise InvalidArgumentException(f"Provided control '{control}' is not in allowed range")
 
@@ -659,14 +659,14 @@ class ControlEntity(BaseEntity):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> str or Dict[str, str or int or float or bool or None] or None:
+    def value(self) -> Union[str, Dict[str, Union[str, int, float, bool, None]], None]:
         """Entity value"""
         return self.__value
 
     # -----------------------------------------------------------------------------
 
     @value.setter
-    def value(self, value: str or None) -> None:
+    def value(self, value: Optional[str]) -> None:
         """Entity value setter"""
         self.__value = value
 
@@ -686,7 +686,7 @@ class ControlEntity(BaseEntity):
     # -----------------------------------------------------------------------------
 
     @property
-    def schema(self) -> Set[Dict[str, str or int or float or bool]] or None:
+    def schema(self) -> Optional[Set[Dict[str, Union[str, int, float, bool]]]]:
         """Config control schema"""
         if self.control != self.CONFIG:
             raise InvalidStateException(f"Schema could be get only for '{self.CONFIG}' control type")
@@ -731,26 +731,26 @@ class ControlEntity(BaseEntity):
 
             if row_type in (self.TYPE_NUMBER, self.TYPE_FLOAT):
                 if row_type == self.TYPE_NUMBER:
-                    schema_row["data_type"] = DataType(DataType.INT)
+                    schema_row["data_type"] = DataType.INT
 
                 else:
-                    schema_row["data_type"] = DataType(DataType.FLOAT)
+                    schema_row["data_type"] = DataType.FLOAT
 
                 for field in ["min", "max", "step", "default"]:
                     schema_row_params[field] = fast_real(row.get(field)) if field in row else None
 
             elif row_type == self.TYPE_TEXT:
-                schema_row["data_type"] = DataType(DataType.STRING)
+                schema_row["data_type"] = DataType.STRING
 
                 schema_row_params["default"] = str(row.get("default")) if "default" in row else None
 
             elif row_type == self.TYPE_BOOLEAN:
-                schema_row["data_type"] = DataType(DataType.BOOLEAN)
+                schema_row["data_type"] = DataType.BOOLEAN
 
                 schema_row_params["default"] = bool(row.get("default", False)) if "default" in row else None
 
             elif row_type == self.TYPE_SELECT:
-                schema_row["data_type"] = DataType(DataType.ENUM)
+                schema_row["data_type"] = DataType.ENUM
 
                 schema_row_params["select_values"] = []
 
@@ -826,7 +826,7 @@ class ChannelControlEntity(ControlEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, channel: str, control: str, parent: str or None = None):
+    def __init__(self, device: str, channel: str, control: str, parent: Optional[str] = None):
         super().__init__(device=device, control=control, parent=parent)
 
         self.__channel = channel

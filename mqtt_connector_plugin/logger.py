@@ -72,4 +72,4 @@ class Logger:
 
     def exception(self, msg: Exception, *args, exc_info: bool = True, **kwargs) -> None:
         """Log thrown exception"""
-        self.__logger.exception(msg, *args, exc_info, **kwargs)
+        self.__logger.exception(msg=msg, exc_info=exc_info, *args, **kwargs)

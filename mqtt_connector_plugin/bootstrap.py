@@ -40,11 +40,17 @@ from mqtt_connector_plugin.subscriptions.repository import SubscriptionsReposito
 
 def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> None:
     """Create FB MQTT connector services"""
+    di[Logger] = Logger(logger=logger)
+    di["fb-mqtt-connector-plugin_logger"] = di[Logger]
+
     di[SubscriptionsRepository] = SubscriptionsRepository()
     di["fb-mqtt-connector-plugin_subscription-repository"] = di[SubscriptionsRepository]
 
-    di[Logger] = Logger(logger=logger)
-    di["fb-mqtt-connector-plugin_logger"] = di[Logger]
+    # Entities consumers
+    di[MessagesConsumer] = MessagesConsumer(
+        logger=di[Logger],
+    )
+    di["fb-mqtt-connector-plugin_consumer-proxy"] = di[MessagesConsumer]
 
     # Clients handlers
     di[CommonHandler] = CommonHandler(
@@ -79,12 +85,7 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
     di[MessagesPublisher] = MessagesPublisher()
     di["fb-mqtt-connector-plugin_publisher-proxy"] = di[MessagesPublisher]
 
-    # Entities consumers
-    di[MessagesConsumer] = MessagesConsumer(
-        logger=di[Logger],
-    )
-    di["fb-mqtt-connector-plugin_consumer-proxy"] = di[MessagesConsumer]
-
+    # MQTT connector
     di[MqttConnector] = MqttConnector(
         mqtt_client=di[MqttClient],
         consumer=di[MessagesConsumer],

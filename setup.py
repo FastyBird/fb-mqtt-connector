@@ -64,6 +64,7 @@ setup(
         "kink",
         "setuptools",
         "fastnumbers",
+        "fastybird-modules-metadata",
     ],
     download_url="https://github.com/FastyBird/mqtt-connector-plugin/archive/%s.tar.gz" % VERSION,
     classifiers=[

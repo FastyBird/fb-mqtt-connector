@@ -20,7 +20,7 @@ MQTT connector plugin messages publisher
 
 # Library dependencies
 from abc import ABC, abstractmethod
-from typing import Dict, Set
+from typing import Dict, Set, Optional, Union
 
 # Library libs
 from mqtt_connector_plugin.logger import Logger
@@ -53,7 +53,7 @@ class BasePublisher(ABC):
         device: str,
         identifier: str,
         payload: str,
-        parent: str or None = None,
+        parent: Optional[str] = None,
     ) -> None:
         """Publish device property set message"""
 
@@ -63,8 +63,8 @@ class BasePublisher(ABC):
     def publish_device_configuration(
         self,
         device: str,
-        payload: Dict[str, any] or Set[Dict[any]],
-        parent: str or None = None,
+        payload: Union[Dict[str, any], Set[Dict[any]]],
+        parent: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
 
@@ -76,7 +76,7 @@ class BasePublisher(ABC):
         device: str,
         command: str,
         payload: str = "true",
-        parent: str or None = None,
+        parent: Optional[str] = None,
     ) -> None:
         """Publish device control command message"""
 
@@ -89,7 +89,7 @@ class BasePublisher(ABC):
         channel: str,
         identifier: str,
         payload: str,
-        parent: str or None = None,
+        parent: Optional[str] = None,
     ) -> None:
         """Publish channel property set message"""
 
@@ -100,8 +100,8 @@ class BasePublisher(ABC):
         self,
         device: str,
         channel: str,
-        payload: Dict[str, any] or Set[Dict[any]],
-        parent: str or None = None,
+        payload: Union[Dict[str, any], Set[Dict[any]]],
+        parent: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
 
@@ -114,6 +114,6 @@ class BasePublisher(ABC):
         channel: str,
         command: str,
         payload: str = "true",
-        parent: str or None = None,
+        parent: Optional[str] = None,
     ) -> None:
         """Publish channel control command message"""
