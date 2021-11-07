@@ -22,7 +22,7 @@ import string
 from time import sleep
 from typing import Dict, Tuple, List, Optional
 from kink import inject
-from paho.mqtt.client import Client as PahoClient, MQTTMessageInfo
+from paho.mqtt.client import Client as PahoClient
 
 # Library libs
 from mqtt_connector_plugin.handlers.handler import MessagesHandler
