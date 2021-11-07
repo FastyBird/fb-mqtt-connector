@@ -121,7 +121,7 @@ class CommonHandler(BaseHandler):
         """On broker message event"""
         if len(re.findall(self.__SYS_TOPIC_REGEX, message.topic)) == 1:
             result: List[tuple] = re.findall(self.__SYS_TOPIC_REGEX, message.topic)
-            log_level: str = str(result.pop()).lower()
+            log_level = str(result.pop()).lower()
 
             if log_level == "n":
                 self._logger.info(message.payload)

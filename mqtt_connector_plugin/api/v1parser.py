@@ -53,7 +53,7 @@ class V1Parser:
         if V1Validator.validate(topic=topic) is False:
             raise ParseMessageException("Provided topic is not valid")
 
-        is_child: bool = V1Validator.validate_child_device_part(topic=topic)
+        is_child = V1Validator.validate_child_device_part(topic=topic)
 
         if V1Validator.validate_device_attribute(topic=topic):
             entity = cls.parse_device_attribute(topic=topic, payload=payload, is_child=is_child)

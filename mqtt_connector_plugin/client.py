@@ -167,10 +167,10 @@ class MqttClient:
 
     def publish(self, topic: str, payload: str, qos: int = 0) -> bool:
         """Publish payload to all brokers & clients"""
-        result: bool = True
+        result = True
 
         for _, client in self.__mqtt_clients.values():
-            client_result: MQTTMessageInfo = client.publish(topic=topic, payload=payload, qos=qos)
+            client_result = client.publish(topic=topic, payload=payload, qos=qos)
 
             if client_result.rc != 0:
                 result = False

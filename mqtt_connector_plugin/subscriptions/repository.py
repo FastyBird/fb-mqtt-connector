@@ -82,7 +82,7 @@ class SubscriptionsRepository:
         if self.__iterator_index < len(self.__items.values()):
             items: List[SubscriptionEntity] = list(self.__items.values())
 
-            result: SubscriptionEntity = items[self.__iterator_index]
+            result = items[self.__iterator_index]
 
             self.__iterator_index += 1
 
