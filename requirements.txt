@@ -2,4 +2,4 @@ paho-mqtt>=1.5
 kink>=0.6
 setuptools>=57.4
 fastnumbers>=3.1
-fastybird-modules-metadata>=0.7
+fastybird-modules-metadata>=0.8
