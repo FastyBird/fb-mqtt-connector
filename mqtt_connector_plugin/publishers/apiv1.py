@@ -91,7 +91,7 @@ class ApiV1Publisher(BasePublisher):
     def publish_device_configuration(
         self,
         device: str,
-        payload: Union[Dict[str, any], Set[Dict[any]]],
+        payload: Union[Dict[str, any], Set[Dict[str, any]]],
         parent: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
@@ -159,7 +159,7 @@ class ApiV1Publisher(BasePublisher):
         self,
         device: str,
         channel: str,
-        payload: Union[Dict[str, any], Set[Dict[any]]],
+        payload: Union[Dict[str, any], Set[Dict[str, any]]],
         parent: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
