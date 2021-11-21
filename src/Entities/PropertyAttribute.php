@@ -68,8 +68,8 @@ final class PropertyAttribute
 		string $attribute,
 		string $value
 	) {
-		if (!in_array($this->getAttribute(), self::ALLOWED_ATTRIBUTES, true)) {
-			throw new Exceptions\InvalidArgumentException(sprintf('Provided property parameter "%s" is not in allowed range', $this->getAttribute()));
+		if (!in_array($attribute, self::ALLOWED_ATTRIBUTES, true)) {
+			throw new Exceptions\InvalidArgumentException(sprintf('Provided property parameter "%s" is not in allowed range', $attribute));
 		}
 
 		$this->attribute = $attribute;

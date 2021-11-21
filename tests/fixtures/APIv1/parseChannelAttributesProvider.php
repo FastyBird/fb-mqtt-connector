@@ -7,6 +7,7 @@ return [
 		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Attribute::NAME,
 		'Some content',
 		[
+			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                 => 'device-name',
 			'parent'                 => null,
 			'channel'                => 'channel-name',
@@ -18,6 +19,7 @@ return [
 		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
+			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                       => 'device-name',
 			'parent'                       => null,
 			'channel'                      => 'channel-name',
@@ -29,6 +31,7 @@ return [
 		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Attribute::CONTROL,
 		'configure,reset',
 		[
+			'client_id'                 => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                    => 'device-name',
 			'parent'                    => null,
 			'channel'                   => 'channel-name',
@@ -40,6 +43,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$channel/channel-name/$' . Entities\Attribute::NAME,
 		'Some content',
 		[
+			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                 => 'child-name',
 			'parent'                 => 'device-name',
 			'channel'                => 'channel-name',
@@ -51,6 +55,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$channel/channel-name/$' . Entities\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
+			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                       => 'child-name',
 			'parent'                       => 'device-name',
 			'channel'                      => 'channel-name',
@@ -62,6 +67,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$channel/channel-name/$' . Entities\Attribute::CONTROL,
 		'configure,reset',
 		[
+			'client_id'                 => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                    => 'child-name',
 			'parent'                    => 'device-name',
 			'channel'                   => 'channel-name',

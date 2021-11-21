@@ -13,6 +13,7 @@ use Mockery;
 use Nette\Utils;
 use Ninjify\Nunjuck\TestCase\BaseMockeryTestCase;
 use Psr\Log;
+use Ramsey\Uuid;
 use React;
 use Tester\Assert;
 
@@ -130,6 +131,9 @@ final class ApiV1HandlerTest extends BaseMockeryTestCase
 		);
 
 		$client = Mockery::mock(Client\MqttClient::class);
+		$client
+			->shouldReceive('getClientId')
+			->andReturn((string) Uuid\Uuid::uuid4());
 
 		$handler->onMessage($message, $client);
 	}

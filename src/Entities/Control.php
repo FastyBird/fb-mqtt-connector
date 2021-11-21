@@ -43,16 +43,14 @@ abstract class Control extends Entity
 	public const DATA_TYPE_SELECT = 'select';
 	public const DATA_TYPE_TEXT = 'text';
 
-	private const NOT_CONFIGURED = 'N/A';
-
 	/** @var string */
 	private string $control;
 
 	/** @var mixed[]|string|null */
-	private $value = self::NOT_CONFIGURED;
+	private $value = null;
 
 	/** @var mixed[]|string|null */
-	private $schema = self::NOT_CONFIGURED;
+	private $schema = null;
 
 	public function __construct(
 		Uuid\UuidInterface $clientId,
@@ -248,11 +246,11 @@ abstract class Control extends Entity
 			'control' => $this->getControl(),
 		], parent::toArray());
 
-		if ($this->getValue() !== self::NOT_CONFIGURED) {
+		if ($this->getValue() !== null) {
 			$return['value'] = $this->getValue();
 		}
 
-		if ($this->isConfiguration() && $this->getSchema() !== self::NOT_CONFIGURED) {
+		if ($this->isConfiguration() && $this->getSchema() !== null) {
 			$return['schema'] = $this->getSchema();
 		}
 

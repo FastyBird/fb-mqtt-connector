@@ -83,8 +83,8 @@ class MqttConnectorPluginExtension extends DI\CompilerExtension
 		$builder->addDefinition($this->prefix('client'), new DI\Definitions\ServiceDefinition())
 			->setFactory(Client\Client::class);
 
-		$builder->addFactoryDefinition($this->prefix('client.factory'))
-			->setImplement(Client\MqttClientFactory::class);
+		$builder->addDefinition($this->prefix('client.factory'), new DI\Definitions\ServiceDefinition())
+			->setFactory(Client\MqttClientFactory::class);
 
 		// MQTT API
 		$builder->addDefinition($this->prefix('api.parser'), new DI\Definitions\ServiceDefinition())

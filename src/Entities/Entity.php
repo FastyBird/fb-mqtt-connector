@@ -107,10 +107,10 @@ abstract class Entity implements IEntity
 	public function toArray(): array
 	{
 		return [
-			'clientId' => $this->getClientId()->toString(),
-			'device'   => $this->getDevice(),
-			'parent'   => $this->getParent(),
-			'retained' => $this->isRetained(),
+			'client_id' => $this->getClientId()->toString(),
+			'device'    => $this->getDevice(),
+			'parent'    => $this->getParent(),
+			'retained'  => $this->isRetained(),
 		];
 	}
 

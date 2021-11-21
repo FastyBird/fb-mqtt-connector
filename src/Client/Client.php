@@ -38,17 +38,12 @@ final class Client
 	/** @var SplObjectStorage<MqttClient, null> */
 	private SplObjectStorage $clients;
 
-	/** @var MqttClientFactory */
-	private MqttClientFactory $mqttClientFactory;
-
 	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		MqttClientFactory $mqttClientFactory,
 		?Log\LoggerInterface $logger = null
 	) {
-		$this->mqttClientFactory = $mqttClientFactory;
 		$this->logger = $logger ?? new Log\NullLogger();
 
 		$this->clients = new SplObjectStorage();

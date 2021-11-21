@@ -7,6 +7,7 @@ return [
 		'/fb/v1/device-name/$' . Entities\Attribute::NAME,
 		'Some content',
 		[
+			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                 => 'device-name',
 			'parent'                 => null,
 			'retained'               => false,
@@ -17,6 +18,7 @@ return [
 		'/fb/v1/device-name/$' . Entities\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
+			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                       => 'device-name',
 			'parent'                       => null,
 			'retained'                     => false,
@@ -27,6 +29,7 @@ return [
 		'/fb/v1/device-name/$' . Entities\Attribute::CHANNELS,
 		'channel-one,channel-two',
 		[
+			'client_id'                  => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                     => 'device-name',
 			'parent'                     => null,
 			'retained'                   => false,
@@ -37,6 +40,7 @@ return [
 		'/fb/v1/device-name/$' . Entities\Attribute::CONTROL,
 		'configure,reset',
 		[
+			'client_id'                 => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                    => 'device-name',
 			'parent'                    => null,
 			'retained'                  => false,
@@ -47,6 +51,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$' . Entities\Attribute::NAME,
 		'Some content',
 		[
+			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                 => 'child-name',
 			'parent'                 => 'device-name',
 			'retained'               => false,
@@ -57,6 +62,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$' . Entities\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
+			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                       => 'child-name',
 			'parent'                       => 'device-name',
 			'retained'                     => false,
@@ -67,6 +73,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$' . Entities\Attribute::CHANNELS,
 		'channel-one,channel-two',
 		[
+			'client_id'                  => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                     => 'child-name',
 			'parent'                     => 'device-name',
 			'retained'                   => false,
@@ -77,6 +84,7 @@ return [
 		'/fb/v1/device-name/$child/child-name/$' . Entities\Attribute::CONTROL,
 		'configure,reset',
 		[
+			'client_id'                 => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'                    => 'child-name',
 			'parent'                    => 'device-name',
 			'retained'                  => false,
