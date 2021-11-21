@@ -16,13 +16,14 @@
 MQTT connector plugin MQTT clients container
 """
 
-# Library dependencies
+# Python base dependencies
 import random
 import string
 import uuid
 from time import sleep
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, Set, Tuple
 
+# Library dependencies
 from kink import inject
 from paho.mqtt.client import Client as PahoClient
 
@@ -41,45 +42,41 @@ class ClientSettings:
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
 
-    __connector_id: uuid.UUID
-    __broker_host: str = "127.0.0.1"
-    __broker_port: int = 1883
+    __host: str = "127.0.0.1"
+    __port: int = 1883
     __client_id: Optional[str] = None
+    __username: Optional[str] = None
+    __password: Optional[str] = None
 
     # -----------------------------------------------------------------------------
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
-        connector_id: uuid.UUID,
-        broker_host: str = "127.0.0.1",
-        broker_port: int = 1883,
+        host: str = "127.0.0.1",
+        port: int = 1883,
         client_id: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
-        self.__connector_id = connector_id
-        self.__broker_host = broker_host
-        self.__broker_port = broker_port
+        self.__host = host
+        self.__port = port
         self.__client_id = client_id
+        self.__username = username
+        self.__password = password
 
     # -----------------------------------------------------------------------------
 
     @property
-    def connector_id(self) -> uuid.UUID:
-        """Get connector identifier"""
-        return self.__connector_id
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def broker_host(self) -> str:
+    def host(self) -> str:
         """Get connector broker host address"""
-        return self.__broker_host
+        return self.__host
 
     # -----------------------------------------------------------------------------
 
     @property
-    def broker_port(self) -> int:
+    def port(self) -> int:
         """Get connector broker port"""
-        return self.__broker_port
+        return self.__port
 
     # -----------------------------------------------------------------------------
 
@@ -91,9 +88,23 @@ class ClientSettings:
 
         return self.__client_id
 
+    # -----------------------------------------------------------------------------
+
+    @property
+    def username(self) -> Optional[str]:
+        """Get connector broker username"""
+        return self.__username
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def password(self) -> Optional[str]:
+        """Get connector broker password"""
+        return self.__password
+
 
 @inject
-class MqttClient:
+class Client:
     """
     MQTT clients proxy
 
@@ -103,9 +114,7 @@ class MqttClient:
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
 
-    __mqtt_clients: Dict[str, Tuple[ClientSettings, PahoClient]] = {}
-
-    __messages_handler: MessagesHandler
+    __mqtt_clients: Set[Tuple[ClientSettings, PahoClient]] = set()
 
     __logger: Logger
 
@@ -114,75 +123,57 @@ class MqttClient:
     @inject
     def __init__(
         self,
-        messages_handler: MessagesHandler,
         logger: Logger,
     ) -> None:
-        self.__messages_handler = messages_handler
-
         self.__logger = logger
 
     # -----------------------------------------------------------------------------
 
-    def initialize(self, connectors: List[ClientSettings]) -> None:
-        """Initialize all brokers connections"""
-        for connector in connectors:
-            client = PahoClient(
-                client_id=connector.client_id,
-                userdata={
-                    "connector_id": connector.connector_id,
-                },
-            )
-
-            # Set up external MQTT broker callbacks
-            client.on_connect = self.__messages_handler.on_connect
-            client.on_disconnect = self.__messages_handler.on_disconnect
-            client.on_message = self.__messages_handler.on_message
-            client.on_subscribe = self.__messages_handler.on_subscribe
-            client.on_unsubscribe = self.__messages_handler.on_unsubscribe
-            client.on_log = self.__messages_handler.on_log
-
-            self.__mqtt_clients[connector.connector_id.__str__()] = (connector, client)
+    def add_client(self, settings: ClientSettings, client: PahoClient) -> None:
+        """Append new client"""
+        self.__mqtt_clients.add((settings, client))
 
     # -----------------------------------------------------------------------------
 
     def connect(self) -> None:
         """Connect to all brokers"""
-        for settings, client in self.__mqtt_clients.values():
+        for settings, client in self.__mqtt_clients:
             self.__connect(client=client, settings=settings)
 
     # -----------------------------------------------------------------------------
 
     def disconnect(self) -> None:
         """Disconnect from all brokers"""
-        for _, client in self.__mqtt_clients.values():
+        for _, client in self.__mqtt_clients:
             client.disconnect()
 
     # -----------------------------------------------------------------------------
 
     def stop(self) -> None:
         """Stop MQTT clients loop"""
-        for _, client in self.__mqtt_clients.values():
+        for _, client in self.__mqtt_clients:
             client.loop_stop()
 
     # -----------------------------------------------------------------------------
 
     def check_connection(self) -> None:
         """Check connection to MQTT brokers"""
-        for settings, client in self.__mqtt_clients.values():
+        for settings, client in self.__mqtt_clients:
             if not client.is_connected():
                 self.__connect(client=client, settings=settings)
 
     # -----------------------------------------------------------------------------
 
-    def publish(self, topic: str, payload: str, qos: int = 0) -> bool:
+    def publish(self, topic: str, payload: str, qos: int = 0, client_id: Optional[str] = None) -> bool:
         """Publish payload to all brokers & clients"""
         result = True
 
-        for _, client in self.__mqtt_clients.values():
-            client_result = client.publish(topic=topic, payload=payload, qos=qos)
+        for settings, client in self.__mqtt_clients:
+            if client_id is None or settings.client_id == client_id:
+                client_result = client.publish(topic=topic, payload=payload, qos=qos)
 
-            if client_result.rc != 0:
-                result = False
+                if client_result.rc != 0:
+                    result = False
 
         return result
 
@@ -191,9 +182,12 @@ class MqttClient:
     def __connect(self, client: PahoClient, settings: ClientSettings) -> None:
         while not client.is_connected():
             try:
+                if settings.username is not None:
+                    client.username_pw_set(username=settings.username, password=settings.password)
+
                 client.connect(
-                    host=settings.broker_host,
-                    port=settings.broker_port,
+                    host=settings.host,
+                    port=settings.port,
                 )
 
                 client.loop_start()
@@ -205,3 +199,78 @@ class MqttClient:
                 self.__logger.exception(ex)
 
                 sleep(10)
+
+
+@inject
+class PahoClientFactory:  # pylint: disable=too-few-public-methods
+    """
+    PAHO MQTT client factory
+
+    @package        FastyBird:MqttConnectorPlugin!
+    @module         client
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    __client: Client
+    __messages_handler: MessagesHandler
+
+    __logger: Logger
+
+    # -----------------------------------------------------------------------------
+
+    @inject
+    def __init__(
+        self,
+        client: Client,
+        messages_handler: MessagesHandler,
+        logger: Logger,
+    ) -> None:
+        self.__client = client
+        self.__messages_handler = messages_handler
+
+        self.__logger = logger
+
+    # -----------------------------------------------------------------------------
+
+    def create(  # pylint: disable=too-many-arguments
+        self,
+        host: str,
+        port: int,
+        client_id: uuid.UUID,
+        username: Optional[str],
+        password: Optional[str],
+    ) -> None:
+        """Create new instance of Paho MQTT client"""
+        client = PahoClient(
+            client_id=client_id.__str__(),
+            userdata={
+                "client_id": client_id,
+            },
+        )
+
+        # Set up external MQTT broker callbacks
+        client.on_connect = self.__messages_handler.on_connect
+        client.on_disconnect = self.__messages_handler.on_disconnect
+        client.on_message = self.__messages_handler.on_message
+        client.on_subscribe = self.__messages_handler.on_subscribe
+        client.on_unsubscribe = self.__messages_handler.on_unsubscribe
+        client.on_log = self.__messages_handler.on_log
+
+        self.__client.add_client(
+            settings=ClientSettings(
+                host=host,
+                port=port,
+                client_id=client_id.__str__(),
+                username=username,
+                password=password,
+            ),
+            client=client,
+        )
+
+        self.__logger.debug(
+            "Created MQTT client: %s to broker: %s:%d",
+            client_id.__str__(),
+            host,
+            port,
+        )

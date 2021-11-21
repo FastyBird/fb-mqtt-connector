@@ -77,8 +77,8 @@ class MqttClient
 	/** @var Flow|null */
 	private ?Flow $writtenFlow;
 
-	/** @var Handlers\IHandler */
-	private Handlers\IHandler $handler;
+	/** @var Handlers\ClientHandler */
+	private Handlers\ClientHandler $handler;
 
 	/** @var ConnectionSettings */
 	private ConnectionSettings $connectionSettings;
@@ -106,7 +106,7 @@ class MqttClient
 
 	public function __construct(
 		ConnectionSettings $connectionSettings,
-		Handlers\IHandler $handler,
+		Handlers\ClientHandler $handler,
 		EventLoop\LoopInterface $loop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
@@ -169,6 +169,16 @@ class MqttClient
 	}
 
 	/**
+	 * Return client identifier
+	 *
+	 * @return string
+	 */
+	public function getClientId(): string
+	{
+		return $this->connectionSettings->getClientId();
+	}
+
+	/**
 	 * @return EventLoop\LoopInterface
 	 */
 	public function getLoop(): EventLoop\LoopInterface
@@ -218,7 +228,12 @@ class MqttClient
 		$this->isConnecting = true;
 		$this->isConnected = false;
 
-		$connection = new Mqtt\DefaultConnection();
+		$connection = new Mqtt\DefaultConnection(
+			$this->connectionSettings->getUsername(),
+			$this->connectionSettings->getPassword(),
+			$this->connectionSettings->getWill(),
+			$this->connectionSettings->getClientId()
+		);
 
 		if ($connection->getClientID() === '') {
 			$connection = $connection->withClientID($this->identifierGenerator->generateClientIdentifier());

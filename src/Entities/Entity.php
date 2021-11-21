@@ -16,6 +16,7 @@
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
 use Nette;
+use Ramsey\Uuid;
 
 /**
  * Base data entity
@@ -30,6 +31,9 @@ abstract class Entity implements IEntity
 
 	use Nette\SmartObject;
 
+	/** @var Uuid\UuidInterface */
+	private Uuid\UuidInterface $clientId;
+
 	/** @var string */
 	private string $device;
 
@@ -40,9 +44,11 @@ abstract class Entity implements IEntity
 	private bool $retained = false;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		?string $parent = null
 	) {
+		$this->clientId = $clientId;
 		$this->device = $device;
 		$this->parent = $parent;
 	}
@@ -50,13 +56,9 @@ abstract class Entity implements IEntity
 	/**
 	 * {@inheritDoc}
 	 */
-	public function toArray(): array
+	public function getClientId(): Uuid\UuidInterface
 	{
-		return [
-			'device'   => $this->getDevice(),
-			'parent'   => $this->getParent(),
-			'retained' => $this->isRetained(),
-		];
+		return $this->clientId;
 	}
 
 	/**
@@ -97,6 +99,19 @@ abstract class Entity implements IEntity
 	public function setRetained(bool $retained): void
 	{
 		$this->retained = $retained;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function toArray(): array
+	{
+		return [
+			'clientId' => $this->getClientId()->toString(),
+			'device'   => $this->getDevice(),
+			'parent'   => $this->getParent(),
+			'retained' => $this->isRetained(),
+		];
 	}
 
 }

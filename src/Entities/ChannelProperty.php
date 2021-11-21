@@ -15,6 +15,8 @@
 
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
+use Ramsey\Uuid;
+
 /**
  * Device or channel property
  *
@@ -30,12 +32,13 @@ final class ChannelProperty extends Property
 	private string $channel;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		string $channel,
 		string $property,
 		?string $parent = null
 	) {
-		parent::__construct($device, $property, $parent);
+		parent::__construct($clientId, $device, $property, $parent);
 
 		$this->channel = $channel;
 	}

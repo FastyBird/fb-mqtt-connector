@@ -15,6 +15,7 @@
 
 namespace FastyBird\MqttConnectorPlugin\Client;
 
+use BinSoul\Net\Mqtt;
 use Nette;
 
 /**
@@ -36,6 +37,34 @@ final class ConnectionSettings
 	/** @var int */
 	private int $port;
 
+	/** @var string */
+	private string $username;
+
+	/** @var string */
+	private string $password;
+
+	/** @var ?Mqtt\Message */
+	private ?Mqtt\Message $will;
+
+	/** @var string */
+	private string $clientId;
+
+	public function __construct(
+		string $host,
+		int $port,
+		string $clientId,
+		string $username = '',
+		string $password = '',
+		?Mqtt\Message $will = null
+	) {
+		$this->host = $host;
+		$this->port = $port;
+		$this->clientId = $clientId;
+		$this->username = $username;
+		$this->password = $password;
+		$this->will = $will;
+	}
+
 	/**
 	 * @return string
 	 */
@@ -50,6 +79,38 @@ final class ConnectionSettings
 	public function getPort(): int
 	{
 		return $this->port;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getUsername(): string
+	{
+		return $this->username;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPassword(): string
+	{
+		return $this->password;
+	}
+
+	/**
+	 * @return Mqtt\Message|null
+	 */
+	public function getWill(): ?Mqtt\Message
+	{
+		return $this->will;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getClientId(): string
+	{
+		return $this->clientId;
 	}
 
 }

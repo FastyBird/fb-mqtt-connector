@@ -16,15 +16,17 @@
 MQTT connector plugin
 """
 
-# Library dependencies
+# Python base dependencies
+import uuid
 from threading import Thread
 from time import sleep
-from typing import List
+from typing import Optional
 
+# Library dependencies
 from kink import inject
 
 # Library libs
-from mqtt_connector_plugin.client import ClientSettings, MqttClient
+from mqtt_connector_plugin.client import Client, PahoClientFactory
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
 from mqtt_connector_plugin.logger import Logger
 
@@ -41,7 +43,8 @@ class MqttConnector(Thread):
 
     __stopped: bool = False
 
-    __mqtt_client: MqttClient
+    __mqtt_client: Client
+    __mqtt_client_factory: PahoClientFactory
 
     __consumer: MessagesConsumer
 
@@ -52,7 +55,8 @@ class MqttConnector(Thread):
     @inject
     def __init__(
         self,
-        mqtt_client: MqttClient,
+        mqtt_client: Client,
+        mqtt_client_factory: PahoClientFactory,
         consumer: MessagesConsumer,
         logger: Logger,
     ) -> None:
@@ -63,6 +67,7 @@ class MqttConnector(Thread):
         )
 
         self.__mqtt_client = mqtt_client
+        self.__mqtt_client_factory = mqtt_client_factory
 
         self.__consumer = consumer
 
@@ -70,9 +75,22 @@ class MqttConnector(Thread):
 
     # -----------------------------------------------------------------------------
 
-    def initialize(self, connectors: List[ClientSettings]) -> None:
-        """Initialize plugin connectors"""
-        self.__mqtt_client.initialize(connectors=connectors)
+    def configure_client(  # pylint: disable=too-many-arguments
+        self,
+        host: str,
+        port: int,
+        client_id: uuid.UUID,
+        username: Optional[str],
+        password: Optional[str],
+    ) -> None:
+        """Configure MQTT client & append it to client proxy"""
+        self.__mqtt_client_factory.create(
+            host=host,
+            port=port,
+            client_id=client_id,
+            username=username,
+            password=password,
+        )
 
     # -----------------------------------------------------------------------------
 

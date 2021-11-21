@@ -16,9 +16,10 @@
 MQTT connector plugin logger
 """
 
-# Library dependencies
+# Python base dependencies
 import logging
 
+# Library dependencies
 from kink import inject
 
 

@@ -15,6 +15,7 @@
 
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
+use Ramsey\Uuid;
 use SplObjectStorage;
 
 /**
@@ -28,23 +29,22 @@ use SplObjectStorage;
 abstract class Property extends Entity
 {
 
-	private const NOT_CONFIGURED = 'N/A';
-
 	/** @var string */
 	private string $property;
 
-	/** @var string */
-	private string $value = self::NOT_CONFIGURED;
+	/** @var string|null */
+	private ?string $value = null;
 
 	/** @var SplObjectStorage<PropertyAttribute, null> */
 	private SplObjectStorage $attributes;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		string $property,
 		?string $parent = null
 	) {
-		parent::__construct($device, $parent);
+		parent::__construct($clientId, $device, $parent);
 
 		$this->property = $property;
 
@@ -61,26 +61,6 @@ abstract class Property extends Entity
 		if (!$this->attributes->contains($attribute)) {
 			$this->attributes->attach($attribute);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function toArray(): array
-	{
-		$return = array_merge([
-			'property' => $this->getProperty(),
-		], parent::toArray());
-
-		foreach ($this->getAttributes() as $attribute) {
-			$return[$attribute->getAttribute()] = $attribute->getValue();
-		}
-
-		if ($this->getValue() !== self::NOT_CONFIGURED) {
-			$return['value'] = $this->getValue();
-		}
-
-		return $return;
 	}
 
 	/**
@@ -107,9 +87,9 @@ abstract class Property extends Entity
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getValue(): string
+	public function getValue(): ?string
 	{
 		return $this->value;
 	}
@@ -122,6 +102,26 @@ abstract class Property extends Entity
 	public function setValue(string $value): void
 	{
 		$this->value = $value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function toArray(): array
+	{
+		$return = array_merge([
+			'property' => $this->getProperty(),
+		], parent::toArray());
+
+		foreach ($this->getAttributes() as $attribute) {
+			$return[$attribute->getAttribute()] = $attribute->getValue();
+		}
+
+		if ($this->getValue() !== null) {
+			$return['value'] = $this->getValue();
+		}
+
+		return $return;
 	}
 
 }

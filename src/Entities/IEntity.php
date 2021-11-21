@@ -15,6 +15,8 @@
 
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
+use Ramsey\Uuid;
+
 /**
  * Base data entity interface
  *
@@ -25,6 +27,11 @@ namespace FastyBird\MqttConnectorPlugin\Entities;
  */
 interface IEntity
 {
+
+	/**
+	 * @return Uuid\UuidInterface
+	 */
+	public function getClientId(): Uuid\UuidInterface;
 
 	/**
 	 * @return string

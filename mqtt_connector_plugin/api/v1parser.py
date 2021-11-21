@@ -35,6 +35,7 @@ from mqtt_connector_plugin.entities.entities import (
     DevicePropertyEntity,
     FirmwareEntity,
     HardwareEntity,
+    PropertyAttributeEntity,
 )
 from mqtt_connector_plugin.exceptions import ParseMessageException
 
@@ -50,9 +51,7 @@ class V1Parser:
     """
 
     @classmethod
-    def parse_message(
-        cls, connector_id: uuid.UUID, topic: str, payload: str, retained: bool = False
-    ) -> BaseEntity:
+    def parse_message(cls, client_id: uuid.UUID, topic: str, payload: str, retained: bool = False) -> BaseEntity:
         """Parse received message topic & value"""
         if V1Validator.validate(topic=topic) is False:
             raise ParseMessageException("Provided topic is not valid")
@@ -61,7 +60,7 @@ class V1Parser:
 
         if V1Validator.validate_device_attribute(topic=topic):
             device_attribute = cls.parse_device_attribute(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=topic,
                 payload=payload,
                 is_child=is_child,
@@ -72,7 +71,7 @@ class V1Parser:
 
         if V1Validator.validate_device_hardware_info(topic=topic):
             device_hardware = cls.parse_device_hardware_info(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=topic,
                 payload=payload,
                 is_child=is_child,
@@ -83,7 +82,7 @@ class V1Parser:
 
         if V1Validator.validate_device_firmware_info(topic=topic):
             device_firmware = cls.parse_device_firmware_info(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=topic,
                 payload=payload,
                 is_child=is_child,
@@ -94,7 +93,7 @@ class V1Parser:
 
         if V1Validator.validate_device_property(topic=topic):
             device_property = cls.parse_device_property(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=topic,
                 payload=payload,
                 is_child=is_child,
@@ -105,7 +104,7 @@ class V1Parser:
 
         if V1Validator.validate_device_control(topic=topic):
             device_control = cls.parse_device_control(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=topic,
                 payload=payload,
                 is_child=is_child,
@@ -118,9 +117,7 @@ class V1Parser:
             result: List[tuple] = []
 
             if is_child:
-                result = re.findall(
-                    V1Validator.CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP, topic
-                )
+                result = re.findall(V1Validator.CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP, topic)
                 parent, device, channel = result.pop()
 
             else:
@@ -129,7 +126,7 @@ class V1Parser:
                 parent = None
 
             return cls.parse_channel_message(
-                connector_id=connector_id,
+                client_id=client_id,
                 device=device,
                 channel=channel,
                 parent=parent,
@@ -145,7 +142,7 @@ class V1Parser:
     @classmethod
     def parse_channel_message(  # pylint: disable=too-many-arguments
         cls,
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         device: str,
         channel: str,
         parent: Optional[str],
@@ -156,7 +153,7 @@ class V1Parser:
         """Parse received message topic & value for device channel"""
         if V1Validator.validate_channel_attribute(topic=topic):
             channel_attribute = cls.parse_channel_attribute(
-                connector_id=connector_id,
+                client_id=client_id,
                 device=device,
                 parent=parent,
                 channel=channel,
@@ -169,7 +166,7 @@ class V1Parser:
 
         if V1Validator.validate_channel_property(topic=topic):
             channel_property = cls.parse_channel_property(
-                connector_id=connector_id,
+                client_id=client_id,
                 device=device,
                 parent=parent,
                 channel=channel,
@@ -182,7 +179,7 @@ class V1Parser:
 
         if V1Validator.validate_channel_control(topic=topic):
             channel_control = cls.parse_channel_control(
-                connector_id=connector_id,
+                client_id=client_id,
                 device=device,
                 parent=parent,
                 channel=channel,
@@ -199,7 +196,7 @@ class V1Parser:
 
     @staticmethod
     def parse_device_attribute(
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         topic: str,
         payload: str,
         is_child: bool = False,
@@ -215,7 +212,7 @@ class V1Parser:
             parent = None
 
         return DeviceAttributeEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             attribute=attribute,
             value=payload,
@@ -226,7 +223,7 @@ class V1Parser:
 
     @staticmethod
     def parse_device_hardware_info(
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         topic: str,
         payload: str,
         is_child: bool = False,
@@ -242,7 +239,7 @@ class V1Parser:
             parent = None
 
         return HardwareEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             parameter=hardware,
             value=payload,
@@ -253,7 +250,7 @@ class V1Parser:
 
     @staticmethod
     def parse_device_firmware_info(
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         topic: str,
         payload: str,
         is_child: bool = False,
@@ -269,7 +266,7 @@ class V1Parser:
             parent = None
 
         return FirmwareEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             parameter=firmware,
             value=payload,
@@ -280,7 +277,7 @@ class V1Parser:
 
     @staticmethod
     def parse_device_property(
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         topic: str,
         payload: str,
         is_child: bool = False,
@@ -296,14 +293,14 @@ class V1Parser:
             parent = None
 
         entity = DevicePropertyEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             name=name,
             parent=parent,
         )
 
         if attribute:
-            entity.add_attribute(attribute=attribute, value=payload)
+            entity.add_attribute(PropertyAttributeEntity(attribute=attribute, value=payload))
 
         else:
             entity.value = payload
@@ -314,7 +311,7 @@ class V1Parser:
 
     @staticmethod
     def parse_device_control(
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         topic: str,
         payload: str,
         is_child: bool = False,
@@ -330,7 +327,7 @@ class V1Parser:
             parent = None
 
         entity = DeviceControlEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             control=control,
             parent=parent,
@@ -348,7 +345,7 @@ class V1Parser:
 
     @staticmethod
     def parse_channel_attribute(  # pylint: disable=too-many-arguments
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         device: str,
         parent: Optional[str],
         channel: str,
@@ -360,7 +357,7 @@ class V1Parser:
         _, __, attribute = result.pop()
 
         return ChannelAttributeEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             channel=channel,
             attribute=attribute,
@@ -372,7 +369,7 @@ class V1Parser:
 
     @staticmethod
     def parse_channel_property(  # pylint: disable=too-many-arguments
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         device: str,
         parent: Optional[str],
         channel: str,
@@ -384,7 +381,7 @@ class V1Parser:
         _, __, name, ___, attribute = result.pop()
 
         entity = ChannelPropertyEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             channel=channel,
             name=name,
@@ -392,7 +389,7 @@ class V1Parser:
         )
 
         if attribute:
-            entity.add_attribute(attribute=attribute, value=payload)
+            entity.add_attribute(PropertyAttributeEntity(attribute=attribute, value=payload))
 
         else:
             entity.value = payload
@@ -403,7 +400,7 @@ class V1Parser:
 
     @staticmethod
     def parse_channel_control(  # pylint: disable=too-many-arguments
-        connector_id: uuid.UUID,
+        client_id: uuid.UUID,
         device: str,
         parent: Optional[str],
         channel: str,
@@ -415,7 +412,7 @@ class V1Parser:
         _, __, control, ___, attribute = result.pop()
 
         entity = ChannelControlEntity(
-            connector_id=connector_id,
+            client_id=client_id,
             device=device,
             channel=channel,
             control=control,

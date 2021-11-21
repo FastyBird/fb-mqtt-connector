@@ -83,23 +83,17 @@ class ApiV1Handler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(
-        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
-    ) -> None:
+    def on_connect(self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]) -> None:
         """On connection to broker established event"""
         for topic in self.__API_TOPICS:
             result, message_id = client.subscribe(topic=topic, qos=0)
 
             if result == MQTT_ERR_SUCCESS:
-                self.__subscriptions_repository.create(
-                    topic=topic, qos=0, mid=message_id
-                )
+                self.__subscriptions_repository.create(topic=topic, qos=0, mid=message_id)
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(
-        self, client: Client, userdata: Any, response_code: Optional[int]
-    ) -> None:
+    def on_disconnect(self, client: Client, userdata: Any, response_code: Optional[int]) -> None:
         """On connection to broker closed event"""
 
     # -----------------------------------------------------------------------------
@@ -109,9 +103,7 @@ class ApiV1Handler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(
-        self, client: Client, userdata: Any, message_id: int, granted_qos: int
-    ) -> None:
+    def on_subscribe(self, client: Client, userdata: Any, message_id: int, granted_qos: int) -> None:
         """On topic subscribed event"""
 
     # -----------------------------------------------------------------------------
@@ -138,23 +130,21 @@ class ApiV1Handler(BaseHandler):
 
             return
 
-        connector_id = self.extract_connector_id(userdata=userdata)
+        client_id = self.extract_client_id(userdata=userdata)
 
-        if connector_id is None:
+        if client_id is None:
             return
 
         try:
             entity = V1Parser.parse_message(
-                connector_id=connector_id,
+                client_id=client_id,
                 topic=message.topic,
                 payload=message.payload.decode("utf-8", "ignore"),
                 retained=message.retain,
             )
 
         except ParseMessageException as ex:
-            self._logger.error(
-                "Received message could not be successfully parsed to entity"
-            )
+            self._logger.error("Received message could not be successfully parsed to entity")
             self._logger.exception(ex)
 
             return

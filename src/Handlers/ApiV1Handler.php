@@ -23,6 +23,7 @@ use FastyBird\MqttConnectorPlugin\Consumers;
 use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette;
 use Psr\Log;
+use Ramsey\Uuid;
 use Throwable;
 
 /**
@@ -163,7 +164,12 @@ final class ApiV1Handler implements IHandler
 			}
 
 			try {
-				$entity = $this->parser->parse($message->getTopic(), $message->getPayload(), $message->isRetained());
+				$entity = $this->parser->parse(
+					Uuid\Uuid::fromString($client->getClientId()),
+					$message->getTopic(),
+					$message->getPayload(),
+					$message->isRetained()
+				);
 
 			} catch (Exceptions\ParseMessageException $ex) {
 				$this->logger->debug(

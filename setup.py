@@ -59,6 +59,7 @@ setup(
     long_description_content_type="text/markdown",
     python_requires=">=3.7",
     packages=find_packages(),
+    package_data={"mqtt_connector_plugin": ["py.typed"]},
     install_requires=[
         "paho-mqtt",
         "kink",

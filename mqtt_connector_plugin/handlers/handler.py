@@ -52,9 +52,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(
-        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
-    ) -> None:
+    def on_connect(self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]) -> None:
         """On connection to broker established event"""
         for handler in self.__handlers:
             handler.on_connect(
@@ -66,9 +64,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(
-        self, client: Client, userdata: Any, response_code: Optional[int]
-    ) -> None:
+    def on_disconnect(self, client: Client, userdata: Any, response_code: Optional[int]) -> None:
         """On connection to broker closed event"""
         for handler in self.__handlers:
             handler.on_disconnect(
@@ -91,9 +87,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(
-        self, client: Client, userdata: Any, message_id: int, granted_qos: int
-    ) -> None:
+    def on_subscribe(self, client: Client, userdata: Any, message_id: int, granted_qos: int) -> None:
         """On topic subscribed event"""
         for handler in self.__handlers:
             handler.on_subscribe(

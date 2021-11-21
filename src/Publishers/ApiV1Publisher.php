@@ -188,7 +188,8 @@ final class ApiV1Publisher implements IPublisher
 		string $device,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDevicePropertyTopic(
@@ -197,7 +198,8 @@ final class ApiV1Publisher implements IPublisher
 				$property,
 				$parentDevice
 			),
-			$payload
+			$payload,
+			$clientId
 		);
 	}
 
@@ -207,7 +209,8 @@ final class ApiV1Publisher implements IPublisher
 	public function sendDeviceConfiguration(
 		string $device,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		try {
 			$this->sendToDevice(
@@ -217,7 +220,8 @@ final class ApiV1Publisher implements IPublisher
 					Entities\DeviceControl::CONFIG,
 					$parentDevice
 				),
-				Utils\Json::encode((array) $configuration)
+				Utils\Json::encode((array) $configuration),
+				$clientId
 			);
 
 		} catch (Utils\JsonException $ex) {
@@ -233,7 +237,8 @@ final class ApiV1Publisher implements IPublisher
 		string $channel,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildChannelPropertyTopic(
@@ -243,7 +248,8 @@ final class ApiV1Publisher implements IPublisher
 				$property,
 				$parentDevice
 			),
-			$payload
+			$payload,
+			$clientId
 		);
 	}
 
@@ -254,7 +260,8 @@ final class ApiV1Publisher implements IPublisher
 		string $device,
 		string $channel,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		try {
 			$this->sendToDevice(
@@ -264,7 +271,8 @@ final class ApiV1Publisher implements IPublisher
 					$channel,
 					$parentDevice
 				),
-				Utils\Json::encode((array) $configuration)
+				Utils\Json::encode((array) $configuration),
+				$clientId
 			);
 
 		} catch (Utils\JsonException $ex) {
@@ -277,7 +285,8 @@ final class ApiV1Publisher implements IPublisher
 	 */
 	public function sendDeviceRestart(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -286,7 +295,8 @@ final class ApiV1Publisher implements IPublisher
 				Entities\DeviceControl::RESET,
 				$parentDevice
 			),
-			'true'
+			'true',
+			$clientId
 		);
 	}
 
@@ -295,7 +305,8 @@ final class ApiV1Publisher implements IPublisher
 	 */
 	public function sendDeviceReconnect(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -304,7 +315,8 @@ final class ApiV1Publisher implements IPublisher
 				Entities\DeviceControl::RECONNECT,
 				$parentDevice
 			),
-			'true'
+			'true',
+			$clientId
 		);
 	}
 
@@ -313,7 +325,8 @@ final class ApiV1Publisher implements IPublisher
 	 */
 	public function sendDeviceFactoryReset(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -322,7 +335,8 @@ final class ApiV1Publisher implements IPublisher
 				Entities\DeviceControl::FACTORY_RESET,
 				$parentDevice
 			),
-			'true'
+			'true',
+			$clientId
 		);
 	}
 
@@ -337,6 +351,7 @@ final class ApiV1Publisher implements IPublisher
 	private function sendToDevice(
 		string $topic,
 		?string $payload,
+		?string $clientId = null,
 		int $qos = MqttConnectorPlugin\Constants::MQTT_API_QOS_1,
 		bool $retained = false
 	): void {
@@ -349,7 +364,7 @@ final class ApiV1Publisher implements IPublisher
 			]
 		);
 
-		$this->client->publish($topic, $payload, $qos, $retained);
+		$this->client->publish($topic, $payload, $qos, $retained, $clientId);
 	}
 
 	/**

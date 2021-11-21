@@ -15,8 +15,10 @@
 
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
+use FastyBird\ModulesMetadata\Types as ModulesMetadataTypes;
 use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette\Utils;
+use Ramsey\Uuid;
 
 /**
  * Device control attribute
@@ -29,16 +31,17 @@ use Nette\Utils;
 abstract class Control extends Entity
 {
 
+	public const CONFIG = ModulesMetadataTypes\ControlNameType::NAME_CONFIGURE;
+	public const RESET = ModulesMetadataTypes\ControlNameType::NAME_RESET;
+	public const REBOOT = ModulesMetadataTypes\ControlNameType::NAME_REBOOT;
+	public const RECONNECT = 'reconnect';
+	public const FACTORY_RESET = 'factory-reset';
+	public const OTA = 'ota';
+
 	public const DATA_TYPE_BOOLEAN = 'boolean';
 	public const DATA_TYPE_NUMBER = 'number';
 	public const DATA_TYPE_SELECT = 'select';
 	public const DATA_TYPE_TEXT = 'text';
-
-	public const CONFIG = 'configure';
-	public const RESET = 'reset';
-	public const RECONNECT = 'reconnect';
-	public const FACTORY_RESET = 'factory-reset';
-	public const OTA = 'ota';
 
 	private const NOT_CONFIGURED = 'N/A';
 
@@ -52,6 +55,7 @@ abstract class Control extends Entity
 	private $schema = self::NOT_CONFIGURED;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		string $control,
 		?string $parent = null
@@ -60,37 +64,9 @@ abstract class Control extends Entity
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided control "%s" is not in allowed range', $control));
 		}
 
-		parent::__construct($device, $parent);
+		parent::__construct($clientId, $device, $parent);
 
 		$this->control = $control;
-	}
-
-	/**
-	 * @return string[]
-	 */
-	protected function getAllowedControls(): array
-	{
-		return [];
-	}
-
-	/**
-	 * @return mixed[]
-	 */
-	public function toArray(): array
-	{
-		$return = array_merge([
-			'control' => $this->getControl(),
-		], parent::toArray());
-
-		if ($this->getValue() !== self::NOT_CONFIGURED) {
-			$return['value'] = $this->getValue();
-		}
-
-		if ($this->isConfiguration() && $this->getSchema() !== self::NOT_CONFIGURED) {
-			$return['schema'] = $this->getSchema();
-		}
-
-		return $return;
 	}
 
 	/**
@@ -110,7 +86,7 @@ abstract class Control extends Entity
 	}
 
 	/**
-	 * @param string $value
+	 * @param string|null $value
 	 *
 	 * @return void
 	 */
@@ -141,15 +117,118 @@ abstract class Control extends Entity
 	}
 
 	/**
-	 * @param mixed[]|null $schema
+	 * @param string $schema
+	 *
+	 * @return void
 	 */
-	public function setSchema(?array $schema): void
+	public function setSchema(string $schema): void
 	{
 		if (!$this->isConfiguration()) {
 			throw new Exceptions\InvalidStateException(sprintf('Schema could be set only for "%s" control type', self::CONFIG));
 		}
 
-		$this->schema = $schema;
+		try {
+			$decodedSchema = Utils\Json::decode($schema, Utils\Json::FORCE_ARRAY);
+
+		} catch (Utils\JsonException $ex) {
+			throw new Exceptions\ParseMessageException('Control payload is not valid JSON value');
+		}
+
+		$this->schema = [];
+
+		/** @var Utils\ArrayHash $row */
+		foreach (Utils\ArrayHash::from($decodedSchema) as $row) {
+			if (!$row->offsetExists('type') || !$row->offsetExists('identifier') || !$row->offsetExists('name')) {
+				continue;
+			}
+
+			$formattedRow = Utils\ArrayHash::from([
+				'identifier' => $row->offsetGet('identifier'),
+				'type'       => $row->offsetGet('type'),
+				'name'       => $row->offsetGet('name'),
+				'title'      => null,
+				'comment'    => null,
+				'default'    => null,
+			]);
+
+			if ($row->offsetExists('title') && $row->offsetGet('title') !== '') {
+				$formattedRow->offsetSet('title', $row->offsetGet('title'));
+			}
+
+			if ($row->offsetExists('comment') && $row->offsetGet('comment') !== '') {
+				$formattedRow->offsetSet('comment', $row->offsetGet('comment'));
+			}
+
+			switch ($row->offsetGet('type')) {
+				case self::DATA_TYPE_NUMBER:
+					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_FLOAT);
+
+					foreach (['min', 'max', 'step', 'default'] as $field) {
+						if ($row->offsetExists($field)) {
+							$formattedRow->offsetSet($field, (float) $row->offsetGet($field));
+
+						} else {
+							$formattedRow->offsetSet($field, null);
+						}
+					}
+
+					break;
+
+				case self::DATA_TYPE_TEXT:
+					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_STRING);
+
+					if ($row->offsetExists('default')) {
+						$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
+					}
+
+					break;
+
+				case self::DATA_TYPE_BOOLEAN:
+					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_BOOLEAN);
+
+					if ($row->offsetExists('default')) {
+						$formattedRow->offsetSet('default', (bool) $row->offsetGet('default'));
+					}
+
+					break;
+
+				case self::DATA_TYPE_SELECT:
+					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_ENUM);
+
+					if (
+						$row->offsetExists('values')
+						&& $row->offsetGet('values') instanceof Utils\ArrayHash
+					) {
+						$selectValues = [];
+
+						foreach ($row->offsetGet('values') as $value) {
+							if (
+								$value instanceof Utils\ArrayHash
+								&& $value->offsetExists('value')
+								&& $value->offsetExists('name')
+							) {
+								$selectValues[] = Utils\ArrayHash::from([
+									'value' => (string) $value->offsetGet('value'),
+									'name'  => (string) $value->offsetGet('name'),
+								]);
+							}
+						}
+
+						$formattedRow->offsetSet('values', $selectValues);
+
+					} else {
+						$formattedRow->offsetSet('values', []);
+					}
+
+					if ($row->offsetExists('default')) {
+						$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
+					}
+
+					break;
+			}
+
+			$this->schema[] = (array) $formattedRow;
+		}
 	}
 
 	/**
@@ -158,6 +237,34 @@ abstract class Control extends Entity
 	public function isConfiguration(): bool
 	{
 		return $this->control === self::CONFIG;
+	}
+
+	/**
+	 * @return mixed[]
+	 */
+	public function toArray(): array
+	{
+		$return = array_merge([
+			'control' => $this->getControl(),
+		], parent::toArray());
+
+		if ($this->getValue() !== self::NOT_CONFIGURED) {
+			$return['value'] = $this->getValue();
+		}
+
+		if ($this->isConfiguration() && $this->getSchema() !== self::NOT_CONFIGURED) {
+			$return['schema'] = $this->getSchema();
+		}
+
+		return $return;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	protected function getAllowedControls(): array
+	{
+		return [];
 	}
 
 }

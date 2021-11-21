@@ -15,6 +15,8 @@
 
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
+use Ramsey\Uuid;
+
 /**
  * Channel control attribute
  *
@@ -34,14 +36,23 @@ class ChannelControl extends Control
 	private string $channel;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		string $channel,
 		string $control,
 		?string $parent = null
 	) {
-		parent::__construct($device, $control, $parent);
+		parent::__construct($clientId, $device, $control, $parent);
 
 		$this->channel = $channel;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getChannel(): string
+	{
+		return $this->channel;
 	}
 
 	/**
@@ -52,14 +63,6 @@ class ChannelControl extends Control
 		return array_merge([
 			'channel' => $this->getChannel(),
 		], parent::toArray());
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getChannel(): string
-	{
-		return $this->channel;
 	}
 
 	/**

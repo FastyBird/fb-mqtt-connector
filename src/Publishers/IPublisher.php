@@ -42,6 +42,7 @@ interface IPublisher
 	 * @param string $property
 	 * @param string $payload
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
@@ -49,20 +50,23 @@ interface IPublisher
 		string $device,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param Utils\ArrayHash $configuration
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceConfiguration(
 		string $device,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
@@ -71,6 +75,7 @@ interface IPublisher
 	 * @param string $property
 	 * @param string $payload
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
@@ -79,7 +84,8 @@ interface IPublisher
 		string $channel,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
@@ -87,6 +93,7 @@ interface IPublisher
 	 * @param string $channel
 	 * @param Utils\ArrayHash $configuration
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
@@ -94,40 +101,47 @@ interface IPublisher
 		string $device,
 		string $channel,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceRestart(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceReconnect(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
+	 * @param string|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceFactoryReset(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void;
 
 }

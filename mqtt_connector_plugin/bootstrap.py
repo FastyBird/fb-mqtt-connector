@@ -20,13 +20,14 @@ MQTT connector plugin DI container
 
 # pylint: disable=no-value-for-parameter
 
-# Library dependencies
+# Python base dependencies
 import logging
 
+# Library dependencies
 from kink import di
 
 # Library libs
-from mqtt_connector_plugin.client import MqttClient
+from mqtt_connector_plugin.client import Client, PahoClientFactory
 from mqtt_connector_plugin.connector import MqttConnector
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
 from mqtt_connector_plugin.handlers.apiv1 import ApiV1Handler
@@ -69,15 +70,19 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
     di[MessagesHandler] = MessagesHandler()  # Messages handler proxy
     di["fb-mqtt-connector-plugin_mqtt-handler-proxy"] = di[MessagesHandler]
 
-    di[MqttClient] = MqttClient(
+    di[Client] = Client(logger=di[Logger])
+    di["fb-mqtt-connector-plugin_clients-proxy"] = di[Client]
+
+    di[PahoClientFactory] = PahoClientFactory(
+        client=di[Client],
         messages_handler=di[MessagesHandler],
         logger=di[Logger],
     )
-    di["fb-mqtt-connector-plugin_clients-proxy"] = di[MqttClient]
+    di["fb-mqtt-connector-plugin_paho-client-factory"] = di[PahoClientFactory]
 
     # MQTT messages publishers
     di[ApiV1Publisher] = ApiV1Publisher(
-        client=di[MqttClient],
+        client=di[Client],
         logger=di[Logger],
     )
     di["fb-mqtt-connector-plugin_publisher-api-v1"] = di[ApiV1Publisher]
@@ -87,7 +92,7 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
 
     # MQTT connector
     di[MqttConnector] = MqttConnector(
-        mqtt_client=di[MqttClient],
+        mqtt_client=di[Client],
         consumer=di[MessagesConsumer],
         logger=di[Logger],
     )

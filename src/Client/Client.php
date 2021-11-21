@@ -55,43 +55,11 @@ final class Client
 	}
 
 	/**
-	 * @param ConnectionSettings[] $settings
+	 * @param MqttClient $client
 	 */
-	public function initialize(array $settings): void
+	public function addClient(MqttClient $client): void
 	{
-		foreach ($settings as $setting) {
-			$client = $this->mqttClientFactory->create($setting);
-
-			try {
-				$client->connect()
-					->otherwise(function (Throwable $ex) use ($client): void {
-						// Log error action reason
-						$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
-							'exception' => [
-								'message' => $ex->getMessage(),
-								'code'    => $ex->getCode(),
-							],
-						]);
-
-						$client->getLoop()
-							->stop();
-					});
-
-			} catch (Throwable $ex) {
-				// Log error action reason
-				$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
-					'exception' => [
-						'message' => $ex->getMessage(),
-						'code'    => $ex->getCode(),
-					],
-				]);
-
-				$client->getLoop()
-					->stop();
-			}
-
-			$this->clients->attach($client);
-		}
+		$this->clients->attach($client);
 	}
 
 	/**
@@ -106,7 +74,8 @@ final class Client
 		string $topic,
 		?string $payload = null,
 		int $qos = Constants::MQTT_API_QOS_0,
-		bool $retained = false
+		bool $retained = false,
+		?string $clientId = null
 	): void {
 		$message = new Mqtt\DefaultMessage(
 			$topic,
@@ -119,21 +88,23 @@ final class Client
 
 		/** @var MqttClient $client */
 		foreach ($this->clients as $client) {
-			$client->publish($message)
-				->otherwise(function (Throwable $ex) use ($topic, $payload, $qos, $retained): void {
-					$this->logger->error('[FB:PLUGIN:MQTT] Message could not be published', [
-						'message'   => [
-							'topic'    => $topic,
-							'payload'  => $payload,
-							'qos'      => $qos,
-							'retained' => $retained,
-						],
-						'exception' => [
-							'message' => $ex->getMessage(),
-							'code'    => $ex->getCode(),
-						],
-					]);
-				});
+			if ($clientId === null || $client->getClientId() === $clientId) {
+				$client->publish($message)
+					->otherwise(function (Throwable $ex) use ($topic, $payload, $qos, $retained): void {
+						$this->logger->error('[FB:PLUGIN:MQTT] Message could not be published', [
+							'message'   => [
+								'topic'    => $topic,
+								'payload'  => $payload,
+								'qos'      => $qos,
+								'retained' => $retained,
+							],
+							'exception' => [
+								'message' => $ex->getMessage(),
+								'code'    => $ex->getCode(),
+							],
+						]);
+					});
+			}
 		}
 	}
 

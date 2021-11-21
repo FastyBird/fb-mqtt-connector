@@ -15,6 +15,12 @@
 
 namespace FastyBird\MqttConnectorPlugin\Client;
 
+use FastyBird\MqttConnectorPlugin\Handlers;
+use Nette;
+use Psr\Log;
+use React\EventLoop;
+use Throwable;
+
 /**
  * MQTT client factory
  *
@@ -23,14 +29,88 @@ namespace FastyBird\MqttConnectorPlugin\Client;
  *
  * @author          Adam Kadlec <adam.kadlec@fastybird.com>
  */
-interface MqttClientFactory
+final class MqttClientFactory
 {
 
+	use Nette\SmartObject;
+
+	/** @var Client */
+	private Client $client;
+
+	/** @var Handlers\ClientHandler */
+	private Handlers\ClientHandler $handler;
+
+	/** @var EventLoop\LoopInterface */
+	private EventLoop\LoopInterface $loop;
+
+	/** @var Log\LoggerInterface */
+	private Log\LoggerInterface $logger;
+
+	public function __construct(
+		Client $client,
+		Handlers\ClientHandler $handler,
+		EventLoop\LoopInterface $loop,
+		?Log\LoggerInterface $logger = null
+	) {
+		$this->client = $client;
+		$this->handler = $handler;
+		$this->loop = $loop;
+
+		$this->logger = $logger ?? new Log\NullLogger();
+	}
+
 	/**
-	 * @param ConnectionSettings $connectionSettings
+	 * @param string $host
+	 * @param int $port
+	 * @param string $clientId
+	 * @param string $username
+	 * @param string $password
 	 *
-	 * @return MqttClient
+	 * @return void
 	 */
-	public function create(ConnectionSettings $connectionSettings): MqttClient;
+	public function create(
+		string $host,
+		int $port,
+		string $clientId,
+		string $username = '',
+		string $password = ''
+	): void
+	{
+		$client = new MqttClient(
+			new ConnectionSettings($host, $port, $clientId, $username, $password),
+			$this->handler,
+			$this->loop
+		);
+
+		try {
+			$client->connect()
+				->otherwise(function (Throwable $ex) use ($client): void {
+					// Log error action reason
+					$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
+						'exception' => [
+							'message' => $ex->getMessage(),
+							'code'    => $ex->getCode(),
+						],
+					]);
+
+					$client->getLoop()
+						->stop();
+				});
+
+		} catch (Throwable $ex) {
+			// Log error action reason
+			$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
+				'exception' => [
+					'message' => $ex->getMessage(),
+					'code'    => $ex->getCode(),
+				],
+			]);
+
+			$client->getLoop()
+				->stop();
+		}
+
+		$this->client->addClient($client);
+	}
 
 }

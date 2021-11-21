@@ -49,12 +49,13 @@ class BasePublisher(ABC):
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def publish_device_property(
+    def publish_device_property(  # pylint: disable=too-many-arguments
         self,
         device: str,
         identifier: str,
         payload: str,
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device property set message"""
 
@@ -69,18 +70,20 @@ class BasePublisher(ABC):
             Set[Dict[str, Union[str, int, float, bool, None]]],
         ],
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def publish_device_command(
+    def publish_device_command(  # pylint: disable=too-many-arguments
         self,
         device: str,
         command: str,
         payload: str = "true",
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device control command message"""
 
@@ -94,13 +97,14 @@ class BasePublisher(ABC):
         identifier: str,
         payload: str,
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel property set message"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def publish_channel_configuration(
+    def publish_channel_configuration(  # pylint: disable=too-many-arguments
         self,
         device: str,
         channel: str,
@@ -109,6 +113,7 @@ class BasePublisher(ABC):
             Set[Dict[str, Union[str, int, float, bool, None]]],
         ],
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
 
@@ -122,5 +127,6 @@ class BasePublisher(ABC):
         command: str,
         payload: str = "true",
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel control command message"""

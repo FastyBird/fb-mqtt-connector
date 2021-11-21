@@ -21,6 +21,7 @@ use FastyBird\MqttConnectorPlugin\Consumers;
 use FastyBird\MqttConnectorPlugin\Entities;
 use Nette;
 use Psr\Log;
+use Ramsey\Uuid;
 use Throwable;
 
 /**
@@ -65,12 +66,12 @@ final class CommonHandler implements IHandler
 		// Network connection established
 		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Established connection to MQTT broker: %s', $client->getHost()), [
 			'server'      => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'credentials' => [
 				'username' => $connection->getUsername(),
-				'clientId' => $connection->getClientID(),
 			],
 		]);
 	}
@@ -83,12 +84,12 @@ final class CommonHandler implements IHandler
 		// Network connection closed
 		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Connection to MQTT broker: %s was closed', $client->getHost()), [
 			'server'      => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'credentials' => [
 				'username' => $connection->getUsername(),
-				'clientId' => $connection->getClientID(),
 			],
 		]);
 
@@ -101,14 +102,14 @@ final class CommonHandler implements IHandler
 	public function onConnect(Mqtt\Connection $connection, Client\MqttClient $client): void
 	{
 		// Broker connected
-		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Connected to MQTT broker with client id %s', $connection->getClientID()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Connected to MQTT broker with client id %s', $client->getClientId()), [
 			'server'      => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'credentials' => [
 				'username' => $connection->getUsername(),
-				'clientId' => $connection->getClientID(),
 			],
 		]);
 
@@ -138,14 +139,14 @@ final class CommonHandler implements IHandler
 	public function onDisconnect(Mqtt\Connection $connection, Client\MqttClient $client): void
 	{
 		// Broker disconnected
-		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Disconnected from MQTT broker with client id %s', $connection->getClientID()), [
+		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Disconnected from MQTT broker with client id %s', $client->getClientId()), [
 			'server'      => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'credentials' => [
 				'username' => $connection->getUsername(),
-				'clientId' => $connection->getClientID(),
 			],
 		]);
 	}
@@ -158,8 +159,9 @@ final class CommonHandler implements IHandler
 		// Broker warning occur
 		$this->logger->warning(sprintf('[FB:PLUGIN:MQTT] There was an error  %s', $ex->getMessage()), [
 			'server' => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'error'  => [
 				'message' => $ex->getMessage(),
@@ -178,8 +180,9 @@ final class CommonHandler implements IHandler
 		// Broker error occur
 		$this->logger->error(sprintf('[FB:PLUGIN:MQTT] There was an error  %s', $ex->getMessage()), [
 			'server' => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'error'  => [
 				'message' => $ex->getMessage(),
@@ -198,8 +201,9 @@ final class CommonHandler implements IHandler
 		// Broker send message
 		$this->logger->info(sprintf('[FB:PLUGIN:MQTT] Received message in topic: %s with payload %s', $message->getTopic(), $message->getPayload()), [
 			'server'  => [
-				'uri'  => $client->getHost(),
-				'port' => $client->getPort(),
+				'uri'      => $client->getHost(),
+				'port'     => $client->getPort(),
+				'clientId' => $client->getClientId(),
 			],
 			'message' => [
 				'topic'      => $message->getTopic(),
@@ -228,7 +232,11 @@ final class CommonHandler implements IHandler
 
 							// Check for correct data
 							if ($username !== null && $deviceId !== null && $ipAddress !== null) {
-								$entity = new Entities\DeviceProperty($deviceId, 'ip-address');
+								$entity = new Entities\DeviceProperty(
+									Uuid\Uuid::fromString($client->getClientId()),
+									$deviceId,
+									'ip-address'
+								);
 								$entity->setValue($ipAddress);
 
 								$this->consumer->consume($entity);

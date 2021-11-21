@@ -90,9 +90,7 @@ class MessagesConsumer:
             self.__queue.put(item=entity)
 
         except QueueFull:
-            self.__logger.error(
-                "Connector processing queue is full. New messages could not be added"
-            )
+            self.__logger.error("Connector processing queue is full. New messages could not be added")
 
     # -----------------------------------------------------------------------------
 

@@ -16,6 +16,7 @@
 namespace FastyBird\MqttConnectorPlugin\Entities;
 
 use FastyBird\MqttConnectorPlugin\Exceptions;
+use Ramsey\Uuid;
 
 /**
  * Device firmware
@@ -45,6 +46,7 @@ final class Firmware extends Entity
 	private string $value;
 
 	public function __construct(
+		Uuid\UuidInterface $clientId,
 		string $device,
 		string $parameter,
 		string $value,
@@ -54,20 +56,10 @@ final class Firmware extends Entity
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided firmware attribute "%s" is not in allowed range', $parameter));
 		}
 
-		parent::__construct($device, $parent);
+		parent::__construct($clientId, $device, $parent);
 
 		$this->parameter = $parameter;
 		$this->value = $value;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function toArray(): array
-	{
-		return array_merge([
-			$this->getParameter() => $this->getValue(),
-		], parent::toArray());
 	}
 
 	/**
@@ -84,6 +76,16 @@ final class Firmware extends Entity
 	public function getValue(): string
 	{
 		return $this->value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function toArray(): array
+	{
+		return array_merge([
+			$this->getParameter() => $this->getValue(),
+		], parent::toArray());
 	}
 
 }

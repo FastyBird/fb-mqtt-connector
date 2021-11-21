@@ -71,9 +71,7 @@ class CommonHandler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(
-        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
-    ) -> None:
+    def on_connect(self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]) -> None:
         """On connection to broker established event"""
         self._logger.info("Connected to MQTT broker")
 
@@ -81,15 +79,11 @@ class CommonHandler(BaseHandler):
             result, message_id = client.subscribe(topic=topic, qos=0)
 
             if result == MQTT_ERR_SUCCESS:
-                self.__subscriptions_repository.create(
-                    topic=topic, qos=0, mid=message_id
-                )
+                self.__subscriptions_repository.create(topic=topic, qos=0, mid=message_id)
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(
-        self, client: Client, userdata: Any, response_code: Optional[int]
-    ) -> None:
+    def on_disconnect(self, client: Client, userdata: Any, response_code: Optional[int]) -> None:
         """On connection to broker closed event"""
         self._logger.info("Disconnected from MQTT broker")
 
@@ -100,9 +94,7 @@ class CommonHandler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(
-        self, client: Client, userdata: Any, message_id: int, granted_qos: int
-    ) -> None:
+    def on_subscribe(self, client: Client, userdata: Any, message_id: int, granted_qos: int) -> None:
         """On topic subscribed event"""
         subscription = self.__subscriptions_repository.get_by_id(mid=message_id)
 
@@ -134,17 +126,15 @@ class CommonHandler(BaseHandler):
             result: List[tuple] = re.findall(self.__SYS_TOPIC_REGEX, message.topic)
             log_level = str(result.pop()).lower()
 
-            connector_id = self.extract_connector_id(userdata=userdata)
+            client_id = self.extract_client_id(userdata=userdata)
 
-            if connector_id is None:
+            if client_id is None:
                 return
 
             if log_level == "n":
                 self._logger.info(message.payload.decode("utf-8", "ignore"))
 
-                if self.__NEW_CLIENT_MESSAGE_PAYLOAD in message.payload.decode(
-                    "utf-8", "ignore"
-                ):
+                if self.__NEW_CLIENT_MESSAGE_PAYLOAD in message.payload.decode("utf-8", "ignore"):
                     payload_parts = message.payload.decode("utf-8", "ignore").split(",")
 
                     try:
@@ -167,7 +157,7 @@ class CommonHandler(BaseHandler):
 
                     if ip_address and device_id and username:
                         entity = DevicePropertyEntity(
-                            connector_id=connector_id,
+                            client_id=client_id,
                             device=device_id,
                             name=DevicePropertyName.IP_ADDRESS.value,
                         )
