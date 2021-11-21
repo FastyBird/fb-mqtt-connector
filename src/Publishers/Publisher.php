@@ -55,11 +55,12 @@ final class Publisher implements IPublisher
 		string $device,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendDeviceProperty($device, $property, $payload, $parentDevice);
+			$publisher->sendDeviceProperty($device, $property, $payload, $parentDevice, $clientId);
 		}
 	}
 
@@ -69,11 +70,12 @@ final class Publisher implements IPublisher
 	public function sendDeviceConfiguration(
 		string $device,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendDeviceConfiguration($device, $configuration, $parentDevice);
+			$publisher->sendDeviceConfiguration($device, $configuration, $parentDevice, $clientId);
 		}
 	}
 
@@ -85,11 +87,12 @@ final class Publisher implements IPublisher
 		string $channel,
 		string $property,
 		string $payload,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendChannelProperty($device, $channel, $property, $payload, $parentDevice);
+			$publisher->sendChannelProperty($device, $channel, $property, $payload, $parentDevice, $clientId);
 		}
 	}
 
@@ -100,11 +103,12 @@ final class Publisher implements IPublisher
 		string $device,
 		string $channel,
 		Utils\ArrayHash $configuration,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendChannelConfiguration($device, $channel, $configuration, $parentDevice);
+			$publisher->sendChannelConfiguration($device, $channel, $configuration, $parentDevice, $clientId);
 		}
 	}
 
@@ -113,11 +117,12 @@ final class Publisher implements IPublisher
 	 */
 	public function sendDeviceRestart(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendDeviceRestart($device, $parentDevice);
+			$publisher->sendDeviceRestart($device, $parentDevice, $clientId);
 		}
 	}
 
@@ -126,11 +131,12 @@ final class Publisher implements IPublisher
 	 */
 	public function sendDeviceReconnect(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendDeviceReconnect($device, $parentDevice);
+			$publisher->sendDeviceReconnect($device, $parentDevice, $clientId);
 		}
 	}
 
@@ -139,11 +145,12 @@ final class Publisher implements IPublisher
 	 */
 	public function sendDeviceFactoryReset(
 		string $device,
-		?string $parentDevice = null
+		?string $parentDevice = null,
+		?string $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
-			$publisher->sendDeviceFactoryReset($device, $parentDevice);
+			$publisher->sendDeviceFactoryReset($device, $parentDevice, $clientId);
 		}
 	}
 
