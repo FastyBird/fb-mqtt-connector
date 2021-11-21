@@ -18,8 +18,12 @@
 MQTT connector plugin messages handler
 """
 
-# Library dependencies
+# Python base dependencies
+import uuid
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
+
+# Library dependencies
 from paho.mqtt.client import Client, MQTTMessage
 
 # Library libs
@@ -35,6 +39,7 @@ class BaseHandler(ABC):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     _logger: Logger
 
     # -----------------------------------------------------------------------------
@@ -48,35 +53,74 @@ class BaseHandler(ABC):
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_connect(self, client: Client, userdata, flags, response_code) -> None:
+    def on_connect(
+        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
+    ) -> None:
         """On connection to broker established event"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_disconnect(self, client: Client, userdata, response_code) -> None:
+    def on_disconnect(
+        self, client: Client, userdata: Any, response_code: Optional[int]
+    ) -> None:
         """On connection to broker closed event"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_log(self, client: Client, userdata, level, buf) -> None:
+    def on_log(self, client: Client, userdata: Any, level: int, buf: str) -> None:
         """On log message result"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_subscribe(self, client: Client, userdata, message_id, granted_qos) -> None:
+    def on_subscribe(
+        self, client: Client, userdata: Any, message_id: int, granted_qos: int
+    ) -> None:
         """On topic subscribed event"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_unsubscribe(self, client: Client, userdata, message_id) -> None:
+    def on_unsubscribe(self, client: Client, userdata: Any, message_id: int) -> None:
         """On topic unsubscribed event"""
 
     # -----------------------------------------------------------------------------
 
     @abstractmethod
-    def on_message(self, client: Client, userdata, message: MQTTMessage) -> None:
+    def on_message(self, client: Client, userdata: Any, message: MQTTMessage) -> None:
         """On broker message event"""
+
+    # -----------------------------------------------------------------------------
+
+    def extract_connector_id(self, userdata: Any) -> Optional[uuid.UUID]:
+        """Extract connector identifier from user data"""
+        connector_id: Optional[uuid.UUID] = None
+
+        if (
+            isinstance(userdata, dict)
+            and userdata.get("connector_id", None) is not None
+        ):
+            userdata_client_id = userdata.get("connector_id", None)
+
+            if isinstance(userdata_client_id, uuid.UUID):
+                connector_id = userdata_client_id
+
+            else:
+                try:
+                    connector_id = uuid.UUID(userdata_client_id, version=4)
+
+                except ValueError:
+                    self._logger.warning(
+                        "Connector identifier could not be extracted from user data"
+                    )
+
+                    return None
+
+        if connector_id is None:
+            self._logger.warning(
+                "Connector identifier could not be extracted from user data"
+            )
+
+        return connector_id

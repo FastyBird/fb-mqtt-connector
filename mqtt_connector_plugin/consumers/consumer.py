@@ -18,16 +18,19 @@
 MQTT messages consumers
 """
 
-# App dependencies
+# Python base dependencies
 from abc import ABC, abstractmethod
-from typing import List, Set, Optional
-from queue import Queue, Full as QueueFull
+from queue import Full as QueueFull
+from queue import Queue
+from typing import List, Optional, Set
+
+# Library dependencies
 from kink import inject
 
-# App libs
-from mqtt_connector_plugin.logger import Logger
+# Library libs
 from mqtt_connector_plugin.entities.entities import BaseEntity
 from mqtt_connector_plugin.exceptions import InvalidStateException
+from mqtt_connector_plugin.logger import Logger
 
 
 class IConsumer(ABC):  # pylint: disable=too-few-public-methods
@@ -39,6 +42,7 @@ class IConsumer(ABC):  # pylint: disable=too-few-public-methods
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     @abstractmethod
     def consume(self, entity: BaseEntity) -> None:
         """Consume provided received entity"""
@@ -54,6 +58,7 @@ class MessagesConsumer:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __consumers: Set[IConsumer]
     __queue: Queue
 
@@ -85,7 +90,9 @@ class MessagesConsumer:
             self.__queue.put(item=entity)
 
         except QueueFull:
-            self.__logger.error("Connector processing queue is full. New messages could not be added")
+            self.__logger.error(
+                "Connector processing queue is full. New messages could not be added"
+            )
 
     # -----------------------------------------------------------------------------
 

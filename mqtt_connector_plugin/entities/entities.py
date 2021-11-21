@@ -18,13 +18,16 @@
 MQTT connector plugin entities
 """
 
-# Library dependencies
+# Python base dependencies
 import json
 import re
+import uuid
 from abc import ABC
-from typing import List, Dict, Set, Optional, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
+
+# Library dependencies
 from fastnumbers import fast_real
-from modules_metadata.types import DataType, ControlName
+from modules_metadata.types import ControlName, DataType
 
 # Library libs
 from mqtt_connector_plugin.exceptions import (
@@ -53,15 +56,27 @@ class BaseEntity(ABC):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
+    __connector_id: uuid.UUID
     __device: str
     __parent: Optional[str] = None
     __retained: bool = False
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parent: Optional[str] = None) -> None:
+    def __init__(
+        self, connector_id: uuid.UUID, device: str, parent: Optional[str] = None
+    ) -> None:
+        self.__connector_id = connector_id
         self.__device = device
         self.__parent = parent
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def connector_id(self) -> uuid.UUID:
+        """Connector unique identifier"""
+        return self.__connector_id
 
     # -----------------------------------------------------------------------------
 
@@ -91,16 +106,6 @@ class BaseEntity(ABC):
         """Entity retained flag setter"""
         self.__retained = retained
 
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict[str, Union[str, bool, None]]:
-        """Entity to dictionary converter"""
-        return {
-            "device": self.device,
-            "parent": self.parent,
-            "retained": self.retained,
-        }
-
 
 class AttributeEntity(BaseEntity):
     """
@@ -111,6 +116,7 @@ class AttributeEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     NAME = "name"
     PROPERTIES = "devices"
     STATE = "state"
@@ -123,11 +129,20 @@ class AttributeEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, attribute: str, value: str, parent: Optional[str] = None) -> None:
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        attribute: str,
+        value: str,
+        parent: Optional[str] = None,
+    ) -> None:
         if attribute not in self.allowed_attributes:
-            raise InvalidArgumentException(f"Provided attribute '{attribute}' is not in allowed range")
+            raise InvalidArgumentException(
+                f"Provided attribute '{attribute}' is not in allowed range"
+            )
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(connector_id=connector_id, device=device, parent=parent)
 
         self.__attribute = attribute
         self.__value = self.__parse_value(value)
@@ -148,14 +163,6 @@ class AttributeEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            self.attribute: self.value,
-        }}
-
-    # -----------------------------------------------------------------------------
-
     @property
     def allowed_attributes(self) -> List[str]:
         """List of entity allowed attributes"""
@@ -168,15 +175,22 @@ class AttributeEntity(BaseEntity):
         if self.attribute == self.NAME:
             return clean_name(value)
 
-        cleaned_value = clean_payload(value)
+        if self.attribute in (
+            self.PROPERTIES,
+            self.CHANNELS,
+            self.EXTENSIONS,
+            self.CONTROLS,
+        ):
+            cleaned_value = clean_payload(value)
 
-        if self.attribute in (self.PROPERTIES, self.CHANNELS, self.EXTENSIONS, self.CONTROLS):
-            cleaned_value = cleaned_value.strip().split(",")
-            cleaned_value = [item.strip() for item in cleaned_value if item.strip()]
+            cleaned_value_parts = cleaned_value.strip().split(",")
+            cleaned_value_parts = [
+                item.strip() for item in cleaned_value_parts if item.strip()
+            ]
 
-            return list(set(cleaned_value))
+            return list(set(cleaned_value_parts))
 
-        return cleaned_value
+        return clean_payload(value)
 
 
 class DeviceAttributeEntity(AttributeEntity):
@@ -188,6 +202,7 @@ class DeviceAttributeEntity(AttributeEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     @property
     def allowed_attributes(self) -> List[str]:
         """List of entity allowed attributes"""
@@ -210,19 +225,27 @@ class ChannelAttributeEntity(AttributeEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __channel: str
 
     # -----------------------------------------------------------------------------
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
+        connector_id: uuid.UUID,
         device: str,
         channel: str,
         attribute: str,
         value: str,
         parent: Optional[str] = None,
     ) -> None:
-        super().__init__(device=device, attribute=attribute, value=value, parent=parent)
+        super().__init__(
+            connector_id=connector_id,
+            device=device,
+            attribute=attribute,
+            value=value,
+            parent=parent,
+        )
 
         self.__channel = channel
 
@@ -232,14 +255,6 @@ class ChannelAttributeEntity(AttributeEntity):
     def channel(self) -> str:
         """Entity channel identifier"""
         return self.__channel
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            "channel": self.channel,
-        }}
 
     # -----------------------------------------------------------------------------
 
@@ -262,6 +277,7 @@ class HardwareEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     MAC_ADDRESS = "mac-address"
     MANUFACTURER = "manufacturer"
     MODEL = "model"
@@ -273,11 +289,20 @@ class HardwareEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parameter: str, value: str, parent: Optional[str] = None) -> None:
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        parameter: str,
+        value: str,
+        parent: Optional[str] = None,
+    ) -> None:
         if parameter not in self.allowed_parameters:
-            raise InvalidArgumentException(f"Provided hardware attribute '{parameter}' is not in allowed range")
+            raise InvalidArgumentException(
+                f"Provided hardware attribute '{parameter}' is not in allowed range"
+            )
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(connector_id=connector_id, device=device, parent=parent)
 
         self.__parameter = parameter
         self.__value = clean_payload(value)
@@ -295,14 +320,6 @@ class HardwareEntity(BaseEntity):
     def value(self) -> str:
         """Entity parameter value"""
         return self.__value
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            self.parameter: self.value,
-        }}
 
     # -----------------------------------------------------------------------------
 
@@ -327,6 +344,7 @@ class FirmwareEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     MANUFACTURER = "manufacturer"
     VERSION = "version"
 
@@ -335,11 +353,20 @@ class FirmwareEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parameter: str, value: str, parent: Optional[str] = None) -> None:
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        parameter: str,
+        value: str,
+        parent: Optional[str] = None,
+    ) -> None:
         if parameter not in self.allowed_parameters:
-            raise InvalidArgumentException(f"Provided firmware attribute '{parameter}' is not in allowed range")
+            raise InvalidArgumentException(
+                f"Provided firmware attribute '{parameter}' is not in allowed range"
+            )
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(connector_id=connector_id, device=device, parent=parent)
 
         self.__parameter = parameter
         self.__value = clean_payload(value)
@@ -357,14 +384,6 @@ class FirmwareEntity(BaseEntity):
     def value(self) -> str:
         """Entity parameter value"""
         return self.__value
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            self.parameter: self.value,
-        }}
 
     # -----------------------------------------------------------------------------
 
@@ -386,14 +405,21 @@ class PropertyEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __name: str
     __value: Optional[str] = None
     __attributes: Set["PropertyAttributeEntity"] = set()
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, name: str, parent: Optional[str] = None) -> None:
-        super().__init__(device=device, parent=parent)
+    def __init__(
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        name: str,
+        parent: Optional[str] = None,
+    ) -> None:
+        super().__init__(connector_id=connector_id, device=device, parent=parent)
 
         self.__name = name
 
@@ -427,73 +453,9 @@ class PropertyEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    def add_attribute(self, attribute: str, value: str) -> None:  # pylint: disable=too-many-branches
+    def add_attribute(self, attribute: str, value: str) -> None:
         """Validate and create property attribute"""
-        if attribute not in PropertyAttributeEntity.allowed_attributes:
-            raise ParseMessageException("Provided topic is not valid")
-
-        cleaned_value = clean_payload(value)
-
-        if attribute in (PropertyAttributeEntity.SETTABLE, PropertyAttributeEntity.QUERYABLE):
-            cleaned_value = "true" if cleaned_value.lower() == "true" else "false"
-
-        elif attribute == PropertyAttributeEntity.NAME:
-            cleaned_value = clean_name(cleaned_value)
-
-        elif attribute == PropertyAttributeEntity.DATA_TYPE:
-            if DataType.has_value(cleaned_value) is False:
-                raise ParseMessageException("Provided payload is not valid")
-
-        elif attribute == PropertyAttributeEntity.FORMAT:
-            if len(re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":")) == 1:
-                start, end = re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":").pop()
-
-                if start and start.isnumeric() is False:
-                    raise ParseMessageException("Provided payload is not valid")
-
-                if end and end.isnumeric() is False:
-                    raise ParseMessageException("Provided payload is not valid")
-
-                start = fast_real(start) if start else None
-                end = fast_real(end) if end else None
-
-                if start and end and start > end:
-                    ParseMessageException("Provided payload is not valid")
-
-                cleaned_value = f"{start}:{end}"
-
-            elif "," in cleaned_value:
-                cleaned_value = cleaned_value.strip().split(",")
-                cleaned_value = [item.strip() for item in cleaned_value if item.strip()]
-
-                cleaned_value = list(set(cleaned_value))
-
-            elif cleaned_value == "none" or cleaned_value is False:
-                cleaned_value = None
-
-            elif cleaned_value not in PropertyAttributeEntity.FORMAT_ALLOWED_PAYLOADS:
-                ParseMessageException("Provided payload is not valid")
-
-        else:
-            cleaned_value = None if cleaned_value == "none" or cleaned_value is False else cleaned_value
-
-        self.__attributes.add(PropertyAttributeEntity(attribute=attribute, value=cleaned_value))
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        result = {**super().to_dict(), **{
-            "identifier": self.name,
-        }}
-
-        for attribute in self.attributes:
-            result[attribute.attribute] = attribute.value
-
-        if self.value is not None:
-            result["value"] = self.value
-
-        return result
+        self.__attributes.add(PropertyAttributeEntity(attribute=attribute, value=value))
 
 
 class DevicePropertyEntity(PropertyEntity):
@@ -516,12 +478,22 @@ class ChannelPropertyEntity(PropertyEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __channel: str
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, channel: str, name: str, parent: Optional[str] = None) -> None:
-        super().__init__(device=device, name=name, parent=parent)
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        channel: str,
+        name: str,
+        parent: Optional[str] = None,
+    ) -> None:
+        super().__init__(
+            connector_id=connector_id, device=device, name=name, parent=parent
+        )
 
         self.__channel = channel
 
@@ -531,14 +503,6 @@ class ChannelPropertyEntity(PropertyEntity):
     def channel(self) -> str:
         """Entity channel identifier"""
         return self.__channel
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            "channel": self.channel,
-        }}
 
 
 class PropertyAttributeEntity(ABC):
@@ -550,6 +514,7 @@ class PropertyAttributeEntity(ABC):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     NAME = "name"
     SETTABLE = "settable"
     QUERYABLE = "queryable"
@@ -563,16 +528,18 @@ class PropertyAttributeEntity(ABC):
     ]
 
     __attribute: str
-    __value: Optional[str] = None
+    __value: Union[str, bool, Tuple[float, float], List[str], DataType, None] = None
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, attribute: str, value: Optional[str] = None) -> None:
+    def __init__(self, attribute: str, value: str) -> None:
         if attribute not in self.allowed_attributes:
-            raise InvalidArgumentException(f"Provided property parameter '{attribute}' is not in allowed range")
+            raise InvalidArgumentException(
+                f"Provided property parameter '{attribute}' is not in allowed range"
+            )
 
         self.__attribute = attribute
-        self.__value = value
+        self.__parse_value(value=value)
 
     # -----------------------------------------------------------------------------
 
@@ -584,7 +551,7 @@ class PropertyAttributeEntity(ABC):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> Union[str, bool, None]:
+    def value(self) -> Union[str, bool, Tuple[float, float], List[str], DataType, None]:
         """Entity value"""
         if self.__value is None:
             return None
@@ -593,14 +560,6 @@ class PropertyAttributeEntity(ABC):
             return self.__value == "true"
 
         return self.__value
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {
-            self.attribute: self.value,
-        }
 
     # -----------------------------------------------------------------------------
 
@@ -616,6 +575,68 @@ class PropertyAttributeEntity(ABC):
             self.UNIT,
         ]
 
+    # -----------------------------------------------------------------------------
+
+    def __parse_value(self, value: str) -> None:  # pylint: disable=too-many-branches
+        cleaned_value = clean_payload(value)
+
+        if self.attribute in (
+            PropertyAttributeEntity.SETTABLE,
+            PropertyAttributeEntity.QUERYABLE,
+        ):
+            self.__value = bool(cleaned_value.lower() == "true")
+
+        elif self.attribute == PropertyAttributeEntity.NAME:
+            self.__value = clean_name(cleaned_value)
+
+        elif self.attribute == PropertyAttributeEntity.DATA_TYPE:
+            if not DataType.has_value(cleaned_value):
+                raise ParseMessageException("Provided payload is not valid")
+
+            self.__value = DataType(cleaned_value)
+
+        elif self.attribute == PropertyAttributeEntity.FORMAT:
+            if len(re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":")) == 1:
+                start, end = re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":").pop()
+
+                if start and start.isnumeric() is False:
+                    raise ParseMessageException("Provided payload is not valid")
+
+                if end and end.isnumeric() is False:
+                    raise ParseMessageException("Provided payload is not valid")
+
+                start = fast_real(start) if start else None
+                end = fast_real(end) if end else None
+
+                if start and end and start > end:
+                    raise ParseMessageException("Provided payload is not valid")
+
+                self.__value = start, end
+
+            elif "," in cleaned_value:
+                cleaned_value_parts = cleaned_value.strip().split(",")
+                cleaned_value_parts = [
+                    item.strip() for item in cleaned_value_parts if item.strip()
+                ]
+
+                self.__value = list(set(cleaned_value_parts))
+
+            elif cleaned_value == "none" or cleaned_value is False:
+                self.__value = None
+
+            elif cleaned_value not in PropertyAttributeEntity.FORMAT_ALLOWED_PAYLOADS:
+                raise ParseMessageException("Provided payload is not valid")
+
+            else:
+                self.__value = cleaned_value
+
+        else:
+            self.__value = (
+                None
+                if cleaned_value == "none" or cleaned_value is False
+                else cleaned_value
+            )
+
 
 class ControlEntity(BaseEntity):
     """
@@ -626,6 +647,7 @@ class ControlEntity(BaseEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     CONFIG = ControlName.CONFIGURE.value
     RESET = ControlName.RESET.value
     REBOOT = ControlName.REBOOT.value
@@ -641,13 +663,43 @@ class ControlEntity(BaseEntity):
 
     __control: str
     __value: Union[str, Dict[str, Union[str, int, float, bool, None]], None] = None
-    __schema: Optional[Set[Dict[str, Union[str, int, float, bool]]]] = None
+    __schema: Optional[
+        Set[
+            Dict[
+                str,
+                Union[
+                    str,
+                    int,
+                    float,
+                    bool,
+                    Dict[
+                        str,
+                        Union[
+                            str,
+                            int,
+                            float,
+                            List[Dict[str, Union[str, int, float]]],
+                            None,
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ] = None
 
-    def __init__(self, device: str, control: str, parent: Optional[str] = None):
+    def __init__(
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        control: str,
+        parent: Optional[str] = None,
+    ):
         if control not in self.allowed_controls:
-            raise InvalidArgumentException(f"Provided control '{control}' is not in allowed range")
+            raise InvalidArgumentException(
+                f"Provided control '{control}' is not in allowed range"
+            )
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(connector_id=connector_id, device=device, parent=parent)
 
     # -----------------------------------------------------------------------------
 
@@ -665,8 +717,7 @@ class ControlEntity(BaseEntity):
 
     # -----------------------------------------------------------------------------
 
-    @value.setter
-    def value(self, value: Optional[str]) -> None:
+    def set_value(self, value: Optional[str]) -> None:
         """Entity value setter"""
         self.__value = value
 
@@ -678,37 +729,72 @@ class ControlEntity(BaseEntity):
                     self.__value = decoded_value
 
                 else:
-                    raise InvalidArgumentException("Received configuration value is not valid")
+                    raise InvalidArgumentException(
+                        "Received configuration value is not valid"
+                    )
 
             except json.JSONDecodeError as ex:
-                raise ParseMessageException('Control config payload is not valid JSON value') from ex
+                raise ParseMessageException(
+                    "Control config payload is not valid JSON value"
+                ) from ex
 
     # -----------------------------------------------------------------------------
 
     @property
-    def schema(self) -> Optional[Set[Dict[str, Union[str, int, float, bool]]]]:
+    def schema(
+        self,
+    ) -> Optional[
+        Set[
+            Dict[
+                str,
+                Union[
+                    str,
+                    int,
+                    float,
+                    bool,
+                    Dict[
+                        str,
+                        Union[
+                            str,
+                            int,
+                            float,
+                            List[Dict[str, Union[str, int, float]]],
+                            None,
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]:
         """Config control schema"""
         if self.control != self.CONFIG:
-            raise InvalidStateException(f"Schema could be get only for '{self.CONFIG}' control type")
+            raise InvalidStateException(
+                f"Schema could be get only for '{self.CONFIG}' control type"
+            )
 
         return self.__schema
 
     # -----------------------------------------------------------------------------
 
-    @schema.setter
-    def schema(self, schema: str) -> None:  # pylint: disable=too-many-branches
+    def set_schema(self, schema: str) -> None:  # pylint: disable=too-many-branches
         """Config control schema setter"""
         if self.control != self.CONFIG:
-            raise InvalidStateException(f"Schema could be set only for '{self.CONFIG}' control type")
+            raise InvalidStateException(
+                f"Schema could be set only for '{self.CONFIG}' control type"
+            )
 
         try:
             decoded_schema = json.loads(schema)
 
             if isinstance(decoded_schema, (list, set)) is False:
-                raise InvalidArgumentException("Received configuration value is not valid")
+                raise InvalidArgumentException(
+                    "Received configuration value is not valid"
+                )
 
         except json.JSONDecodeError as ex:
-            raise ParseMessageException("Control payload is not valid JSON value") from ex
+            raise ParseMessageException(
+                "Control payload is not valid JSON value"
+            ) from ex
 
         self.__schema = set()
 
@@ -720,8 +806,12 @@ class ControlEntity(BaseEntity):
 
             schema_row = {
                 "identifier": row.get("identifier"),
-                "name": row.get("name") if "name" in row and row.get("name", None) else None,
-                "comment": row.get("comment") if "comment" in row and row.get("comment", None) else None,
+                "name": row.get("name")
+                if "name" in row and row.get("name", None)
+                else None,
+                "comment": row.get("comment")
+                if "comment" in row and row.get("comment", None)
+                else None,
                 "default": None,
             }
 
@@ -737,52 +827,52 @@ class ControlEntity(BaseEntity):
                     schema_row["data_type"] = DataType.FLOAT
 
                 for field in ["min", "max", "step", "default"]:
-                    schema_row_params[field] = fast_real(row.get(field)) if field in row else None
+                    schema_row_params[field] = (
+                        fast_real(row.get(field)) if field in row else None
+                    )
 
             elif row_type == self.TYPE_TEXT:
                 schema_row["data_type"] = DataType.STRING
 
-                schema_row_params["default"] = str(row.get("default")) if "default" in row else None
+                schema_row_params["default"] = (
+                    str(row.get("default")) if "default" in row else None
+                )
 
             elif row_type == self.TYPE_BOOLEAN:
                 schema_row["data_type"] = DataType.BOOLEAN
 
-                schema_row_params["default"] = bool(row.get("default", False)) if "default" in row else None
+                schema_row_params["default"] = (
+                    bool(row.get("default", False)) if "default" in row else None
+                )
 
             elif row_type == self.TYPE_SELECT:
                 schema_row["data_type"] = DataType.ENUM
 
-                schema_row_params["select_values"] = []
+                select_values = []
 
                 if "values" in row and isinstance(row.get("values"), list):
                     for value in row.get("values"):
-                        if isinstance(value, dict) and "value" in value and "name" in value:
-                            schema_row_params["select_values"].append({
-                                "value": value.get("value"),
-                                "name": value.get("name"),
-                            })
+                        if (
+                            isinstance(value, dict)
+                            and "value" in value
+                            and "name" in value
+                        ):
+                            select_values.append(
+                                {
+                                    "value": value.get("value"),
+                                    "name": value.get("name"),
+                                }
+                            )
 
-                schema_row_params["default"] = str(row.get("default")) if "default" in row else None
+                schema_row_params["select_values"] = select_values
+
+                schema_row_params["default"] = (
+                    str(row.get("default")) if "default" in row else None
+                )
 
             schema_row["params"] = schema_row_params
 
             self.__schema.add(schema_row)
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        result = {**super().to_dict(), **{
-            "identifier": self.control,
-        }}
-
-        if self.value is not None:
-            result["value"] = self.value
-
-        if self.schema is not None and self.control == self.CONFIG:
-            result["schema"] = self.schema
-
-        return result
 
     # -----------------------------------------------------------------------------
 
@@ -801,6 +891,7 @@ class DeviceControlEntity(ControlEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     @property
     def allowed_controls(self) -> List[str]:
         """List of entity allowed controls"""
@@ -822,12 +913,22 @@ class ChannelControlEntity(ControlEntity):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __channel: str
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, channel: str, control: str, parent: Optional[str] = None):
-        super().__init__(device=device, control=control, parent=parent)
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        connector_id: uuid.UUID,
+        device: str,
+        channel: str,
+        control: str,
+        parent: Optional[str] = None,
+    ):
+        super().__init__(
+            connector_id=connector_id, device=device, control=control, parent=parent
+        )
 
         self.__channel = channel
 
@@ -837,14 +938,6 @@ class ChannelControlEntity(ControlEntity):
     def channel(self) -> str:
         """Entity channel identifier"""
         return self.__channel
-
-    # -----------------------------------------------------------------------------
-
-    def to_dict(self) -> Dict:
-        """Entity to dictionary converter"""
-        return {**super().to_dict(), **{
-            "channel": self.channel,
-        }}
 
     # -----------------------------------------------------------------------------
 

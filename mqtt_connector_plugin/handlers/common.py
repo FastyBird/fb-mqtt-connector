@@ -18,18 +18,20 @@
 MQTT connector plugin common handler
 """
 
-# Library dependencies
+# Python base dependencies
 import re
-from typing import List
+from typing import Any, Dict, List, Optional
+
+# Library dependencies
 from kink import inject
 from modules_metadata.devices_module import DevicePropertyName
-from paho.mqtt.client import Client, MQTTMessage, MQTT_ERR_SUCCESS
+from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessage
 
 # Library libs
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
+from mqtt_connector_plugin.entities.entities import DevicePropertyEntity
 from mqtt_connector_plugin.handlers.base import BaseHandler
 from mqtt_connector_plugin.logger import Logger
-from mqtt_connector_plugin.entities.entities import DevicePropertyEntity
 from mqtt_connector_plugin.subscriptions.repository import SubscriptionsRepository
 
 
@@ -43,6 +45,7 @@ class CommonHandler(BaseHandler):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __COMMON_TOPICS: List[str] = [
         "$SYS/broker/log/#",
     ]
@@ -68,7 +71,9 @@ class CommonHandler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(self, client: Client, userdata, flags, response_code) -> None:
+    def on_connect(
+        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
+    ) -> None:
         """On connection to broker established event"""
         self._logger.info("Connected to MQTT broker")
 
@@ -76,22 +81,28 @@ class CommonHandler(BaseHandler):
             result, message_id = client.subscribe(topic=topic, qos=0)
 
             if result == MQTT_ERR_SUCCESS:
-                self.__subscriptions_repository.create(topic=topic, qos=0, mid=message_id)
+                self.__subscriptions_repository.create(
+                    topic=topic, qos=0, mid=message_id
+                )
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(self, client: Client, userdata, response_code) -> None:
+    def on_disconnect(
+        self, client: Client, userdata: Any, response_code: Optional[int]
+    ) -> None:
         """On connection to broker closed event"""
         self._logger.info("Disconnected from MQTT broker")
 
     # -----------------------------------------------------------------------------
 
-    def on_log(self, client: Client, userdata, level, buf) -> None:
+    def on_log(self, client: Client, userdata: Any, level: int, buf: str) -> None:
         """On log message result"""
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(self, client: Client, userdata, message_id, granted_qos) -> None:
+    def on_subscribe(
+        self, client: Client, userdata: Any, message_id: int, granted_qos: int
+    ) -> None:
         """On topic subscribed event"""
         subscription = self.__subscriptions_repository.get_by_id(mid=message_id)
 
@@ -103,7 +114,7 @@ class CommonHandler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_unsubscribe(self, client: Client, userdata, message_id) -> None:
+    def on_unsubscribe(self, client: Client, userdata: Any, message_id: int) -> None:
         """On topic unsubscribed event"""
         subscription = self.__subscriptions_repository.get_by_id(mid=message_id)
 
@@ -117,25 +128,46 @@ class CommonHandler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_message(self, client: Client, userdata, message: MQTTMessage) -> None:
+    def on_message(self, client: Client, userdata: Any, message: MQTTMessage) -> None:
         """On broker message event"""
         if len(re.findall(self.__SYS_TOPIC_REGEX, message.topic)) == 1:
             result: List[tuple] = re.findall(self.__SYS_TOPIC_REGEX, message.topic)
             log_level = str(result.pop()).lower()
 
+            connector_id = self.extract_connector_id(userdata=userdata)
+
+            if connector_id is None:
+                return
+
             if log_level == "n":
-                self._logger.info(message.payload)
+                self._logger.info(message.payload.decode("utf-8", "ignore"))
 
-                if self.__NEW_CLIENT_MESSAGE_PAYLOAD in message.payload:
-                    payload_parts = message.payload.split(",") + \
-                                    [None, None, None, None, None, None, None, None, None, None, None]
+                if self.__NEW_CLIENT_MESSAGE_PAYLOAD in message.payload.decode(
+                    "utf-8", "ignore"
+                ):
+                    payload_parts = message.payload.decode("utf-8", "ignore").split(",")
 
-                    ip_address = payload_parts[5]
-                    device_id = payload_parts[7]
-                    username = payload_parts[10]
+                    try:
+                        ip_address: Optional[str] = payload_parts[5]
+
+                    except IndexError:
+                        ip_address = None
+
+                    try:
+                        device_id: Optional[str] = payload_parts[7]
+
+                    except IndexError:
+                        device_id = None
+
+                    try:
+                        username: Optional[str] = payload_parts[10]
+
+                    except IndexError:
+                        username = None
 
                     if ip_address and device_id and username:
                         entity = DevicePropertyEntity(
+                            connector_id=connector_id,
                             device=device_id,
                             name=DevicePropertyName.IP_ADDRESS.value,
                         )
@@ -144,10 +176,10 @@ class CommonHandler(BaseHandler):
                         self.__consumer.append(entity=entity)
 
             elif log_level == "e":
-                self._logger.error(message.payload)
+                self._logger.error(message.payload.decode("utf-8", "ignore"))
 
             elif log_level == "i":
-                self._logger.info(message.payload)
+                self._logger.info(message.payload.decode("utf-8", "ignore"))
 
             else:
-                self._logger.debug(message.payload)
+                self._logger.debug(message.payload.decode("utf-8", "ignore"))

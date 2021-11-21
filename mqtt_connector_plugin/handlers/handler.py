@@ -18,8 +18,10 @@
 MQTT connector plugin messages handler proxy
 """
 
+# Python base dependencies
+from typing import Any, Dict, List, Optional, Set
+
 # Library dependencies
-from typing import List
 from kink import inject
 from paho.mqtt.client import Client, MQTTMessage
 
@@ -37,19 +39,22 @@ class MessagesHandler:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
-    __handlers: List[BaseHandler]
+
+    __handlers: Set[BaseHandler]
 
     # -----------------------------------------------------------------------------
 
     def __init__(
         self,
-        handlers: List[BaseHandler],
+        handlers: Optional[List[BaseHandler]] = None,
     ) -> None:
-        self.__handlers = handlers
+        self.__handlers = set() if handlers is None else set(handlers)
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(self, client: Client, userdata, flags, response_code) -> None:
+    def on_connect(
+        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
+    ) -> None:
         """On connection to broker established event"""
         for handler in self.__handlers:
             handler.on_connect(
@@ -61,7 +66,9 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(self, client: Client, userdata, response_code) -> None:
+    def on_disconnect(
+        self, client: Client, userdata: Any, response_code: Optional[int]
+    ) -> None:
         """On connection to broker closed event"""
         for handler in self.__handlers:
             handler.on_disconnect(
@@ -72,7 +79,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_log(self, client: Client, userdata, level, buf) -> None:
+    def on_log(self, client: Client, userdata: Any, level: int, buf: str) -> None:
         """On log message result"""
         for handler in self.__handlers:
             handler.on_log(
@@ -84,7 +91,9 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(self, client: Client, userdata, message_id, granted_qos) -> None:
+    def on_subscribe(
+        self, client: Client, userdata: Any, message_id: int, granted_qos: int
+    ) -> None:
         """On topic subscribed event"""
         for handler in self.__handlers:
             handler.on_subscribe(
@@ -96,7 +105,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_unsubscribe(self, client: Client, userdata, message_id) -> None:
+    def on_unsubscribe(self, client: Client, userdata: Any, message_id: int) -> None:
         """On topic unsubscribed event"""
         for handler in self.__handlers:
             handler.on_unsubscribe(
@@ -107,7 +116,7 @@ class MessagesHandler:
 
     # -----------------------------------------------------------------------------
 
-    def on_message(self, client: Client, userdata, message: MQTTMessage) -> None:
+    def on_message(self, client: Client, userdata: Any, message: MQTTMessage) -> None:
         """On broker message event"""
         for handler in self.__handlers:
             handler.on_message(

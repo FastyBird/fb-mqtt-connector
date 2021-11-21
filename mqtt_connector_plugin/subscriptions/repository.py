@@ -18,7 +18,7 @@
 MQTT connector plugin subscriptions subscriptions repository
 """
 
-# Library dependencies
+# Python base dependencies
 from typing import Dict, List, Optional
 
 # Library libs
@@ -34,6 +34,7 @@ class SubscriptionsRepository:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __items: Dict[int, SubscriptionEntity] = {}
 
     __iterator_index = 0
@@ -42,7 +43,7 @@ class SubscriptionsRepository:
 
     def get_by_id(self, mid: int) -> Optional[SubscriptionEntity]:
         """Get topic subscription by message identifier"""
-        if mid in self.__items.keys():
+        if mid in self.__items:
             return self.__items[mid]
 
         return None
@@ -51,11 +52,11 @@ class SubscriptionsRepository:
 
     def create(self, topic: str, qos: int, mid: int) -> SubscriptionEntity:
         """Create new topic subscription"""
-        topic = SubscriptionEntity(topic=topic, qos=qos, mid=mid)
+        subscription = SubscriptionEntity(topic=topic, qos=qos, mid=mid)
 
-        self.__items[mid] = topic
+        self.__items[mid] = subscription
 
-        return topic
+        return subscription
 
     # -----------------------------------------------------------------------------
 

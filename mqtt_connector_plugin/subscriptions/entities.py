@@ -28,6 +28,7 @@ class SubscriptionEntity:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __topic: str
     __qos: int
     __mid: int

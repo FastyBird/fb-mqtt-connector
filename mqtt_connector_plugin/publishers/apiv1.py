@@ -18,17 +18,19 @@
 MQTT connector plugin API v1 messages publisher
 """
 
-# Library dependencies
+# Python base dependencies
 import json
-from typing import Dict, Set, Union, Optional
+from typing import Dict, Optional, Set, Union
+
+# Library dependencies
 from kink import inject
 
 # Library libs
 from mqtt_connector_plugin.client import MqttClient
-from mqtt_connector_plugin.logger import Logger
-from mqtt_connector_plugin.publishers.base import BasePublisher
 from mqtt_connector_plugin.entities.entities import ControlEntity
 from mqtt_connector_plugin.exceptions import InvalidArgumentException
+from mqtt_connector_plugin.logger import Logger
+from mqtt_connector_plugin.publishers.base import BasePublisher
 
 
 @inject(alias=BasePublisher)
@@ -41,19 +43,26 @@ class ApiV1Publisher(BasePublisher):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __DEVICE_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$property/{IDENTIFIER}/set"
-    __DEVICE_CHILD_PROPERTY_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$property/{IDENTIFIER}/set"
+    __DEVICE_CHILD_PROPERTY_TOPIC = (
+        "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$property/{IDENTIFIER}/set"
+    )
 
     __DEVICE_CONTROL_TOPIC = "/fb/v1/{DEVICE_ID}/$control/{CONTROL}/set"
-    __DEVICE_CHILD_CONTROL_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$control/{CONTROL}/set"
+    __DEVICE_CHILD_CONTROL_TOPIC = (
+        "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$control/{CONTROL}/set"
+    )
 
-    __CHANNEL_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
-    __CHANNEL_CHILD_PROPERTY_TOPIC = \
-        "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
+    __CHANNEL_PROPERTY_TOPIC = (
+        "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
+    )
+    __CHANNEL_CHILD_PROPERTY_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
 
-    __CHANNEL_CONTROL_TOPIC = "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
-    __CHANNEL_CHILD_CONTROL_TOPIC = \
-        "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
+    __CHANNEL_CONTROL_TOPIC = (
+        "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
+    )
+    __CHANNEL_CHILD_CONTROL_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
 
     __client: MqttClient
 
@@ -76,12 +85,14 @@ class ApiV1Publisher(BasePublisher):
     ) -> None:
         """Publish device property set message"""
         topic = self.__build_topic(
-            topic=self.__DEVICE_CHILD_PROPERTY_TOPIC if parent is not None else self.__DEVICE_PROPERTY_TOPIC,
+            topic=self.__DEVICE_CHILD_PROPERTY_TOPIC
+            if parent is not None
+            else self.__DEVICE_PROPERTY_TOPIC,
             data={
                 "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "IDENTIFIER": identifier,
-            }
+            },
         )
 
         self.__publish_message(topic=topic, payload=payload)
@@ -91,7 +102,10 @@ class ApiV1Publisher(BasePublisher):
     def publish_device_configuration(
         self,
         device: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
@@ -113,12 +127,14 @@ class ApiV1Publisher(BasePublisher):
     ) -> None:
         """Publish device control command message"""
         topic = self.__build_topic(
-            topic=self.__DEVICE_CHILD_CONTROL_TOPIC if parent is not None else self.__DEVICE_CONTROL_TOPIC,
+            topic=self.__DEVICE_CHILD_CONTROL_TOPIC
+            if parent is not None
+            else self.__DEVICE_CONTROL_TOPIC,
             data={
                 "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CONTROL": command,
-            }
+            },
         )
 
         if command == ControlEntity.CONFIG:
@@ -126,7 +142,9 @@ class ApiV1Publisher(BasePublisher):
                 json.loads(payload)
 
             except json.JSONDecodeError as ex:
-                raise InvalidArgumentException("Invalid payload for device command provided") from ex
+                raise InvalidArgumentException(
+                    "Invalid payload for device command provided"
+                ) from ex
 
         self.__publish_message(topic=topic, payload=payload)
 
@@ -142,13 +160,15 @@ class ApiV1Publisher(BasePublisher):
     ) -> None:
         """Publish channel property set message"""
         topic = self.__build_topic(
-            topic=self.__CHANNEL_CHILD_PROPERTY_TOPIC if parent is not None else self.__CHANNEL_PROPERTY_TOPIC,
+            topic=self.__CHANNEL_CHILD_PROPERTY_TOPIC
+            if parent is not None
+            else self.__CHANNEL_PROPERTY_TOPIC,
             data={
                 "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CHANNEL_ID": channel,
                 "IDENTIFIER": identifier,
-            }
+            },
         )
 
         self.__publish_message(topic=topic, payload=payload)
@@ -159,7 +179,10 @@ class ApiV1Publisher(BasePublisher):
         self,
         device: str,
         channel: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
@@ -183,13 +206,15 @@ class ApiV1Publisher(BasePublisher):
     ) -> None:
         """Publish channel control command message"""
         topic = self.__build_topic(
-            topic=self.__CHANNEL_CHILD_CONTROL_TOPIC if parent is not None else self.__CHANNEL_CONTROL_TOPIC,
+            topic=self.__CHANNEL_CHILD_CONTROL_TOPIC
+            if parent is not None
+            else self.__CHANNEL_CONTROL_TOPIC,
             data={
                 "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CHANNEL_ID": channel,
                 "CONTROL": command,
-            }
+            },
         )
 
         if command == ControlEntity.CONFIG:
@@ -197,14 +222,16 @@ class ApiV1Publisher(BasePublisher):
                 json.loads(payload)
 
             except json.JSONDecodeError as ex:
-                raise InvalidArgumentException("Invalid payload for channel command provided") from ex
+                raise InvalidArgumentException(
+                    "Invalid payload for channel command provided"
+                ) from ex
 
         self.__publish_message(topic=topic, payload=payload)
 
     # -----------------------------------------------------------------------------
 
     @staticmethod
-    def __build_topic(topic: str, data: Dict[str, str]) -> str:
+    def __build_topic(topic: str, data: Dict[str, Optional[str]]) -> str:
         build_topic = topic
 
         for key, value in data.items():

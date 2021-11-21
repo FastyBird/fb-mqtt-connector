@@ -20,10 +20,11 @@ MQTT connector plugin
 from threading import Thread
 from time import sleep
 from typing import List
+
 from kink import inject
 
 # Library libs
-from mqtt_connector_plugin.client import MqttClient, ClientSettings
+from mqtt_connector_plugin.client import ClientSettings, MqttClient
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
 from mqtt_connector_plugin.logger import Logger
 
@@ -37,6 +38,7 @@ class MqttConnector(Thread):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __stopped: bool = False
 
     __mqtt_client: MqttClient

@@ -18,23 +18,25 @@
 MQTT connector plugin API v1 handler
 """
 
+# Python base dependencies
+from typing import Any, Dict, List, Optional
+
 # Library dependencies
-from typing import List
 from kink import inject
-from paho.mqtt.client import Client, MQTTMessage, MQTT_ERR_SUCCESS
+from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessage
 
 # Library libs
-from mqtt_connector_plugin.api.v1validator import V1Validator
 from mqtt_connector_plugin.api.v1parser import V1Parser
+from mqtt_connector_plugin.api.v1validator import V1Validator
 from mqtt_connector_plugin.consumers.consumer import MessagesConsumer
-from mqtt_connector_plugin.handlers.base import BaseHandler
-from mqtt_connector_plugin.logger import Logger
-from mqtt_connector_plugin.subscriptions.repository import SubscriptionsRepository
 from mqtt_connector_plugin.exceptions import (
     InvalidArgumentException,
     InvalidStateException,
     ParseMessageException,
 )
+from mqtt_connector_plugin.handlers.base import BaseHandler
+from mqtt_connector_plugin.logger import Logger
+from mqtt_connector_plugin.subscriptions.repository import SubscriptionsRepository
 
 
 @inject(alias=BaseHandler)
@@ -47,6 +49,7 @@ class ApiV1Handler(BaseHandler):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __API_TOPICS: List[str] = [
         "/fb/v1/+/+",
         "/fb/v1/+/+/+",
@@ -54,7 +57,6 @@ class ApiV1Handler(BaseHandler):
         "/fb/v1/+/+/+/+/+",
         "/fb/v1/+/+/+/+/+/+",
         "/fb/v1/+/+/+/+/+/+/+",
-
         "/fb/v1/+/$child/+/+",
         "/fb/v1/+/$child/+/+/+",
         "/fb/v1/+/$child/+/+/+/+",
@@ -81,37 +83,45 @@ class ApiV1Handler(BaseHandler):
 
     # -----------------------------------------------------------------------------
 
-    def on_connect(self, client: Client, userdata, flags, response_code) -> None:
+    def on_connect(
+        self, client: Client, userdata: Any, flags: Dict, response_code: Optional[int]
+    ) -> None:
         """On connection to broker established event"""
         for topic in self.__API_TOPICS:
             result, message_id = client.subscribe(topic=topic, qos=0)
 
             if result == MQTT_ERR_SUCCESS:
-                self.__subscriptions_repository.create(topic=topic, qos=0, mid=message_id)
+                self.__subscriptions_repository.create(
+                    topic=topic, qos=0, mid=message_id
+                )
 
     # -----------------------------------------------------------------------------
 
-    def on_disconnect(self, client: Client, userdata, response_code) -> None:
+    def on_disconnect(
+        self, client: Client, userdata: Any, response_code: Optional[int]
+    ) -> None:
         """On connection to broker closed event"""
 
     # -----------------------------------------------------------------------------
 
-    def on_log(self, client: Client, userdata, level, buf) -> None:
+    def on_log(self, client: Client, userdata: Any, level: int, buf: str) -> None:
         """On log message result"""
 
     # -----------------------------------------------------------------------------
 
-    def on_subscribe(self, client: Client, userdata, message_id, granted_qos) -> None:
+    def on_subscribe(
+        self, client: Client, userdata: Any, message_id: int, granted_qos: int
+    ) -> None:
         """On topic subscribed event"""
 
     # -----------------------------------------------------------------------------
 
-    def on_unsubscribe(self, client: Client, userdata, message_id) -> None:
+    def on_unsubscribe(self, client: Client, userdata: Any, message_id: int) -> None:
         """On topic unsubscribed event"""
 
     # -----------------------------------------------------------------------------
 
-    def on_message(self, client: Client, userdata, message: MQTTMessage) -> None:
+    def on_message(self, client: Client, userdata: Any, message: MQTTMessage) -> None:
         """On broker message event"""
         if (
             V1Validator.validate_convention(message.topic) is False
@@ -121,19 +131,30 @@ class ApiV1Handler(BaseHandler):
             return
 
         if V1Validator.validate(message.topic) is False:
-            self._logger.warning("Received topic is not valid MQTT v1 convention topic: %s", message.topic)
+            self._logger.warning(
+                "Received topic is not valid MQTT v1 convention topic: %s",
+                message.topic,
+            )
 
+            return
+
+        connector_id = self.extract_connector_id(userdata=userdata)
+
+        if connector_id is None:
             return
 
         try:
             entity = V1Parser.parse_message(
+                connector_id=connector_id,
                 topic=message.topic,
                 payload=message.payload.decode("utf-8", "ignore"),
                 retained=message.retain,
             )
 
         except ParseMessageException as ex:
-            self._logger.error("Received message could not be successfully parsed to entity")
+            self._logger.error(
+                "Received message could not be successfully parsed to entity"
+            )
             self._logger.exception(ex)
 
             return

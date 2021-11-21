@@ -18,8 +18,10 @@
 MQTT connector plugin messages publisher proxy
 """
 
+# Python base dependencies
+from typing import Dict, List, Optional, Set, Union
+
 # Library dependencies
-from typing import List, Set, Dict, Optional, Union
 from kink import inject
 
 # Library libs
@@ -36,15 +38,16 @@ class MessagesPublisher:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __publishers: List[BasePublisher]
 
     # -----------------------------------------------------------------------------
 
     def __init__(
         self,
-        publishers: List[BasePublisher],
+        publishers: Optional[List[BasePublisher]] = None,
     ) -> None:
-        self.__publishers = publishers
+        self.__publishers = [] if publishers is None else publishers
 
     # -----------------------------------------------------------------------------
 
@@ -69,7 +72,10 @@ class MessagesPublisher:
     def publish_device_configuration(
         self,
         device: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
@@ -124,7 +130,10 @@ class MessagesPublisher:
         self,
         device: str,
         channel: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""

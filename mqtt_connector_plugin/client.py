@@ -19,8 +19,10 @@ MQTT connector plugin MQTT clients container
 # Library dependencies
 import random
 import string
+import uuid
 from time import sleep
-from typing import Dict, Tuple, List, Optional
+from typing import Dict, List, Optional, Tuple
+
 from kink import inject
 from paho.mqtt.client import Client as PahoClient
 
@@ -38,7 +40,8 @@ class ClientSettings:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
-    __connector_id: str
+
+    __connector_id: uuid.UUID
     __broker_host: str = "127.0.0.1"
     __broker_port: int = 1883
     __client_id: Optional[str] = None
@@ -47,7 +50,7 @@ class ClientSettings:
 
     def __init__(
         self,
-        connector_id: str,
+        connector_id: uuid.UUID,
         broker_host: str = "127.0.0.1",
         broker_port: int = 1883,
         client_id: Optional[str] = None,
@@ -60,7 +63,7 @@ class ClientSettings:
     # -----------------------------------------------------------------------------
 
     @property
-    def connector_id(self) -> str:
+    def connector_id(self) -> uuid.UUID:
         """Get connector identifier"""
         return self.__connector_id
 
@@ -99,6 +102,7 @@ class MqttClient:
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     __mqtt_clients: Dict[str, Tuple[ClientSettings, PahoClient]] = {}
 
     __messages_handler: MessagesHandler
@@ -122,7 +126,12 @@ class MqttClient:
     def initialize(self, connectors: List[ClientSettings]) -> None:
         """Initialize all brokers connections"""
         for connector in connectors:
-            client = PahoClient(connector.client_id)
+            client = PahoClient(
+                client_id=connector.client_id,
+                userdata={
+                    "connector_id": connector.connector_id,
+                },
+            )
 
             # Set up external MQTT broker callbacks
             client.on_connect = self.__messages_handler.on_connect
@@ -132,7 +141,7 @@ class MqttClient:
             client.on_unsubscribe = self.__messages_handler.on_unsubscribe
             client.on_log = self.__messages_handler.on_log
 
-            self.__mqtt_clients[connector.connector_id] = (connector, client)
+            self.__mqtt_clients[connector.connector_id.__str__()] = (connector, client)
 
     # -----------------------------------------------------------------------------
 

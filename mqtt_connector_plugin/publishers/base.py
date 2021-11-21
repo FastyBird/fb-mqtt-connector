@@ -18,9 +18,9 @@
 MQTT connector plugin messages publisher
 """
 
-# Library dependencies
+# Python base dependencies
 from abc import ABC, abstractmethod
-from typing import Dict, Set, Optional, Union
+from typing import Dict, Optional, Set, Union
 
 # Library libs
 from mqtt_connector_plugin.logger import Logger
@@ -35,6 +35,7 @@ class BasePublisher(ABC):
 
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
+
     _logger: Logger
 
     # -----------------------------------------------------------------------------
@@ -63,7 +64,10 @@ class BasePublisher(ABC):
     def publish_device_configuration(
         self,
         device: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
@@ -100,7 +104,10 @@ class BasePublisher(ABC):
         self,
         device: str,
         channel: str,
-        payload: Union[Dict[str, any], Set[Dict[str, any]]],
+        payload: Union[
+            Dict[str, Union[str, int, float, bool, None]],
+            Set[Dict[str, Union[str, int, float, bool, None]]],
+        ],
         parent: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
