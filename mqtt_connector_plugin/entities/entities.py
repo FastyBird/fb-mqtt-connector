@@ -643,7 +643,7 @@ class ControlEntity(BaseEntity):
 
     __control: str
     __value: Union[str, Dict[str, Union[str, int, float, bool, None]], None] = None
-    __schema: Optional[
+    __schema: Union[
         Set[
             Dict[
                 str,
@@ -665,6 +665,7 @@ class ControlEntity(BaseEntity):
                 ],
             ],
         ],
+        None,
     ] = None
 
     def __init__(
@@ -717,7 +718,7 @@ class ControlEntity(BaseEntity):
     @property
     def schema(
         self,
-    ) -> Optional[
+    ) -> Union[
         Set[
             Dict[
                 str,
@@ -739,6 +740,7 @@ class ControlEntity(BaseEntity):
                 ],
             ],
         ],
+        None,
     ]:
         """Config control schema"""
         if self.control != self.CONFIG:
