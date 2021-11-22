@@ -80,8 +80,8 @@ class MqttConnector(Thread):
         host: str,
         port: int,
         client_id: uuid.UUID,
-        username: Optional[str],
-        password: Optional[str],
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """Configure MQTT client & append it to client proxy"""
         self.__mqtt_client_factory.create(
@@ -99,6 +99,8 @@ class MqttConnector(Thread):
         self.__stopped = False
 
         super().start()
+
+        self.__mqtt_client.connect()
 
     # -----------------------------------------------------------------------------
 
