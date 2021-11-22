@@ -67,7 +67,8 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
     )
     di["fb-mqtt-connector-plugin_mqtt-handler-api-v1"] = di[ApiV1Handler]
 
-    di[MessagesHandler] = MessagesHandler()  # Messages handler proxy
+    # Messages handler proxy
+    di[MessagesHandler] = MessagesHandler()  # type: ignore[call-arg]
     di["fb-mqtt-connector-plugin_mqtt-handler-proxy"] = di[MessagesHandler]
 
     di[Client] = Client(logger=di[Logger])
@@ -87,7 +88,7 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
     )
     di["fb-mqtt-connector-plugin_publisher-api-v1"] = di[ApiV1Publisher]
 
-    di[MessagesPublisher] = MessagesPublisher()
+    di[MessagesPublisher] = MessagesPublisher()  # type: ignore[call-arg]
     di["fb-mqtt-connector-plugin_publisher-proxy"] = di[MessagesPublisher]
 
     # MQTT connector
