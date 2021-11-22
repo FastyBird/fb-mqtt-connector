@@ -100,8 +100,6 @@ class MqttConnector(Thread):
 
         super().start()
 
-        self.__mqtt_client.connect()
-
     # -----------------------------------------------------------------------------
 
     def stop(self) -> None:

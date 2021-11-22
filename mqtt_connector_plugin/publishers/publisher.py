@@ -39,15 +39,15 @@ class MessagesPublisher:
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
 
-    __publishers: List[BasePublisher]
+    __publishers: Set[BasePublisher]
 
     # -----------------------------------------------------------------------------
 
     def __init__(
         self,
-        publishers: Optional[List[BasePublisher]] = None,
+        publishers: List[BasePublisher],
     ) -> None:
-        self.__publishers = [] if publishers is None else publishers
+        self.__publishers = set(publishers)
 
     # -----------------------------------------------------------------------------
 
@@ -57,6 +57,7 @@ class MessagesPublisher:
         identifier: str,
         payload: str,
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device property set message"""
         for publisher in self.__publishers:
@@ -65,6 +66,7 @@ class MessagesPublisher:
                 parent=parent,
                 identifier=identifier,
                 payload=payload,
+                client_id=client_id,
             )
 
     # -----------------------------------------------------------------------------
@@ -77,6 +79,7 @@ class MessagesPublisher:
             Set[Dict[str, Union[str, int, float, bool, None]]],
         ],
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device configure set message"""
         for publisher in self.__publishers:
@@ -84,6 +87,7 @@ class MessagesPublisher:
                 device=device,
                 parent=parent,
                 payload=payload,
+                client_id=client_id,
             )
 
     # -----------------------------------------------------------------------------
@@ -94,6 +98,7 @@ class MessagesPublisher:
         command: str,
         payload: str = "true",
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish device control command message"""
         for publisher in self.__publishers:
@@ -102,6 +107,7 @@ class MessagesPublisher:
                 parent=parent,
                 command=command,
                 payload=payload,
+                client_id=client_id,
             )
 
     # -----------------------------------------------------------------------------
@@ -113,6 +119,7 @@ class MessagesPublisher:
         identifier: str,
         payload: str,
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel property set message"""
         for publisher in self.__publishers:
@@ -122,6 +129,7 @@ class MessagesPublisher:
                 channel=channel,
                 identifier=identifier,
                 payload=payload,
+                client_id=client_id,
             )
 
     # -----------------------------------------------------------------------------
@@ -135,6 +143,7 @@ class MessagesPublisher:
             Set[Dict[str, Union[str, int, float, bool, None]]],
         ],
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel configure set message"""
         for publisher in self.__publishers:
@@ -143,6 +152,7 @@ class MessagesPublisher:
                 parent=parent,
                 channel=channel,
                 payload=payload,
+                client_id=client_id,
             )
 
     # -----------------------------------------------------------------------------
@@ -154,6 +164,7 @@ class MessagesPublisher:
         command: str,
         payload: str = "true",
         parent: Optional[str] = None,
+        client_id: Optional[str] = None,
     ) -> None:
         """Publish channel control command message"""
         for publisher in self.__publishers:
@@ -163,4 +174,5 @@ class MessagesPublisher:
                 channel=channel,
                 command=command,
                 payload=payload,
+                client_id=client_id,
             )

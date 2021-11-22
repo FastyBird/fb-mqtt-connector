@@ -238,8 +238,8 @@ class PahoClientFactory:  # pylint: disable=too-few-public-methods
         host: str,
         port: int,
         client_id: uuid.UUID,
-        username: Optional[str],
-        password: Optional[str],
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """Create new instance of Paho MQTT client"""
         client = PahoClient(

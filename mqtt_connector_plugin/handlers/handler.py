@@ -46,9 +46,9 @@ class MessagesHandler:
 
     def __init__(
         self,
-        handlers: Optional[List[BaseHandler]] = None,
+        handlers: List[BaseHandler],
     ) -> None:
-        self.__handlers = set() if handlers is None else set(handlers)
+        self.__handlers = set(handlers)
 
     # -----------------------------------------------------------------------------
 

@@ -22,7 +22,7 @@ MQTT messages consumers
 from abc import ABC, abstractmethod
 from queue import Full as QueueFull
 from queue import Queue
-from typing import List, Optional, Set
+from typing import List, Set, Union
 
 # Library dependencies
 from kink import inject
@@ -70,7 +70,7 @@ class MessagesConsumer:
     def __init__(
         self,
         logger: Logger,
-        consumers: Optional[List[IConsumer]] = None,
+        consumers: Union[List[IConsumer], None] = None,
     ):
         if consumers is None:
             self.__consumers = set()
