@@ -38,11 +38,6 @@ abstract class Control extends Entity
 	public const FACTORY_RESET = 'factory-reset';
 	public const OTA = 'ota';
 
-	public const DATA_TYPE_BOOLEAN = 'boolean';
-	public const DATA_TYPE_NUMBER = 'number';
-	public const DATA_TYPE_SELECT = 'select';
-	public const DATA_TYPE_TEXT = 'text';
-
 	/** @var string */
 	private string $control;
 
@@ -158,10 +153,10 @@ abstract class Control extends Entity
 			}
 
 			switch ($row->offsetGet('type')) {
-				case self::DATA_TYPE_NUMBER:
+				case ModulesMetadataTypes\ConfigurationFieldType::FIELD_NUMBER:
 					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_FLOAT);
 
-					foreach (['min', 'max', 'step', 'default'] as $field) {
+					foreach (ModulesMetadataTypes\ConfigurationNumberFieldAttributeType::getAvailableValues() as $field) {
 						if ($row->offsetExists($field)) {
 							$formattedRow->offsetSet($field, (float) $row->offsetGet($field));
 
@@ -172,34 +167,44 @@ abstract class Control extends Entity
 
 					break;
 
-				case self::DATA_TYPE_TEXT:
+				case ModulesMetadataTypes\ConfigurationFieldType::FIELD_TEXT:
 					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_STRING);
 
-					if ($row->offsetExists('default')) {
-						$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
+					foreach (ModulesMetadataTypes\ConfigurationTextFieldAttributeType::getAvailableValues() as $field) {
+						if ($row->offsetExists($field)) {
+							$formattedRow->offsetSet($field, (string) $row->offsetGet($field));
+
+						} else {
+							$formattedRow->offsetSet($field, null);
+						}
 					}
 
 					break;
 
-				case self::DATA_TYPE_BOOLEAN:
+				case ModulesMetadataTypes\ConfigurationFieldType::FIELD_BOOLEAN:
 					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_BOOLEAN);
 
-					if ($row->offsetExists('default')) {
-						$formattedRow->offsetSet('default', (bool) $row->offsetGet('default'));
+					foreach (ModulesMetadataTypes\ConfigurationBooleanFieldAttributeType::getAvailableValues() as $field) {
+						if ($row->offsetExists($field)) {
+							$formattedRow->offsetSet($field, (string) $row->offsetGet($field));
+
+						} else {
+							$formattedRow->offsetSet($field, null);
+						}
 					}
 
 					break;
 
-				case self::DATA_TYPE_SELECT:
+				case ModulesMetadataTypes\ConfigurationFieldType::FIELD_SELECT:
 					$formattedRow->offsetSet('data_type', ModulesMetadataTypes\DataTypeType::DATA_TYPE_ENUM);
 
 					if (
-						$row->offsetExists('values')
-						&& $row->offsetGet('values') instanceof Utils\ArrayHash
+						$row->offsetExists(ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_VALUES)
+						&& $row->offsetGet(ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_VALUES) instanceof Utils\ArrayHash
 					) {
 						$selectValues = [];
 
-						foreach ($row->offsetGet('values') as $value) {
+						foreach ($row->offsetGet(ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_VALUES) as $value) {
 							if (
 								$value instanceof Utils\ArrayHash
 								&& $value->offsetExists('value')
@@ -212,14 +217,23 @@ abstract class Control extends Entity
 							}
 						}
 
-						$formattedRow->offsetSet('values', $selectValues);
+						$formattedRow->offsetSet(
+							ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_VALUES,
+							$selectValues
+						);
 
 					} else {
-						$formattedRow->offsetSet('values', []);
+						$formattedRow->offsetSet(
+							ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_VALUES,
+							[]
+						);
 					}
 
-					if ($row->offsetExists('default')) {
-						$formattedRow->offsetSet('default', (string) $row->offsetGet('default'));
+					if ($row->offsetExists(ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_DEFAULT)) {
+						$formattedRow->offsetSet(
+							ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_DEFAULT,
+							(string) $row->offsetGet(ModulesMetadataTypes\ConfigurationSelectFieldAttributeType::ATTRIBUTE_DEFAULT)
+						);
 					}
 
 					break;

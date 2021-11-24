@@ -51,7 +51,7 @@ class MessagesPublisher:
 
     # -----------------------------------------------------------------------------
 
-    def publish_device_property(
+    def publish_device_property(  # pylint: disable=too-many-arguments
         self,
         device: str,
         identifier: str,
@@ -92,7 +92,7 @@ class MessagesPublisher:
 
     # -----------------------------------------------------------------------------
 
-    def publish_device_command(
+    def publish_device_command(  # pylint: disable=too-many-arguments
         self,
         device: str,
         command: str,
@@ -134,7 +134,7 @@ class MessagesPublisher:
 
     # -----------------------------------------------------------------------------
 
-    def publish_channel_configuration(
+    def publish_channel_configuration(  # pylint: disable=too-many-arguments
         self,
         device: str,
         channel: str,

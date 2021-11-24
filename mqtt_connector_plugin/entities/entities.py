@@ -27,6 +27,13 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 # Library dependencies
 from fastnumbers import fast_real
+from modules_metadata.devices_module import (
+    ConfigurationBooleanFieldAttribute,
+    ConfigurationField,
+    ConfigurationNumberFieldAttribute,
+    ConfigurationSelectFieldAttribute,
+    ConfigurationTextFieldAttribute,
+)
 from modules_metadata.types import ControlName, DataType
 
 # Library libs
@@ -636,11 +643,6 @@ class ControlEntity(BaseEntity):
     FACTORY_RESET = "factory-reset"
     OTA = "ota"
 
-    TYPE_BOOLEAN = "boolean"
-    TYPE_NUMBER = "number"
-    TYPE_SELECT = "select"
-    TYPE_TEXT = "text"
-
     __control: str
     __value: Union[str, Dict[str, Union[str, int, float, bool, None]], None] = None
     __schema: Union[
@@ -780,29 +782,37 @@ class ControlEntity(BaseEntity):
                 "default": None,
             }
 
-            if row_type == self.TYPE_NUMBER:
+            if row_type == ConfigurationField.NUMBER.value:
                 schema_row["data_type"] = DataType.FLOAT
 
-                for field in ["min", "max", "step", "default"]:
-                    schema_row[field] = fast_real(row.get(field)) if field in row else None
+                for number_field in ConfigurationNumberFieldAttribute:
+                    schema_row[number_field.value] = (
+                        fast_real(row.get(number_field.value)) if number_field.value in row else None
+                    )
 
-            elif row_type == self.TYPE_TEXT:
+            elif row_type == ConfigurationField.TEXT.value:
                 schema_row["data_type"] = DataType.STRING
 
-                schema_row["default"] = str(row.get("default")) if "default" in row else None
+                for text_field in ConfigurationTextFieldAttribute:
+                    schema_row[text_field.value] = str(row.get(text_field.value)) if text_field.value in row else None
 
-            elif row_type == self.TYPE_BOOLEAN:
+            elif row_type == ConfigurationField.BOOLEAN.value:
                 schema_row["data_type"] = DataType.BOOLEAN
 
-                schema_row["default"] = bool(row.get("default", False)) if "default" in row else None
+                for boolean_field in ConfigurationBooleanFieldAttribute:
+                    schema_row[boolean_field.value] = (
+                        str(row.get(boolean_field.value)) if boolean_field.value in row else None
+                    )
 
-            elif row_type == self.TYPE_SELECT:
+            elif row_type == ConfigurationField.SELECT.value:
                 schema_row["data_type"] = DataType.ENUM
 
                 select_values = []
 
-                if "values" in row and isinstance(row.get("values"), list):
-                    for value in row.get("values"):
+                if ConfigurationSelectFieldAttribute.VALUES.value in row and isinstance(
+                    row.get(ConfigurationSelectFieldAttribute.VALUES.value), list
+                ):
+                    for value in row.get(ConfigurationSelectFieldAttribute.VALUES.value):
                         if isinstance(value, dict) and "value" in value and "name" in value:
                             select_values.append(
                                 {
@@ -811,9 +821,11 @@ class ControlEntity(BaseEntity):
                                 }
                             )
 
-                schema_row["values"] = select_values
+                schema_row[ConfigurationSelectFieldAttribute.VALUES.value] = select_values
 
-                schema_row["default"] = str(row.get("default")) if "default" in row else None
+                schema_row[ConfigurationSelectFieldAttribute.DEFAULT.value] = (
+                    str(row.get("default")) if "default" in row else None
+                )
 
             self.__schema.add(schema_row)
 
