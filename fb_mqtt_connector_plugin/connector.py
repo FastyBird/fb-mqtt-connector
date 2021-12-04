@@ -143,11 +143,11 @@ class FbMqttConnector(Thread):
                 self.__logger.exception(ex)
 
         while True:
-            self.__consumer.consume()
-
             # All records have to be processed before thread is closed
             if self.__stopped and self.__consumer.is_empty():
                 break
+
+            self.__consumer.consume()
 
             self.__mqtt_client.check_connection()
 

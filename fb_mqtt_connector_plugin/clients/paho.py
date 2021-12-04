@@ -108,7 +108,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
         """Enable client communication"""
         self.__state = True
 
-        self.connect()
+        if not self.is_connected():
+            self.connect()
+
         self.start()
 
         return True
@@ -120,7 +122,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
         self.__state = False
 
         self.stop()
-        self.disconnect()
+
+        if self.is_connected():
+            self.disconnect()
 
         return True
 
@@ -164,6 +168,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
 
     def subscribe(self, topic: str, qos: int = 0) -> Tuple[bool, Optional[int]]:
         """Subscribe to broker"""
+        if not self.is_connected():
+            return False, None
+
         result, message_id = self.__paho_client.subscribe(topic=topic, qos=qos)
 
         if result == MQTT_ERR_SUCCESS:
@@ -175,6 +182,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
 
     def publish(self, topic: str, payload: str, qos: int = 0) -> bool:
         """Send message to broker"""
+        if not self.is_connected():
+            return False
+
         result = self.__paho_client.publish(topic=topic, payload=payload, qos=qos)
 
         if result.rc != 0:

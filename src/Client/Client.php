@@ -60,10 +60,15 @@ final class Client
 	{
 		$processClientsIds = $this->buildClientsIdsList($clientId);
 
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
 			if ($processClientsIds === [] || in_array($client->getClientId(), $processClientsIds, true)) {
 				if (!$client->isEnabled()) {
 					throw new InvalidStateException('Client is not enabled and can not be connected');
+				}
+
+				if ($client->isConnected()) {
+					continue;
 				}
 
 				try {
@@ -112,8 +117,13 @@ final class Client
 	 */
 	public function removeClient(Uuid\UuidInterface $clientId): bool
 	{
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
 			if ($clientId->equals($client->getClientId())) {
+				if ($client->isConnected()) {
+					$client->disconnect();
+				}
+
 				$this->clients->detach($client);
 
 				return true;
@@ -128,8 +138,11 @@ final class Client
 	 */
 	public function resetClients(): void
 	{
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
-			$client->disconnect();
+			if ($client->isConnected()) {
+				$client->disconnect();
+			}
 		}
 
 		$this->clients = new SplObjectStorage();
@@ -146,6 +159,7 @@ final class Client
 
 		$result = false;
 
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
 			if ($processClientsIds === [] || in_array($client->getClientId(), $processClientsIds, true)) {
 				$result = $client->enable();
@@ -166,6 +180,7 @@ final class Client
 
 		$result = false;
 
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
 			if ($processClientsIds === [] || in_array($client->getClientId(), $processClientsIds, true)) {
 				$result = $client->disable();
@@ -198,8 +213,9 @@ final class Client
 			$retained
 		);
 
+		/** @var MqttClient $client */
 		foreach ($this->getClients() as $client) {
-			if ($clientId === null || $client->getClientId()->equals($clientId)) {
+			if (($clientId === null || $client->getClientId()->equals($clientId)) && $client->isConnected()) {
 				$client->publish($message)
 					->otherwise(function (Throwable $ex) use ($topic, $payload, $qos, $retained): void {
 						$this->logger->error('[FB:PLUGIN:MQTT] Message could not be published', [

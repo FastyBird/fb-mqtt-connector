@@ -60,7 +60,7 @@ class Client:
     def connect(self) -> None:
         """Connect to all brokers"""
         for client in self.__mqtt_clients:
-            if client.enabled:
+            if client.enabled and not client.is_connected():
                 self.__connect(client=client)
 
     # -----------------------------------------------------------------------------
@@ -68,15 +68,17 @@ class Client:
     def disconnect(self) -> None:
         """Disconnect from all brokers"""
         for client in self.__mqtt_clients:
-            client.disconnect()
+            if client.is_connected():
+                client.disconnect()
 
     # -----------------------------------------------------------------------------
 
     def stop(self) -> None:
         """Stop MQTT clients loop"""
         for client in self.__mqtt_clients:
-            client.stop()
-            client.disconnect()
+            if client.is_connected():
+                client.stop()
+                client.disconnect()
 
     # -----------------------------------------------------------------------------
 
@@ -93,7 +95,7 @@ class Client:
         result = True
 
         for client in self.__mqtt_clients:
-            if client_id is None or client.id == client_id:
+            if (client_id is None or client.id == client_id) and client.is_connected():
                 client_result = client.publish(topic=topic, payload=payload, qos=qos)
 
                 if client_result:
@@ -127,8 +129,9 @@ class Client:
     def reset_clients(self) -> None:
         """Reset registered clients"""
         for client in self.__mqtt_clients:
-            client.stop()
-            client.disconnect()
+            if client.is_connected():
+                client.stop()
+                client.disconnect()
 
         self.__mqtt_clients = set()
 
