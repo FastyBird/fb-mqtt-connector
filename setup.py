@@ -44,22 +44,22 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-VERSION: str = find_version("mqtt_connector_plugin", "__init__.py")
+VERSION: str = find_version("fb_mqtt_connector_plugin", "__init__.py")
 
 
 setup(
     version=VERSION,
-    name="fastybird-mqtt-connector-plugin",
+    name="fastybird-fb-mqtt-connector-plugin",
     author="FastyBird",
     author_email="code@fastybird.com",
     license="Apache Software License (Apache Software License 2.0)",
     description="FastyBird MQTT connector plugin",
-    url="https://github.com/FastyBird/mqtt-connector-plugin",
+    url="https://github.com/FastyBird/fb-mqtt-connector-plugin",
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires=">=3.7",
     packages=find_packages(),
-    package_data={"mqtt_connector_plugin": ["py.typed"]},
+    package_data={"fb_mqtt_connector_plugin": ["py.typed"]},
     install_requires=[
         "paho-mqtt",
         "kink",
@@ -67,7 +67,7 @@ setup(
         "fastnumbers",
         "fastybird-modules-metadata",
     ],
-    download_url="https://github.com/FastyBird/mqtt-connector-plugin/archive/%s.tar.gz" % VERSION,
+    download_url="https://github.com/FastyBird/fb-mqtt-connector-plugin/archive/%s.tar.gz" % VERSION,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

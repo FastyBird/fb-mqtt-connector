@@ -6,7 +6,7 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     Client
  * @since          0.1.0
  *
@@ -24,7 +24,7 @@ use Throwable;
 /**
  * MQTT client factory
  *
- * @package         FastyBird:MqttConnectorPlugin!
+ * @package         FastyBird:FbMqttConnectorPlugin!
  * @subpackage      Client
  *
  * @author          Adam Kadlec <adam.kadlec@fastybird.com>

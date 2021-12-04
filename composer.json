@@ -1,5 +1,5 @@
 {
-  "name" : "fastybird/mqtt-connector-plugin",
+  "name" : "fastybird/fb-mqtt-connector-plugin",
   "type" : "library",
   "description" : "FastyBird MQTT connector plugin",
   "keywords" : [

@@ -6,7 +6,7 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     API
  * @since          0.1.0
  *
@@ -21,7 +21,7 @@ use Nette;
 /**
  * API v1 topic validator
  *
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     API
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

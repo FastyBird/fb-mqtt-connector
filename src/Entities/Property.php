@@ -6,7 +6,7 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     Entities
  * @since          0.1.0
  *
@@ -21,7 +21,7 @@ use SplObjectStorage;
 /**
  * Device or channel property
  *
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

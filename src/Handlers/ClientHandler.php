@@ -6,7 +6,7 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:MqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnectorPlugin!
  * @subpackage     Handlers
  * @since          0.1.0
  *
@@ -24,7 +24,7 @@ use Throwable;
 /**
  * MQTT client handler proxy
  *
- * @package         FastyBird:MqttConnectorPlugin!
+ * @package         FastyBird:FbMqttConnectorPlugin!
  * @subpackage      Handlers
  *
  * @author          Adam Kadlec <adam.kadlec@fastybird.com>
