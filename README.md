@@ -17,7 +17,7 @@
 
 ## What is FastyBird MQTT connector plugin?
 
-This is a combined plugin for [Nette framework](https://nette.org) and [Python](https://www.python.org) which is implementing [MQTT](https://mqtt.org) client for [FastyBird](https://www.fastybird.com) IoT services
+This is a combined plugin for [Nette framework](https://nette.org) and [Python](https://www.python.org) which is implementing [MQTT](https://mqtt.org) via [FastyBird MQTT convention](https://github.com/FastyBird/mqtt-convention) client for [FastyBird](https://www.fastybird.com) IoT services
 
 ## Installation
 
