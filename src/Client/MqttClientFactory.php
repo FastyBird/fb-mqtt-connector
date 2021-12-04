@@ -61,10 +61,11 @@ final class MqttClientFactory
 
 	/**
 	 * @param Uuid\UuidInterface $clientId
-	 * @param string $host
-	 * @param int $port
-	 * @param string $username
-	 * @param string $password
+	 * @param bool $clientState
+	 * @param string $serverHost
+	 * @param int $serverPort
+	 * @param string $serverUsername
+	 * @param string $serverPassword
 	 *
 	 * @return void
 	 */
