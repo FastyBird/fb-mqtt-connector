@@ -53,7 +53,7 @@ setup(
     author="FastyBird",
     author_email="code@fastybird.com",
     license="Apache Software License (Apache Software License 2.0)",
-    description="FastyBird MQTT connector plugin",
+    description="FastyBird FB MQTT connector plugin",
     url="https://github.com/FastyBird/fb-mqtt-connector-plugin",
     long_description=long_description,
     long_description_content_type="text/markdown",
