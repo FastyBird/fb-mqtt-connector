@@ -35,7 +35,7 @@ from fb_mqtt_connector_plugin.handlers.common import CommonHandler
 from fb_mqtt_connector_plugin.handlers.handler import Handler
 from fb_mqtt_connector_plugin.logger import Logger
 from fb_mqtt_connector_plugin.publishers.apiv1 import ApiV1Publisher
-from fb_mqtt_connector_plugin.publishers.publisher import MessagesPublisher
+from fb_mqtt_connector_plugin.publishers.publisher import Publisher
 from fb_mqtt_connector_plugin.subscriptions.repository import SubscriptionsRepository
 
 
@@ -88,8 +88,8 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
     )
     di["fb-mqtt-connector-plugin_publisher-api-v1"] = di[ApiV1Publisher]
 
-    di[MessagesPublisher] = MessagesPublisher()  # type: ignore[call-arg]
-    di["fb-mqtt-connector-plugin_publisher-proxy"] = di[MessagesPublisher]
+    di[Publisher] = Publisher()  # type: ignore[call-arg]
+    di["fb-mqtt-connector-plugin_publisher-proxy"] = di[Publisher]
 
     # MQTT connector
     di[FbMqttConnector] = FbMqttConnector(

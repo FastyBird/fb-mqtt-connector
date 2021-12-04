@@ -29,7 +29,7 @@ from fb_mqtt_connector_plugin.publishers.base import BasePublisher
 
 
 @inject
-class MessagesPublisher:
+class Publisher:
     """
     MQTT messages publisher
 
