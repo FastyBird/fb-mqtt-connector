@@ -71,10 +71,10 @@ final class MqttClientFactory
 	public function create(
 		Uuid\UuidInterface $clientId,
 		bool $clientState,
-		string $host,
-		int $port,
-		string $username = '',
-		string $password = ''
+		string $serverHost = 'localhost',
+		int $serverPort = 1883,
+		?string $serverUsername = null,
+		?string $serverPassword = null
 	): void
 	{
 		$client = new MqttClient(
@@ -82,10 +82,10 @@ final class MqttClientFactory
 			$clientState,
 			$this->handler,
 			$this->loop,
-			$host,
-			$port,
-			$username,
-			$password
+			$serverHost,
+			$serverPort,
+			$serverUsername,
+			$serverPassword
 		);
 
 		$this->client->registerClient($client);
