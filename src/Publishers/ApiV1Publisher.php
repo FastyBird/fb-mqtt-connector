@@ -22,6 +22,7 @@ use FastyBird\MqttConnectorPlugin\Exceptions;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
+use Ramsey\Uuid;
 
 /**
  * MQTT api V1 publisher
@@ -189,7 +190,7 @@ final class ApiV1Publisher implements IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDevicePropertyTopic(
@@ -210,7 +211,7 @@ final class ApiV1Publisher implements IPublisher
 		string $device,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		try {
 			$this->sendToDevice(
@@ -238,7 +239,7 @@ final class ApiV1Publisher implements IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildChannelPropertyTopic(
@@ -261,7 +262,7 @@ final class ApiV1Publisher implements IPublisher
 		string $channel,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		try {
 			$this->sendToDevice(
@@ -286,7 +287,7 @@ final class ApiV1Publisher implements IPublisher
 	public function sendDeviceRestart(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -306,7 +307,7 @@ final class ApiV1Publisher implements IPublisher
 	public function sendDeviceReconnect(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -326,7 +327,7 @@ final class ApiV1Publisher implements IPublisher
 	public function sendDeviceFactoryReset(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		$this->sendToDevice(
 			$this->buildDeviceControlTopic(
@@ -351,7 +352,7 @@ final class ApiV1Publisher implements IPublisher
 	private function sendToDevice(
 		string $topic,
 		?string $payload,
-		?string $clientId = null,
+		?Uuid\UuidInterface $clientId = null,
 		int $qos = MqttConnectorPlugin\Constants::MQTT_API_QOS_1,
 		bool $retained = false
 	): void {

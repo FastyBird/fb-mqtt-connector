@@ -60,7 +60,8 @@ class Client:
     def connect(self) -> None:
         """Connect to all brokers"""
         for client in self.__mqtt_clients:
-            self.__connect(client=client)
+            if client.enabled:
+                self.__connect(client=client)
 
     # -----------------------------------------------------------------------------
 
@@ -75,13 +76,14 @@ class Client:
         """Stop MQTT clients loop"""
         for client in self.__mqtt_clients:
             client.stop()
+            client.disconnect()
 
     # -----------------------------------------------------------------------------
 
     def check_connection(self) -> None:
         """Check connection to MQTT brokers"""
         for client in self.__mqtt_clients:
-            if not client.is_connected():
+            if client.enabled and not client.is_connected():
                 self.__connect(client=client)
 
     # -----------------------------------------------------------------------------
@@ -124,6 +126,10 @@ class Client:
 
     def reset_clients(self) -> None:
         """Reset registered clients"""
+        for client in self.__mqtt_clients:
+            client.stop()
+            client.disconnect()
+
         self.__mqtt_clients = set()
 
     # -----------------------------------------------------------------------------
@@ -132,11 +138,13 @@ class Client:
         """Enable one or more clients"""
         process_clients_ids = self.__build_clients_ids_list(client_id=client_id)
 
+        result = False
+
         for client in self.__mqtt_clients:
             if process_clients_ids is None or client.id in process_clients_ids:
-                return client.enable()
+                result = client.enable()
 
-        return False
+        return result
 
     # -----------------------------------------------------------------------------
 
@@ -144,11 +152,13 @@ class Client:
         """Disable one or more clients"""
         process_clients_ids = self.__build_clients_ids_list(client_id=client_id)
 
+        result = False
+
         for client in self.__mqtt_clients:
             if process_clients_ids is None or client.id in process_clients_ids:
-                return client.disable()
+                result = client.disable()
 
-        return False
+        return result
 
     # -----------------------------------------------------------------------------
 

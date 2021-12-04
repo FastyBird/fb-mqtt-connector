@@ -20,6 +20,7 @@ use Closure;
 use FastyBird\MqttConnectorPlugin\Exceptions;
 use FastyBird\MqttConnectorPlugin\Handlers;
 use Nette;
+use Ramsey\Uuid;
 use React\EventLoop;
 use React\Promise;
 use React\Socket;
@@ -53,6 +54,24 @@ class MqttClient
 
 	use Nette\SmartObject;
 
+	/** @var Uuid\UuidInterface */
+	private Uuid\UuidInterface $clientId;
+
+	/** @var bool */
+	private bool $clientState;
+
+	/** @var string */
+	private string $serverHost;
+
+	/** @var int */
+	private int $serverPort;
+
+	/** @var ?string */
+	private ?string $serverUsername;
+
+	/** @var ?string */
+	private ?string $serverPassword;
+
 	/** @var bool */
 	private bool $isConnected = false;
 
@@ -80,9 +99,6 @@ class MqttClient
 	/** @var Handlers\ClientHandler */
 	private Handlers\ClientHandler $handler;
 
-	/** @var ConnectionSettings */
-	private ConnectionSettings $connectionSettings;
-
 	/** @var Socket\DnsConnector */
 	private Socket\DnsConnector $connector;
 
@@ -105,14 +121,25 @@ class MqttClient
 	private Mqtt\FlowFactory $flowFactory;
 
 	public function __construct(
-		ConnectionSettings $connectionSettings,
+		Uuid\UuidInterface $clientId,
+		bool $clientState,
 		Handlers\ClientHandler $handler,
 		EventLoop\LoopInterface $loop,
+		string $serverHost = 'localhost',
+		int $serverPort = 1883,
+		?string $serverUsername = null,
+		?string $serverPassword = null,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
 		?Mqtt\StreamParser $parser = null
 	) {
-		$this->connectionSettings = $connectionSettings;
+		$this->clientId = $clientId;
+		$this->clientState = $clientState;
+
+		$this->serverHost = $serverHost;
+		$this->serverPort = $serverPort;
+		$this->serverUsername = $serverUsername;
+		$this->serverPassword = $serverPassword;
 
 		$this->handler = $handler;
 
@@ -149,13 +176,31 @@ class MqttClient
 	}
 
 	/**
+	 * Return client identifier
+	 *
+	 * @return Uuid\UuidInterface
+	 */
+	public function getClientId(): Uuid\UuidInterface
+	{
+		return $this->clientId;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isEnabled(): bool
+	{
+		return $this->clientState;
+	}
+
+	/**
 	 * Return the host
 	 *
 	 * @return string
 	 */
 	public function getHost(): string
 	{
-		return $this->connectionSettings->getHost();
+		return $this->serverHost;
 	}
 
 	/**
@@ -165,17 +210,7 @@ class MqttClient
 	 */
 	public function getPort(): int
 	{
-		return $this->connectionSettings->getPort();
-	}
-
-	/**
-	 * Return client identifier
-	 *
-	 * @return string
-	 */
-	public function getClientId(): string
-	{
-		return $this->connectionSettings->getClientId();
+		return $this->serverPort;
 	}
 
 	/**
@@ -207,6 +242,38 @@ class MqttClient
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function enable(): bool
+	{
+		$this->clientState = true;
+
+		if (!$this->isConnected && !$this->isConnecting) {
+			$this->connect();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function disable(): bool
+	{
+		$this->clientState = false;
+
+		if ($this->isConnected || $this->isConnecting) {
+			$this->disconnect();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Connects to a broker
 	 *
 	 * @param int $timeout
@@ -229,17 +296,17 @@ class MqttClient
 		$this->isConnected = false;
 
 		$connection = new Mqtt\DefaultConnection(
-			$this->connectionSettings->getUsername(),
-			$this->connectionSettings->getPassword(),
-			$this->connectionSettings->getWill(),
-			$this->connectionSettings->getClientId()
+			($this->serverUsername ?? ''),
+			($this->serverPassword ?? ''),
+			null,
+			$this->clientId->toString()
 		);
 
 		if ($connection->getClientID() === '') {
 			$connection = $connection->withClientID($this->identifierGenerator->generateClientIdentifier());
 		}
 
-		$this->establishConnection($this->connectionSettings->getHost(), $this->connectionSettings->getPort(), $timeout)
+		$this->establishConnection($this->serverHost, $this->serverPort, $timeout)
 			->then(function (Stream\DuplexStreamInterface $stream) use ($connection, $deferred, $timeout): void {
 				$this->stream = $stream;
 

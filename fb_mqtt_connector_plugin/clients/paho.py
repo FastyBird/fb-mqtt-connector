@@ -108,6 +108,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
         """Enable client communication"""
         self.__state = True
 
+        self.connect()
+        self.start()
+
         return True
 
     # -----------------------------------------------------------------------------
@@ -115,6 +118,9 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
     def disable(self) -> bool:
         """Disable client communication"""
         self.__state = False
+
+        self.stop()
+        self.disconnect()
 
         return True
 

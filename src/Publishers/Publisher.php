@@ -17,6 +17,7 @@ namespace FastyBird\MqttConnectorPlugin\Publishers;
 
 use Nette;
 use Nette\Utils;
+use Ramsey\Uuid;
 use SplObjectStorage;
 
 /**
@@ -56,7 +57,7 @@ final class Publisher implements IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -71,7 +72,7 @@ final class Publisher implements IPublisher
 		string $device,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -88,7 +89,7 @@ final class Publisher implements IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -104,7 +105,7 @@ final class Publisher implements IPublisher
 		string $channel,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -118,7 +119,7 @@ final class Publisher implements IPublisher
 	public function sendDeviceRestart(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -132,7 +133,7 @@ final class Publisher implements IPublisher
 	public function sendDeviceReconnect(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {
@@ -146,7 +147,7 @@ final class Publisher implements IPublisher
 	public function sendDeviceFactoryReset(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void {
 		/** @var IPublisher $publisher */
 		foreach ($this->getPublishers() as $publisher) {

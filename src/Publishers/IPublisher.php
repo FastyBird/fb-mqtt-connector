@@ -16,6 +16,7 @@
 namespace FastyBird\MqttConnectorPlugin\Publishers;
 
 use Nette\Utils;
+use Ramsey\Uuid;
 
 /**
  * MQTT client publisher interface
@@ -42,7 +43,7 @@ interface IPublisher
 	 * @param string $property
 	 * @param string $payload
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
@@ -51,14 +52,14 @@ interface IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param Utils\ArrayHash $configuration
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
@@ -66,7 +67,7 @@ interface IPublisher
 		string $device,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
@@ -75,7 +76,7 @@ interface IPublisher
 	 * @param string $property
 	 * @param string $payload
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
@@ -85,7 +86,7 @@ interface IPublisher
 		string $property,
 		string $payload,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
@@ -93,7 +94,7 @@ interface IPublisher
 	 * @param string $channel
 	 * @param Utils\ArrayHash $configuration
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
@@ -102,46 +103,46 @@ interface IPublisher
 		string $channel,
 		Utils\ArrayHash $configuration,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceRestart(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceReconnect(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 	/**
 	 * @param string $device
 	 * @param string|null $parentDevice
-	 * @param string|null $clientId
+	 * @param Uuid\UuidInterface|null $clientId
 	 *
 	 * @return void
 	 */
 	public function sendDeviceFactoryReset(
 		string $device,
 		?string $parentDevice = null,
-		?string $clientId = null
+		?Uuid\UuidInterface $clientId = null
 	): void;
 
 }

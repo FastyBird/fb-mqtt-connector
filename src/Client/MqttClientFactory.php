@@ -18,8 +18,8 @@ namespace FastyBird\MqttConnectorPlugin\Client;
 use FastyBird\MqttConnectorPlugin\Handlers;
 use Nette;
 use Psr\Log;
+use Ramsey\Uuid;
 use React\EventLoop;
-use Throwable;
 
 /**
  * MQTT client factory
@@ -60,57 +60,35 @@ final class MqttClientFactory
 	}
 
 	/**
+	 * @param Uuid\UuidInterface $clientId
 	 * @param string $host
 	 * @param int $port
-	 * @param string $clientId
 	 * @param string $username
 	 * @param string $password
 	 *
 	 * @return void
 	 */
 	public function create(
+		Uuid\UuidInterface $clientId,
+		bool $clientState,
 		string $host,
 		int $port,
-		string $clientId,
 		string $username = '',
 		string $password = ''
 	): void
 	{
 		$client = new MqttClient(
-			new ConnectionSettings($host, $port, $clientId, $username, $password),
+			$clientId,
+			$clientState,
 			$this->handler,
-			$this->loop
+			$this->loop,
+			$host,
+			$port,
+			$username,
+			$password
 		);
 
-		try {
-			$client->connect()
-				->otherwise(function (Throwable $ex) use ($client): void {
-					// Log error action reason
-					$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
-						'exception' => [
-							'message' => $ex->getMessage(),
-							'code'    => $ex->getCode(),
-						],
-					]);
-
-					$client->getLoop()
-						->stop();
-				});
-
-		} catch (Throwable $ex) {
-			// Log error action reason
-			$this->logger->error('[FB:PLUGIN:MQTT] Stopping MQTT client', [
-				'exception' => [
-					'message' => $ex->getMessage(),
-					'code'    => $ex->getCode(),
-				],
-			]);
-
-			$client->getLoop()
-				->stop();
-		}
-
-		$this->client->addClient($client);
+		$this->client->registerClient($client);
 	}
 
 }
