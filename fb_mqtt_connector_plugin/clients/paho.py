@@ -29,6 +29,7 @@ from paho.mqtt.client import MQTT_ERR_SUCCESS, Client, MQTTMessage
 from fb_mqtt_connector_plugin.clients.base import BaseClient
 from fb_mqtt_connector_plugin.handlers.handler import Handler
 from fb_mqtt_connector_plugin.logger import Logger
+from fb_mqtt_connector_plugin.types import ProtocolVersion
 
 
 class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
@@ -45,6 +46,7 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
 
     __id: uuid.UUID
     __state: bool = True
+    __version: ProtocolVersion
 
     __server_host: str = "localhost"
     __server_port: int = 1883
@@ -63,6 +65,7 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
         server_port: int,
         server_username: Optional[str],
         server_password: Optional[str],
+        protocol_version: ProtocolVersion,
         handler: Handler,
         logger: Logger,
     ) -> None:
@@ -80,6 +83,7 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
 
         self.__id = client_id
         self.__state = client_state
+        self.__version = protocol_version
 
         self.__server_host = server_host
         self.__server_port = server_port
@@ -101,6 +105,13 @@ class PahoClient(BaseClient):  # pylint: disable=too-many-instance-attributes
     def enabled(self) -> bool:
         """Is client enabled?"""
         return self.__state
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def version(self) -> ProtocolVersion:
+        """Protocol version used by client"""
+        return self.__version
 
     # -----------------------------------------------------------------------------
 

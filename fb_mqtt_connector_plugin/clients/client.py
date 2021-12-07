@@ -27,8 +27,10 @@ from kink import inject
 # Library libs
 from fb_mqtt_connector_plugin.clients.base import BaseClient
 from fb_mqtt_connector_plugin.clients.paho import PahoClient
+from fb_mqtt_connector_plugin.exceptions import InvalidArgumentException
 from fb_mqtt_connector_plugin.handlers.handler import Handler
 from fb_mqtt_connector_plugin.logger import Logger
+from fb_mqtt_connector_plugin.types import ClientType, ProtocolVersion
 
 
 @inject
@@ -69,20 +71,12 @@ class Client:
         """Disconnect from all brokers"""
         for client in self.__mqtt_clients:
             if client.is_connected():
-                client.disconnect()
-
-    # -----------------------------------------------------------------------------
-
-    def stop(self) -> None:
-        """Stop MQTT clients loop"""
-        for client in self.__mqtt_clients:
-            if client.is_connected():
                 client.stop()
                 client.disconnect()
 
     # -----------------------------------------------------------------------------
 
-    def check_connection(self) -> None:
+    def loop(self) -> None:
         """Check connection to MQTT brokers"""
         for client in self.__mqtt_clients:
             if client.enabled and not client.is_connected():
@@ -228,28 +222,36 @@ class ClientFactory:  # pylint: disable=too-few-public-methods
     def create(  # pylint: disable=too-many-arguments
         self,
         client_id: uuid.UUID,
+        client_type: ClientType,
         server_host: str,
         server_port: int,
-        server_username: Optional[str] = None,
-        server_password: Optional[str] = None,
+        server_username: Optional[str],
+        server_password: Optional[str],
+        protocol_version: ProtocolVersion,
     ) -> None:
         """Create new instance of Paho MQTT client"""
-        client = PahoClient(
-            client_id=client_id,
-            client_state=True,
-            server_host=server_host,
-            server_port=server_port,
-            server_username=server_username,
-            server_password=server_password,
-            handler=self.__handler,
-            logger=self.__logger,
-        )
+        if client_type == ClientType.PAHO:
+            client = PahoClient(
+                client_id=client_id,
+                client_state=True,
+                server_host=server_host,
+                server_port=server_port,
+                server_username=server_username,
+                server_password=server_password,
+                protocol_version=protocol_version,
+                handler=self.__handler,
+                logger=self.__logger,
+            )
 
-        self.__client.register_client(client=client)
+            self.__client.register_client(client=client)
 
-        self.__logger.debug(
-            "Created MQTT client: %s to broker: %s:%d",
-            client_id.__str__(),
-            server_host,
-            server_port,
-        )
+            self.__logger.debug(
+                "Created MQTT client: %s to broker: %s:%d",
+                client_id.__str__(),
+                server_host,
+                server_port,
+            )
+
+            return
+
+        raise InvalidArgumentException(f"Unsupported client type: {client_type}")

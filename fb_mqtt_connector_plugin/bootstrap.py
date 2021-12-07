@@ -15,7 +15,7 @@
 #     limitations under the License.
 
 """
-MQTT connector plugin DI container
+FastyBird MQTT connector plugin DI container
 """
 
 # pylint: disable=no-value-for-parameter
@@ -93,7 +93,8 @@ def create_container(logger: logging.Logger = logging.getLogger("dummy")) -> Non
 
     # MQTT connector
     di[FbMqttConnector] = FbMqttConnector(
-        mqtt_client=di[Client],
+        client=di[Client],
+        client_factory=di[ClientFactory],
         consumer=di[Consumer],
         logger=di[Logger],
     )

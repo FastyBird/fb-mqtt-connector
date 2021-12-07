@@ -94,7 +94,7 @@ class Consumer:
 
     # -----------------------------------------------------------------------------
 
-    def consume(self) -> None:
+    def loop(self) -> None:
         """Consume received message"""
         try:
             if not self.__queue.empty():

@@ -13,7 +13,7 @@
 #     limitations under the License.
 
 """
-MQTT connector plugin
+FastyBird MQTT connector plugin
 """
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"

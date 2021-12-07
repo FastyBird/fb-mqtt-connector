@@ -18,8 +18,6 @@ FastyBird MQTT connector
 
 # Python base dependencies
 import uuid
-from threading import Thread
-from time import sleep
 from typing import Optional
 
 # Library dependencies
@@ -29,9 +27,10 @@ from kink import inject
 from fb_mqtt_connector_plugin.clients.client import Client, ClientFactory
 from fb_mqtt_connector_plugin.consumers.consumer import Consumer
 from fb_mqtt_connector_plugin.logger import Logger
+from fb_mqtt_connector_plugin.types import ClientType, ProtocolVersion
 
 
-class FbMqttConnector(Thread):
+class FbMqttConnector:
     """
     FastyBird MQTT connector
 
@@ -43,8 +42,8 @@ class FbMqttConnector(Thread):
 
     __stopped: bool = False
 
-    __mqtt_client: Client
-    __mqtt_client_factory: ClientFactory
+    __client: Client
+    __client_factory: ClientFactory
 
     __consumer: Consumer
 
@@ -55,19 +54,13 @@ class FbMqttConnector(Thread):
     @inject
     def __init__(
         self,
-        mqtt_client: Client,
-        mqtt_client_factory: ClientFactory,
+        client: Client,
+        client_factory: ClientFactory,
         consumer: Consumer,
         logger: Logger,
     ) -> None:
-        Thread.__init__(
-            self,
-            name="FB MQTT connector plugin thread",
-            daemon=True,
-        )
-
-        self.__mqtt_client = mqtt_client
-        self.__mqtt_client_factory = mqtt_client_factory
+        self.__client = client
+        self.__client_factory = client_factory
 
         self.__consumer = consumer
 
@@ -78,37 +71,41 @@ class FbMqttConnector(Thread):
     def configure_client(  # pylint: disable=too-many-arguments
         self,
         client_id: uuid.UUID,
+        client_type: ClientType,
         server_host: str,
         server_port: int,
+        protocol_version: ProtocolVersion,
         server_username: Optional[str] = None,
         server_password: Optional[str] = None,
     ) -> None:
         """Configure MQTT client & append it to client proxy"""
-        self.__mqtt_client_factory.create(
+        self.__client_factory.create(
             client_id=client_id,
+            client_type=client_type,
             server_host=server_host,
             server_port=server_port,
             server_username=server_username,
             server_password=server_password,
+            protocol_version=protocol_version,
         )
 
     # -----------------------------------------------------------------------------
 
     def enable_client(self, client_id: uuid.UUID) -> bool:
         """Enable client"""
-        return self.__mqtt_client.enable_client(client_id=client_id)
+        return self.__client.enable_client(client_id=client_id)
 
     # -----------------------------------------------------------------------------
 
     def disable_client(self, client_id: uuid.UUID) -> bool:
         """Disable client connector"""
-        return self.__mqtt_client.disable_client(client_id=client_id)
+        return self.__client.disable_client(client_id=client_id)
 
     # -----------------------------------------------------------------------------
 
     def remove_client(self, client_id: uuid.UUID) -> bool:
         """Remove client from connector"""
-        return self.__mqtt_client.remove_client(client_id=client_id)
+        return self.__client.remove_client(client_id=client_id)
 
     # -----------------------------------------------------------------------------
 
@@ -116,22 +113,8 @@ class FbMqttConnector(Thread):
         """Start connector services"""
         self.__stopped = False
 
-        super().start()
-
-    # -----------------------------------------------------------------------------
-
-    def stop(self) -> None:
-        """Close all opened connections & stop connector thread"""
-        self.__stopped = True
-
-        self.__logger.info("Connector FB MQTT has been stopped.")
-
-    # -----------------------------------------------------------------------------
-
-    def run(self) -> None:
-        """Process MQTT connectors messages"""
         try:
-            self.__mqtt_client.connect()
+            self.__client.connect()
 
         except Exception as ex:  # pylint: disable=broad-except
             self.__logger.exception(ex)
@@ -142,23 +125,38 @@ class FbMqttConnector(Thread):
             except Exception as ex:  # pylint: disable=broad-except
                 self.__logger.exception(ex)
 
-        while True:
-            # All records have to be processed before thread is closed
-            if self.__stopped and self.__consumer.is_empty():
-                break
+        self.__logger.info("Connector FB MQTT has been started.")
 
-            self.__consumer.consume()
+    # -----------------------------------------------------------------------------
 
-            self.__mqtt_client.check_connection()
-
-            sleep(0.01)
+    def stop(self) -> None:
+        """Close all opened connections & stop connector thread"""
+        self.__stopped = True
 
         try:
-            self.__mqtt_client.disconnect()
+            self.__client.disconnect()
 
         except Exception as ex:  # pylint: disable=broad-except
             self.__logger.exception(ex)
 
-        self.__mqtt_client.stop()
+        self.__logger.info("Connector FB MQTT has been stopped.")
 
-        self.__logger.info("Connector FB MQTT was closed")
+    # -----------------------------------------------------------------------------
+
+    def has_unfinished_tasks(self) -> bool:
+        """Check if connector has some unfinished task"""
+        return not not self.__consumer.is_empty()
+
+    # -----------------------------------------------------------------------------
+
+    def loop(self) -> None:
+        """Run connector service"""
+        if self.__stopped and not self.has_unfinished_tasks():
+            self.__logger.warning("Connector FB MQTT is stopped")
+
+            return
+
+        self.__consumer.loop()
+
+        if not self.__stopped:
+            self.__client.loop()
