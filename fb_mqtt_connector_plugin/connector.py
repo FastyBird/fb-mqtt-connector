@@ -131,8 +131,6 @@ class FbMqttConnector:
 
     def stop(self) -> None:
         """Close all opened connections & stop connector thread"""
-        self.__stopped = True
-
         try:
             self.__client.disconnect()
 
@@ -140,6 +138,8 @@ class FbMqttConnector:
             self.__logger.exception(ex)
 
         self.__logger.info("Connector FB MQTT has been stopped.")
+
+        self.__stopped = True
 
     # -----------------------------------------------------------------------------
 
