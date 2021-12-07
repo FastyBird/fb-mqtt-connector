@@ -145,7 +145,7 @@ class FbMqttConnector:
 
     def has_unfinished_tasks(self) -> bool:
         """Check if connector has some unfinished task"""
-        return not not self.__consumer.is_empty()
+        return not self.__consumer.is_empty()
 
     # -----------------------------------------------------------------------------
 
