@@ -654,12 +654,14 @@ class ControlEntity(BaseEntity):
                     int,
                     float,
                     bool,
+                    DataType,
                     Dict[
                         str,
                         Union[
                             str,
                             int,
                             float,
+                            bool,
                             List[Dict[str, Union[str, int, float]]],
                             None,
                         ],
@@ -730,12 +732,14 @@ class ControlEntity(BaseEntity):
                     int,
                     float,
                     bool,
+                    DataType,
                     Dict[
                         str,
                         Union[
                             str,
                             int,
                             float,
+                            bool,
                             List[Dict[str, Union[str, int, float]]],
                             None,
                         ],
