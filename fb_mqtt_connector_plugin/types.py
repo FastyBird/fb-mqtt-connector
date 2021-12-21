@@ -40,7 +40,7 @@ class ProtocolVersion(Enum):
     @classmethod
     def has_value(cls, value: int) -> bool:
         """Check if value exists in enum"""
-        return value in cls._value2member_map_  # type: ignore[operator]  # pylint: disable=no-member
+        return value in cls._value2member_map_  # pylint: disable=no-member
 
 
 @unique
@@ -61,4 +61,4 @@ class ClientType(Enum):
     @classmethod
     def has_value(cls, value: str) -> bool:
         """Check if value exists in enum"""
-        return value in cls._value2member_map_  # type: ignore[operator]  # pylint: disable=no-member
+        return value in cls._value2member_map_  # pylint: disable=no-member
