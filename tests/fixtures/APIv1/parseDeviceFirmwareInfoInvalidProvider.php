@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttConnectorPlugin\Exceptions;
+use FastyBird\FbMqttConnector\Exceptions;
 
 return [
 	'fw-not-valid'       => [

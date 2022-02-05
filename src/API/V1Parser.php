@@ -6,25 +6,24 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     API
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttConnectorPlugin\API;
+namespace FastyBird\FbMqttConnector\API;
 
-use FastyBird\MqttConnectorPlugin\Entities;
-use FastyBird\MqttConnectorPlugin\Exceptions;
-use FastyBird\MqttConnectorPlugin\Helpers;
+use FastyBird\FbMqttConnector\Entities;
+use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\FbMqttConnector\Helpers;
 use Nette;
-use Ramsey\Uuid;
 
 /**
  * API v1 topic parser
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     API
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -44,19 +43,17 @@ final class V1Parser
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $retained
 	 *
-	 * @return Entities\IEntity
+	 * @return Entities\Messages\IEntity
 	 */
 	public function parse(
-		Uuid\UuidInterface $clientId,
 		string $topic,
 		string $payload,
 		bool $retained = false
-	): Entities\IEntity {
+	): Entities\Messages\IEntity {
 		if (!$this->validator->validate($topic)) {
 			throw new Exceptions\ParseMessageException('Provided topic is not valid');
 		}
@@ -64,35 +61,28 @@ final class V1Parser
 		$isChild = $this->validator->validateChildDevicePart($topic);
 
 		if ($this->validator->validateDeviceAttribute($topic)) {
-			$entity = $this->parseDeviceAttribute($clientId, $topic, $payload, $isChild);
+			$entity = $this->parseDeviceAttribute($topic, $payload, $isChild);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceHardwareInfo($topic)) {
-			$entity = $this->parseDeviceHardwareInfo($clientId, $topic, $payload, $isChild);
+			$entity = $this->parseDeviceHardwareInfo($topic, $payload, $isChild);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceFirmwareInfo($topic)) {
-			$entity = $this->parseDeviceFirmwareInfo($clientId, $topic, $payload, $isChild);
+			$entity = $this->parseDeviceFirmwareInfo($topic, $payload, $isChild);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceProperty($topic)) {
-			$entity = $this->parseDeviceProperty($clientId, $topic, $payload, $isChild);
-			$entity->setRetained($retained);
-
-			return $entity;
-		}
-
-		if ($this->validator->validateDeviceControl($topic)) {
-			$entity = $this->parseDeviceControl($clientId, $topic, $payload, $isChild);
+			$entity = $this->parseDeviceProperty($topic, $payload, $isChild);
 			$entity->setRetained($retained);
 
 			return $entity;
@@ -110,21 +100,14 @@ final class V1Parser
 			}
 
 			if ($this->validator->validateChannelAttribute($topic)) {
-				$entity = $this->parseChannelAttribute($clientId, $device, $parent, $topic, $payload);
+				$entity = $this->parseChannelAttribute($device, $parent, $topic, $payload);
 				$entity->setRetained($retained);
 
 				return $entity;
 			}
 
 			if ($this->validator->validateChannelProperty($topic)) {
-				$entity = $this->parseChannelProperty($clientId, $device, $parent, $topic, $payload);
-				$entity->setRetained($retained);
-
-				return $entity;
-			}
-
-			if ($this->validator->validateChannelControl($topic)) {
-				$entity = $this->parseChannelControl($clientId, $device, $parent, $topic, $payload);
+				$entity = $this->parseChannelProperty($device, $parent, $topic, $payload);
 				$entity->setRetained($retained);
 
 				return $entity;
@@ -135,19 +118,17 @@ final class V1Parser
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $isChild
 	 *
-	 * @return Entities\DeviceAttribute
+	 * @return Entities\Messages\DeviceAttribute
 	 */
 	private function parseDeviceAttribute(
-		Uuid\UuidInterface $clientId,
 		string $topic,
 		string $payload,
 		bool $isChild = false
-	): Entities\DeviceAttribute {
+	): Entities\Messages\DeviceAttribute {
 		if ($isChild) {
 			preg_match(V1Validator::DEVICE_CHILD_ATTRIBUTE_REGEXP, $topic, $matches);
 			[, $parent, $device, $attribute] = $matches;
@@ -158,8 +139,7 @@ final class V1Parser
 			$parent = null;
 		}
 
-		return new Entities\DeviceAttribute(
-			$clientId,
+		return new Entities\Messages\DeviceAttribute(
 			$device,
 			$attribute,
 			$payload,
@@ -168,19 +148,17 @@ final class V1Parser
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $isChild
 	 *
-	 * @return Entities\Hardware
+	 * @return Entities\Messages\Hardware
 	 */
 	private function parseDeviceHardwareInfo(
-		Uuid\UuidInterface $clientId,
 		string $topic,
 		string $payload,
 		bool $isChild = false
-	): Entities\Hardware {
+	): Entities\Messages\Hardware {
 		if ($isChild) {
 			preg_match(V1Validator::DEVICE_CHILD_HW_INFO_REGEXP, $topic, $matches);
 			[, $parent, $device, $hardware] = $matches;
@@ -191,23 +169,21 @@ final class V1Parser
 			$parent = null;
 		}
 
-		return new Entities\Hardware($clientId, $device, $hardware, Helpers\PayloadHelper::cleanName(strtolower($payload)), $parent);
+		return new Entities\Messages\Hardware($device, $hardware, Helpers\PayloadHelper::cleanName(strtolower($payload)), $parent);
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $isChild
 	 *
-	 * @return Entities\Firmware
+	 * @return Entities\Messages\Firmware
 	 */
 	private function parseDeviceFirmwareInfo(
-		Uuid\UuidInterface $clientId,
 		string $topic,
 		string $payload,
 		bool $isChild = false
-	): Entities\Firmware {
+	): Entities\Messages\Firmware {
 		if ($isChild) {
 			preg_match(V1Validator::DEVICE_CHILD_FW_INFO_REGEXP, $topic, $matches);
 			[, $parent, $device, $firmware] = $matches;
@@ -218,23 +194,21 @@ final class V1Parser
 			$parent = null;
 		}
 
-		return new Entities\Firmware($clientId, $device, $firmware, Helpers\PayloadHelper::cleanName(strtolower($payload)), $parent);
+		return new Entities\Messages\Firmware($device, $firmware, Helpers\PayloadHelper::cleanName(strtolower($payload)), $parent);
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $topic
 	 * @param string $payload
 	 * @param bool $isChild
 	 *
-	 * @return Entities\DeviceProperty
+	 * @return Entities\Messages\DeviceProperty
 	 */
 	private function parseDeviceProperty(
-		Uuid\UuidInterface $clientId,
 		string $topic,
 		string $payload,
 		bool $isChild = false
-	): Entities\DeviceProperty {
+	): Entities\Messages\DeviceProperty {
 		if ($isChild) {
 			preg_match(V1Validator::DEVICE_CHILD_PROPERTY_REGEXP, $topic, $matches);
 			[, $parent, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
@@ -245,11 +219,11 @@ final class V1Parser
 			$parent = null;
 		}
 
-		$entity = new Entities\DeviceProperty($clientId, (string) $device, (string) $property, $parent);
+		$entity = new Entities\Messages\DeviceProperty((string) $device, (string) $property, $parent);
 
 		if ($attribute !== null) {
 			$entity->addAttribute(
-				new Entities\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
+				new Entities\Messages\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
 			);
 
 		} else {
@@ -260,64 +234,23 @@ final class V1Parser
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
-	 * @param string $topic
-	 * @param string $payload
-	 * @param bool $isChild
-	 *
-	 * @return Entities\DeviceControl
-	 */
-	private function parseDeviceControl(
-		Uuid\UuidInterface $clientId,
-		string $topic,
-		string $payload,
-		bool $isChild = false
-	): Entities\DeviceControl {
-		if ($isChild) {
-			preg_match(V1Validator::DEVICE_CHILD_CONTROL_REGEXP, $topic, $matches);
-			[, $parent, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
-
-		} else {
-			preg_match(V1Validator::DEVICE_CONTROL_REGEXP, $topic, $matches);
-			[, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null];
-			$parent = null;
-		}
-
-		$control = new Entities\DeviceControl($clientId, (string) $device, (string) $property, $parent);
-
-		if ($attribute === null) {
-			$control->setValue($payload);
-
-			return $control;
-
-		} elseif ($attribute === 'schema') {
-			$control->setSchema($payload);
-		}
-
-		return $control;
-	}
-
-	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $device
 	 * @param string|null $parent
 	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return Entities\ChannelAttribute
+	 * @return Entities\Messages\ChannelAttribute
 	 */
 	private function parseChannelAttribute(
-		Uuid\UuidInterface $clientId,
 		string $device,
 		?string $parent,
 		string $topic,
 		string $payload
-	): Entities\ChannelAttribute {
+	): Entities\Messages\ChannelAttribute {
 		preg_match(V1Validator::CHANNEL_ATTRIBUTE_REGEXP, $topic, $matches);
 		[, , $channel, $attribute] = $matches;
 
-		return new Entities\ChannelAttribute(
-			$clientId,
+		return new Entities\Messages\ChannelAttribute(
 			$device,
 			$channel,
 			$attribute,
@@ -327,29 +260,27 @@ final class V1Parser
 	}
 
 	/**
-	 * @param Uuid\UuidInterface $clientId
 	 * @param string $device
 	 * @param string|null $parent
 	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return Entities\ChannelProperty
+	 * @return Entities\Messages\ChannelProperty
 	 */
 	private function parseChannelProperty(
-		Uuid\UuidInterface $clientId,
 		string $device,
 		?string $parent,
 		string $topic,
 		string $payload
-	): Entities\ChannelProperty {
+	): Entities\Messages\ChannelProperty {
 		preg_match(V1Validator::CHANNEL_PROPERTY_REGEXP, $topic, $matches);
 		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
 
-		$entity = new Entities\ChannelProperty($clientId, $device, (string) $channel, (string) $property, $parent);
+		$entity = new Entities\Messages\ChannelProperty($device, (string) $channel, (string) $property, $parent);
 
 		if ($attribute !== null) {
 			$entity->addAttribute(
-				new Entities\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
+				new Entities\Messages\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
 			);
 
 		} else {
@@ -357,39 +288,6 @@ final class V1Parser
 		}
 
 		return $entity;
-	}
-
-	/**
-	 * @param Uuid\UuidInterface $clientId
-	 * @param string $device
-	 * @param string|null $parent
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\ChannelControl
-	 */
-	private function parseChannelControl(
-		Uuid\UuidInterface $clientId,
-		string $device,
-		?string $parent,
-		string $topic,
-		string $payload
-	): Entities\ChannelControl {
-		preg_match(V1Validator::CHANNEL_CONTROL_REGEXP, $topic, $matches);
-		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
-
-		$control = new Entities\ChannelControl($clientId, $device, (string) $channel, (string) $property, $parent);
-
-		if ($attribute === null) {
-			$control->setValue($payload);
-
-			return $control;
-
-		} elseif ($attribute === 'schema') {
-			$control->setSchema($payload);
-		}
-
-		return $control;
 	}
 
 }

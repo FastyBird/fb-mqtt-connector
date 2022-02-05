@@ -6,19 +6,19 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     common
  * @since          0.1.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\MqttConnectorPlugin;
+namespace FastyBird\FbMqttConnector;
 
 /**
  * Service constants
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     common
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -37,14 +37,9 @@ final class Constants
 	public const MQTT_API_PREFIX = self::MQTT_TOPIC_DELIMITER . 'fb';
 
 	/**
-	 * MQTT api supported versions
-	 */
-	public const MQTT_API_VERSION_V1 = 'v1';
-
-	/**
 	 * MQTT protocol api prefixes
 	 */
-	public const MQTT_API_V1_VERSION_PREFIX = self::MQTT_TOPIC_DELIMITER . self::MQTT_API_VERSION_V1;
+	public const MQTT_API_V1_VERSION_PREFIX = self::MQTT_TOPIC_DELIMITER . Types\ProtocolVersionType::VERSION_1;
 
 	/**
 	 * MQTT message QOS values

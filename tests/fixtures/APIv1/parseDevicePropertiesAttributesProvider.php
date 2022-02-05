@@ -1,102 +1,94 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttConnectorPlugin\Entities;
+use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'attr-' . Entities\PropertyAttribute::NAME            => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\PropertyAttribute::NAME,
+	'attr-' . Entities\Messages\PropertyAttribute::NAME            => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::NAME,
 		'payload',
 		[
-			'client_id'                      => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                         => 'device-name',
-			'parent'                         => null,
-			'retained'                       => false,
-			'property'                       => 'some-property',
-			Entities\PropertyAttribute::NAME => 'payload',
+			'device'                                  => 'device-name',
+			'parent'                                  => null,
+			'retained'                                => false,
+			'property'                                => 'some-property',
+			Entities\Messages\PropertyAttribute::NAME => 'payload',
 		],
 	],
-	'attr-' . Entities\PropertyAttribute::TYPE            => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\PropertyAttribute::TYPE,
+	'attr-' . Entities\Messages\PropertyAttribute::TYPE            => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::TYPE,
 		'typename',
 		[
-			'client_id'                      => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                         => 'device-name',
-			'parent'                         => null,
-			'retained'                       => false,
-			'property'                       => 'some-property',
-			Entities\PropertyAttribute::TYPE => 'typename',
+			'device'                                  => 'device-name',
+			'parent'                                  => null,
+			'retained'                                => false,
+			'property'                                => 'some-property',
+			Entities\Messages\PropertyAttribute::TYPE => 'typename',
 		],
 	],
-	'attr-' . Entities\PropertyAttribute::SETTABLE        => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\PropertyAttribute::SETTABLE,
+	'attr-' . Entities\Messages\PropertyAttribute::SETTABLE        => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::SETTABLE,
 		'true',
 		[
-			'client_id'                          => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                             => 'device-name',
-			'parent'                             => null,
-			'retained'                           => false,
-			'property'                           => 'some-property',
-			Entities\PropertyAttribute::SETTABLE => true,
+			'device'                                      => 'device-name',
+			'parent'                                      => null,
+			'retained'                                    => false,
+			'property'                                    => 'some-property',
+			Entities\Messages\PropertyAttribute::SETTABLE => true,
 		],
 	],
-	'attr-' . Entities\PropertyAttribute::QUERYABLE       => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\PropertyAttribute::QUERYABLE,
+	'attr-' . Entities\Messages\PropertyAttribute::QUERYABLE       => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::QUERYABLE,
 		'invalid',
 		[
-			'client_id'                           => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                              => 'device-name',
-			'parent'                              => null,
-			'retained'                            => false,
-			'property'                            => 'some-property',
-			Entities\PropertyAttribute::QUERYABLE => false,
+			'device'                                       => 'device-name',
+			'parent'                                       => null,
+			'retained'                                     => false,
+			'property'                                     => 'some-property',
+			Entities\Messages\PropertyAttribute::QUERYABLE => false,
 		],
 	],
-	'child-attr-' . Entities\PropertyAttribute::NAME      => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\PropertyAttribute::NAME,
+	'child-attr-' . Entities\Messages\PropertyAttribute::NAME      => [
+		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::NAME,
 		'payload',
 		[
-			'client_id'                      => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                         => 'child-name',
-			'parent'                         => 'device-name',
-			'retained'                       => false,
-			'property'                       => 'some-property',
-			Entities\PropertyAttribute::NAME => 'payload',
+			'device'                                  => 'child-name',
+			'parent'                                  => 'device-name',
+			'retained'                                => false,
+			'property'                                => 'some-property',
+			Entities\Messages\PropertyAttribute::NAME => 'payload',
 		],
 	],
-	'child-attr-' . Entities\PropertyAttribute::TYPE      => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\PropertyAttribute::TYPE,
+	'child-attr-' . Entities\Messages\PropertyAttribute::TYPE      => [
+		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::TYPE,
 		'typename',
 		[
-			'client_id'                      => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                         => 'child-name',
-			'parent'                         => 'device-name',
-			'retained'                       => false,
-			'property'                       => 'some-property',
-			Entities\PropertyAttribute::TYPE => 'typename',
+			'device'                                  => 'child-name',
+			'parent'                                  => 'device-name',
+			'retained'                                => false,
+			'property'                                => 'some-property',
+			Entities\Messages\PropertyAttribute::TYPE => 'typename',
 		],
 	],
-	'child-attr-' . Entities\PropertyAttribute::SETTABLE  => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\PropertyAttribute::SETTABLE,
+	'child-attr-' . Entities\Messages\PropertyAttribute::SETTABLE  => [
+		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::SETTABLE,
 		'true',
 		[
-			'client_id'                          => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                             => 'child-name',
-			'parent'                             => 'device-name',
-			'retained'                           => false,
-			'property'                           => 'some-property',
-			Entities\PropertyAttribute::SETTABLE => true,
+			'device'                                      => 'child-name',
+			'parent'                                      => 'device-name',
+			'retained'                                    => false,
+			'property'                                    => 'some-property',
+			Entities\Messages\PropertyAttribute::SETTABLE => true,
 		],
 	],
-	'child-attr-' . Entities\PropertyAttribute::QUERYABLE => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\PropertyAttribute::QUERYABLE,
+	'child-attr-' . Entities\Messages\PropertyAttribute::QUERYABLE => [
+		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::QUERYABLE,
 		'invalid',
 		[
-			'client_id'                           => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                              => 'child-name',
-			'parent'                              => 'device-name',
-			'retained'                            => false,
-			'property'                            => 'some-property',
-			Entities\PropertyAttribute::QUERYABLE => false,
+			'device'                                       => 'child-name',
+			'parent'                                       => 'device-name',
+			'retained'                                     => false,
+			'property'                                     => 'some-property',
+			Entities\Messages\PropertyAttribute::QUERYABLE => false,
 		],
 	],
 ];

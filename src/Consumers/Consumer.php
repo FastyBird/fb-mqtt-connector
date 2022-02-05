@@ -6,23 +6,23 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     Consumers
- * @since          0.1.0
+ * @since          0.4.0
  *
- * @date           08.03.20
+ * @date           05.02.22
  */
 
-namespace FastyBird\MqttConnectorPlugin\Consumers;
+namespace FastyBird\FbMqttConnector\Consumers;
 
-use FastyBird\MqttConnectorPlugin\Entities;
+use FastyBird\FbMqttConnector\Entities;
 use Nette;
 use SplObjectStorage;
 
 /**
- * Exchange message consumer container
+ * MQTT message consumer proxy
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     Consumers
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -53,7 +53,7 @@ final class Consumer implements IConsumer
 	/**
 	 * {@inheritDoc}
 	 */
-	public function consume(Entities\IEntity $entity): void
+	public function consume(Entities\Messages\IEntity $entity): void
 	{
 		$this->consumers->rewind();
 

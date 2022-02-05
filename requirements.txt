@@ -1,5 +1,7 @@
-paho-mqtt>=1.5
-kink>=0.6
-setuptools>=57.4
 fastnumbers>=3.2
-fastybird-modules-metadata>=0.13
+fastybird-devices-module>=0.29
+fastybird-metadata>=0.38
+kink>=0.6
+paho-mqtt>=1.5
+setuptools>=57.4
+whistle>=1.0

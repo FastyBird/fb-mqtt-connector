@@ -6,19 +6,19 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     Helpers
  * @since          0.1.5
  *
  * @date           21.11.21
  */
 
-namespace FastyBird\MqttConnectorPlugin\Helpers;
+namespace FastyBird\FbMqttConnector\Helpers;
 
 /**
  * MQTT payload helpers
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     Helpers
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

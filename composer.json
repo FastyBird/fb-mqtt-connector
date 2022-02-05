@@ -1,13 +1,13 @@
 {
-  "name" : "fastybird/fb-mqtt-connector-plugin",
-  "type" : "library",
-  "description" : "FastyBird FB MQTT connector plugin",
+  "name" : "fastybird/fb-mqtt-connector",
+  "type" : "connector",
+  "description" : "FastyBird IoT connector for FB MQTT devices",
   "keywords" : [
     "fastybird",
     "fb",
-    "libs",
-    "library",
-    "mqtt"
+    "iot",
+    "mqtt",
+    "connector"
   ],
 
   "homepage" : "https://www.fastybird.com",
@@ -26,6 +26,12 @@
     }
   ],
 
+  "support" : {
+    "email" : "code@fastybird.com",
+    "issues" : "https://github.com/FastyBird/fb-mqtt-connector/issues",
+    "source" : "https://github.com/FastyBird/fb-mqtt-connector"
+  },
+
   "prefer-stable" : true,
 
   "minimum-stability" : "dev",
@@ -34,7 +40,9 @@
     "php": ">=7.4.0|>=8.0.0",
     "binsoul/net-mqtt": "^0.8",
     "cweagans/composer-patches": "^1.7",
-    "fastybird/modules-metadata": "^0.13",
+    "fastybird/devices-module": "^0.29",
+    "fastybird/json-api": "^0.8",
+    "fastybird/metadata": "^0.38",
     "nette/bootstrap": "^3.1",
     "nette/di": "^3.0",
     "psr/log": "^1.1",
@@ -43,28 +51,30 @@
   },
 
   "require-dev" : {
-    "mockery/mockery": "^1.4",
-    "ninjify/nunjuck": "^0.3",
-    "ninjify/qa": "^0.12",
-    "pds/skeleton": "~1.0",
-    "phpstan/extension-installer": "^1.1",
-    "phpstan/phpstan": "^0.12",
-    "phpstan/phpstan-deprecation-rules": "^0.12",
-    "phpstan/phpstan-nette": "^0.12",
-    "phpstan/phpstan-strict-rules" : "^0.12",
-    "tracy/tracy": "^2.8"
+    "contributte/translation" : "^0.9",
+    "mockery/mockery" : "^1.4",
+    "ninjify/nunjuck" : "^0.3",
+    "ninjify/qa" : "^0.13",
+    "pds/skeleton": "^1.0",
+    "phpstan/extension-installer" : "^1.1",
+    "phpstan/phpstan" : "^0.12",
+    "phpstan/phpstan-deprecation-rules" : "^0.12",
+    "phpstan/phpstan-doctrine" : "^0.12",
+    "phpstan/phpstan-nette" : "^0.12",
+    "tracy/tracy": "^2.9"
   },
 
   "autoload" : {
     "psr-4" : {
-      "FastyBird\\MqttConnectorPlugin\\" : "src/"
+      "FastyBird\\FbMqttConnector\\" : "src/"
     }
   },
 
   "autoload-dev" : {
     "psr-4" : {
       "Tests\\Cases\\" : "tests/cases",
-      "Tests\\Fixtures\\" : "tests/fixtures"
+      "Tests\\Fixtures\\" : "tests/fixtures",
+      "Tests\\Tools\\" : "tests/tools"
     }
   },
 
@@ -74,11 +84,11 @@
 
   "extra": {
     "patches": {
+      "nettrine/orm" : {
+        "Enable connection overrides" : "patches/nettrine.orm.mangerRegistry.diff"
+      },
       "nette/utils": {
         "Bug: Offset check with null support": "patches/nette.array.offsetCheck.diff"
-      },
-      "ninjify/qa": {
-        "Bug: PHPCS path error": "patches/ninjify-qa-bin-codesniffer.diff"
       }
     }
   }

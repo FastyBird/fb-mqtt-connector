@@ -6,22 +6,22 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
- * @subpackage     common
+ * @package        FastyBird:FbMqttConnector!
+ * @subpackage     Client
  * @since          0.1.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\MqttConnectorPlugin\Client;
+namespace FastyBird\FbMqttConnector\Client;
 
 use BinSoul\Net\Mqtt;
 use React\Promise;
 
 /**
- * Decorates flows with data required for the {@see MqttClient} class.
+ * Decorates flows with data required for the {@see FbMqttV1Client} class.
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     Client
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>

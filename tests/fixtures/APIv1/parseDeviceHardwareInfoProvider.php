@@ -1,94 +1,86 @@
 <?php declare(strict_types = 1);
 
-use FastyBird\MqttConnectorPlugin\Entities;
+use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'hw-' . Entities\Hardware::MAC_ADDRESS        => [
-		'/fb/v1/device-name/$hw/' . Entities\Hardware::MAC_ADDRESS,
+	'hw-' . Entities\Messages\Hardware::MAC_ADDRESS        => [
+		'/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MAC_ADDRESS,
 		'00:0a:95:9d:68:16',
 		[
-			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                       => 'device-name',
-			'parent'                       => null,
-			'retained'                     => false,
-			Entities\Hardware::MAC_ADDRESS => '000a959d6816',
+			'device'                                => 'device-name',
+			'parent'                                => null,
+			'retained'                              => false,
+			Entities\Messages\Hardware::MAC_ADDRESS => '000a959d6816',
 		],
 	],
-	'hw-' . Entities\Hardware::MANUFACTURER       => [
-		'/fb/v1/device-name/$hw/' . Entities\Hardware::MANUFACTURER,
+	'hw-' . Entities\Messages\Hardware::MANUFACTURER       => [
+		'/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MANUFACTURER,
 		'value-content',
 		[
-			'client_id'                     => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                        => 'device-name',
-			'parent'                        => null,
-			'retained'                      => false,
-			Entities\Hardware::MANUFACTURER => 'value-content',
+			'device'                                 => 'device-name',
+			'parent'                                 => null,
+			'retained'                               => false,
+			Entities\Messages\Hardware::MANUFACTURER => 'value-content',
 		],
 	],
-	'hw-' . Entities\Hardware::MODEL              => [
-		'/fb/v1/device-name/$hw/' . Entities\Hardware::MODEL,
+	'hw-' . Entities\Messages\Hardware::MODEL              => [
+		'/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MODEL,
 		'value-content',
 		[
-			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                 => 'device-name',
-			'parent'                 => null,
-			'retained'               => false,
-			Entities\Hardware::MODEL => 'value-content',
+			'device'                          => 'device-name',
+			'parent'                          => null,
+			'retained'                        => false,
+			Entities\Messages\Hardware::MODEL => 'value-content',
 		],
 	],
-	'hw-' . Entities\Hardware::VERSION            => [
-		'/fb/v1/device-name/$hw/' . Entities\Hardware::VERSION,
+	'hw-' . Entities\Messages\Hardware::VERSION            => [
+		'/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::VERSION,
 		'value-content',
 		[
-			'client_id'                => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                   => 'device-name',
-			'parent'                   => null,
-			'retained'                 => false,
-			Entities\Hardware::VERSION => 'value-content',
+			'device'                            => 'device-name',
+			'parent'                            => null,
+			'retained'                          => false,
+			Entities\Messages\Hardware::VERSION => 'value-content',
 		],
 	],
-	'child-hw-' . Entities\Hardware::MAC_ADDRESS  => [
-		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Hardware::MAC_ADDRESS,
+	'child-hw-' . Entities\Messages\Hardware::MAC_ADDRESS  => [
+		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Messages\Hardware::MAC_ADDRESS,
 		'00:0a:95:9d:68:16',
 		[
-			'client_id'                    => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                       => 'child-name',
-			'parent'                       => 'device-name',
-			'retained'                     => false,
-			Entities\Hardware::MAC_ADDRESS => '000a959d6816',
+			'device'                                => 'child-name',
+			'parent'                                => 'device-name',
+			'retained'                              => false,
+			Entities\Messages\Hardware::MAC_ADDRESS => '000a959d6816',
 		],
 	],
-	'child-hw-' . Entities\Hardware::MANUFACTURER => [
-		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Hardware::MANUFACTURER,
+	'child-hw-' . Entities\Messages\Hardware::MANUFACTURER => [
+		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Messages\Hardware::MANUFACTURER,
 		'value-content',
 		[
-			'client_id'                     => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                        => 'child-name',
-			'parent'                        => 'device-name',
-			'retained'                      => false,
-			Entities\Hardware::MANUFACTURER => 'value-content',
+			'device'                                 => 'child-name',
+			'parent'                                 => 'device-name',
+			'retained'                               => false,
+			Entities\Messages\Hardware::MANUFACTURER => 'value-content',
 		],
 	],
-	'child-hw-' . Entities\Hardware::MODEL        => [
-		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Hardware::MODEL,
+	'child-hw-' . Entities\Messages\Hardware::MODEL        => [
+		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Messages\Hardware::MODEL,
 		'value-content',
 		[
-			'client_id'              => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                 => 'child-name',
-			'parent'                 => 'device-name',
-			'retained'               => false,
-			Entities\Hardware::MODEL => 'value-content',
+			'device'                          => 'child-name',
+			'parent'                          => 'device-name',
+			'retained'                        => false,
+			Entities\Messages\Hardware::MODEL => 'value-content',
 		],
 	],
-	'child-hw-' . Entities\Hardware::VERSION      => [
-		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Hardware::VERSION,
+	'child-hw-' . Entities\Messages\Hardware::VERSION      => [
+		'/fb/v1/device-name/$child/child-name/$hw/' . Entities\Messages\Hardware::VERSION,
 		'value-content',
 		[
-			'client_id'                => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
-			'device'                   => 'child-name',
-			'parent'                   => 'device-name',
-			'retained'                 => false,
-			Entities\Hardware::VERSION => 'value-content',
+			'device'                            => 'child-name',
+			'parent'                            => 'device-name',
+			'retained'                          => false,
+			Entities\Messages\Hardware::VERSION => 'value-content',
 		],
 	],
 ];

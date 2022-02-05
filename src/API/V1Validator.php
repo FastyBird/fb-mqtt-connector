@@ -6,22 +6,22 @@
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     API
  * @since          0.1.0
  *
  * @date           24.02.20
  */
 
-namespace FastyBird\MqttConnectorPlugin\API;
+namespace FastyBird\FbMqttConnector\API;
 
-use FastyBird\MqttConnectorPlugin;
+use FastyBird\FbMqttConnector;
 use Nette;
 
 /**
  * API v1 topic validator
  *
- * @package        FastyBird:FbMqttConnectorPlugin!
+ * @package        FastyBird:FbMqttConnector!
  * @subpackage     API
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
@@ -37,43 +37,39 @@ final class V1Validator
 	// TOPIC: /fb/v1/*
 	public const API_VERSION_REGEXP = '/^\/fb\/v1\/.*$/';
 
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/*
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/*
 	public const DEVICE_CHILD_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/(.*)$/';
-	// TOPIC: /fb/v1/<device-name>/$channel/<channel-name>/*
+	// TOPIC: /fb/v1/<device>/$channel/<channel>/*
 	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$channel/<channel-name>/*
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/$channel/<channel>/*
 	public const CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
 
-	// TOPIC: /fb/v1/<device-name>/<$name|$properties|$control|$channels|$extensions>
+	// TOPIC: /fb/v1/<device>/<$name|$properties|$control|$channels|$extensions>
 	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$name|<$properties|$control|$channels|$extensions>
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/$name|<$properties|$control|$channels|$extensions>
 	public const DEVICE_CHILD_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
 
-	// TOPIC: /fb/v1/<device-name>/$hw/<mac-address|manufacturer|model|version>
+	// TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
 	public const DEVICE_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$hw/<mac-address|manufacturer|model|version>
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/$hw/<mac-address|manufacturer|model|version>
 	public const DEVICE_CHILD_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
-	// TOPIC: /fb/v1/<device-name>/$fw/<manufacturer|name|version>
+	// TOPIC: /fb/v1/<device>/$fw/<manufacturer|name|version>
 	public const DEVICE_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$fw/<manufacturer|name|version>
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/$fw/<manufacturer|name|version>
 	public const DEVICE_CHILD_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
 
-	// TOPIC: /fb/v1/<device-name>/$property/<property-name>[/<$name|$type|$settable|$queryable|$datatype|$format|$unit>]
-	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|datatype|format|unit))?$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$property/<property-name>[/<$name|$type|$settable|$queryable|$datatype|$format|$unit>]
-	public const DEVICE_CHILD_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|datatype|format|unit))?$/';
+	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
+	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
+	// TOPIC: /fb/v1/<device>/$child/<child-device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
+	public const DEVICE_CHILD_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
 
-	// TOPIC: /fb/v1/<device-name>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
+	// TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
 	public const DEVICE_CONTROL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$control\/(configure|reset|reconnect|factory-reset|ota)((\/\$)(schema))?$/';
-	// TOPIC: /fb/v1/<device-name>/$child/<child-device-name>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
-	public const DEVICE_CHILD_CONTROL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$control\/(configure|reset|reconnect|factory-reset|ota)((\/\$)(schema))?$/';
 
-	// TOPIC: /fb/v1/*/$channel/<channel-name>/<$name|$properties|$control>
+	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$control>
 	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|control)$/';
-	// TOPIC: /fb/v1/*/$channel/<channel-name>/$property/<property-name>[/<$name|$type|$settable|$queryable|$datatype|$format|$unit>]
-	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|datatype|format|unit))?$/';
-	// TOPIC: /fb/v1/*/$channel/<channel-name>/$control/<configure>[/$schema]
-	public const CHANNEL_CONTROL_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$control\/(configure)((\/\$)(schema))?$/';
+	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
+	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
 
 	/**
 	 * @param string $topic
@@ -83,7 +79,7 @@ final class V1Validator
 	public function validate(string $topic): bool
 	{
 		// Check if message is sent from broker
-		if (strpos(trim($topic, MqttConnectorPlugin\Constants::MQTT_TOPIC_DELIMITER), MqttConnectorPlugin\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
+		if (strpos(trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER), FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
 			return false;
 		}
 
@@ -113,10 +109,6 @@ final class V1Validator
 			return true;
 		}
 
-		if ($this->validateDeviceControl($topic)) {
-			return true;
-		}
-
 		// Check for channel topics
 		if ($this->validateChannelPart($topic)) {
 			if ($this->validateChannelAttribute($topic)) {
@@ -124,10 +116,6 @@ final class V1Validator
 			}
 
 			if ($this->validateChannelProperty($topic)) {
-				return true;
-			}
-
-			if ($this->validateChannelControl($topic)) {
 				return true;
 			}
 		}
@@ -226,20 +214,6 @@ final class V1Validator
 	 *
 	 * @return bool
 	 */
-	public function validateDeviceControl(string $topic): bool
-	{
-		if (preg_match(self::DEVICE_CONTROL_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_CONTROL_REGEXP, $topic) === 1;
-	}
-
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateChannelPart(string $topic): bool
 	{
 		if (preg_match(self::CHANNEL_PARTIAL_REGEXP, $topic) === 1) {
@@ -267,16 +241,6 @@ final class V1Validator
 	public function validateChannelProperty(string $topic): bool
 	{
 		return $this->validateChannelPart($topic) && preg_match(self::CHANNEL_PROPERTY_REGEXP, $topic) === 1;
-	}
-
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
-	public function validateChannelControl(string $topic): bool
-	{
-		return $this->validateChannelPart($topic) && preg_match(self::CHANNEL_CONTROL_REGEXP, $topic) === 1;
 	}
 
 }

@@ -5,7 +5,6 @@ return [
 		'/fb/v1/device-name/$property/property-name',
 		'content',
 		[
-			'client_id' => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'    => 'device-name',
 			'parent'    => null,
 			'retained'  => false,
@@ -18,7 +17,6 @@ return [
 		'content',
 		[
 
-			'client_id' => '4f7180ae-6195-460d-aae2-35bfc6124bbc',
 			'device'    => 'child-name',
 			'parent'    => 'device-name',
 			'retained'  => false,
