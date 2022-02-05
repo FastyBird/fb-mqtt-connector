@@ -22,7 +22,7 @@ FastyBird MQTT connector consumers module properties messages consumers
 import logging
 import uuid
 from abc import ABC
-from typing import Dict, Optional, Tuple, Union, List
+from typing import Dict, List, Optional, Tuple, Union
 
 # Library dependencies
 from fastybird_metadata.types import DataType

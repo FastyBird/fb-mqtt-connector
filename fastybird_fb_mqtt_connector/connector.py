@@ -67,7 +67,10 @@ from fastybird_fb_mqtt_connector.registry.model import (
     DevicesPropertiesRegistry,
     DevicesRegistry,
 )
-from fastybird_fb_mqtt_connector.registry.records import DevicePropertyRecord, ChannelPropertyRecord
+from fastybird_fb_mqtt_connector.registry.records import (
+    ChannelPropertyRecord,
+    DevicePropertyRecord,
+)
 
 
 @inject(alias=IConnector)
@@ -376,18 +379,16 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
                     else:
                         value_to_write = SwitchPayload.ON
 
-                if (
-                    isinstance(property_item, DeviceDynamicPropertyEntity)
-                    and isinstance(property_record, DevicePropertyRecord)
+                if isinstance(property_item, DeviceDynamicPropertyEntity) and isinstance(
+                    property_record, DevicePropertyRecord
                 ):
                     self.__devices_properties_registry.set_expected_value(
                         device_property=property_record,
                         value=value_to_write,
                     )
 
-                if (
-                    isinstance(property_item, ChannelDynamicPropertyEntity)
-                    and isinstance(property_record, ChannelPropertyRecord)
+                if isinstance(property_item, ChannelDynamicPropertyEntity) and isinstance(
+                    property_record, ChannelPropertyRecord
                 ):
                     self.__channels_properties_registry.set_expected_value(
                         channel_property=property_record,
