@@ -27,8 +27,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 # Library dependencies
 from fastybird_devices_module.repositories.state import (
-    IChannelPropertyStateRepository,
-    IDevicePropertyStateRepository,
+    ChannelPropertiesStatesRepository,
+    DevicePropertiesStatesRepository,
 )
 from fastybird_metadata.devices_module import ConnectionState
 from fastybird_metadata.types import ButtonPayload, DataType, SwitchPayload
@@ -425,11 +425,7 @@ class ChannelsRegistry:
             self.__items = {}
 
 
-@inject(
-    bind={
-        "channel_property_state_repository": IChannelPropertyStateRepository,
-    }
-)
+@inject
 class ChannelsPropertiesRegistry:
     """
     Channels properties registry
@@ -446,14 +442,14 @@ class ChannelsPropertiesRegistry:
 
     __event_dispatcher: EventDispatcher
 
-    __channel_property_state_repository: Optional[IChannelPropertyStateRepository] = None
+    __channel_property_state_repository: ChannelPropertiesStatesRepository
 
     # -----------------------------------------------------------------------------
 
     def __init__(
         self,
         event_dispatcher: EventDispatcher,
-        channel_property_state_repository: Optional[IChannelPropertyStateRepository] = None,
+        channel_property_state_repository: ChannelPropertiesStatesRepository,
     ) -> None:
         self.__items = {}
 
@@ -531,13 +527,17 @@ class ChannelsPropertiesRegistry:
             property_settable=property_settable,
         )
 
-        if existing_property is None and self.__channel_property_state_repository is not None:
-            stored_state = self.__channel_property_state_repository.get_by_id(property_id=property_id)
+        if existing_property is None:
+            try:
+                stored_state = self.__channel_property_state_repository.get_by_id(property_id=property_id)
 
-            if stored_state is not None:
-                property_record.actual_value = stored_state.actual_value
-                property_record.expected_value = stored_state.expected_value
-                property_record.expected_pending = stored_state.pending
+                if stored_state is not None:
+                    property_record.actual_value = stored_state.actual_value
+                    property_record.expected_value = stored_state.expected_value
+                    property_record.expected_pending = stored_state.pending
+
+            except NotImplementedError:
+                pass
 
         self.__items[property_record.id.__str__()] = property_record
 
@@ -726,11 +726,7 @@ class ChannelsPropertiesRegistry:
         raise StopIteration
 
 
-@inject(
-    bind={
-        "device_property_state_repository": IDevicePropertyStateRepository,
-    }
-)
+@inject
 class DevicesPropertiesRegistry:
     """
     Devices properties registry
@@ -747,14 +743,14 @@ class DevicesPropertiesRegistry:
 
     __event_dispatcher: EventDispatcher
 
-    __device_property_state_repository: Optional[IDevicePropertyStateRepository] = None
+    __device_property_state_repository: DevicePropertiesStatesRepository
 
     # -----------------------------------------------------------------------------
 
     def __init__(
         self,
         event_dispatcher: EventDispatcher,
-        device_property_state_repository: Optional[IDevicePropertyStateRepository] = None,
+        device_property_state_repository: DevicePropertiesStatesRepository,
     ) -> None:
         self.__items = {}
 
@@ -832,13 +828,17 @@ class DevicesPropertiesRegistry:
             property_settable=property_settable,
         )
 
-        if existing_property is None and self.__device_property_state_repository is not None:
-            stored_state = self.__device_property_state_repository.get_by_id(property_id=property_id)
+        if existing_property is None:
+            try:
+                stored_state = self.__device_property_state_repository.get_by_id(property_id=property_id)
 
-            if stored_state is not None:
-                property_record.actual_value = stored_state.actual_value
-                property_record.expected_value = stored_state.expected_value
-                property_record.expected_pending = stored_state.pending
+                if stored_state is not None:
+                    property_record.actual_value = stored_state.actual_value
+                    property_record.expected_value = stored_state.expected_value
+                    property_record.expected_pending = stored_state.pending
+
+            except NotImplementedError:
+                pass
 
         self.__items[property_record.id.__str__()] = property_record
 

@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Schemas;
 
 use FastyBird\DevicesModule\Schemas as DevicesModuleSchemas;
 use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Metadata\Types as MetadataTypes;
 
 /**
  * FastyBird MQTT connector entity schema
@@ -34,7 +35,7 @@ final class FbMqttDeviceSchema extends DevicesModuleSchemas\Devices\DeviceSchema
 	/**
 	 * Define entity schema type string
 	 */
-	public const SCHEMA_TYPE = 'devices-module/device-fb-mqtt';
+	public const SCHEMA_TYPE = MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT . '/device/' . Entities\FbMqttDevice::DEVICE_TYPE;
 
 	/**
 	 * {@inheritDoc}

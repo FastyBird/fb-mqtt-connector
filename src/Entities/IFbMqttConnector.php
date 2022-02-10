@@ -30,23 +30,9 @@ interface IFbMqttConnector extends DevicesModuleEntities\Connectors\IConnector
 {
 
 	/**
-	 * @param string|null $server
-	 *
-	 * @return void
-	 */
-	public function setServer(?string $server): void;
-
-	/**
 	 * @return string
 	 */
 	public function getServer(): string;
-
-	/**
-	 * @param int|null $port
-	 *
-	 * @return void
-	 */
-	public function setPort(?int $port): void;
 
 	/**
 	 * @return int
@@ -54,35 +40,14 @@ interface IFbMqttConnector extends DevicesModuleEntities\Connectors\IConnector
 	public function getPort(): int;
 
 	/**
-	 * @param int|null $port
-	 *
-	 * @return void
-	 */
-	public function setSecuredPort(?int $port): void;
-
-	/**
 	 * @return int
 	 */
 	public function getSecuredPort(): int;
 
 	/**
-	 * @param string|null $username
-	 *
-	 * @return void
-	 */
-	public function setUsername(?string $username): void;
-
-	/**
 	 * @return string|null
 	 */
 	public function getUsername(): ?string;
-
-	/**
-	 * @param string|null $password
-	 *
-	 * @return void
-	 */
-	public function setPassword(?string $password): void;
 
 	/**
 	 * @return string|null
@@ -93,12 +58,5 @@ interface IFbMqttConnector extends DevicesModuleEntities\Connectors\IConnector
 	 * @return Types\ProtocolVersionType
 	 */
 	public function getProtocol(): Types\ProtocolVersionType;
-
-	/**
-	 * @param Types\ProtocolVersionType|null $protocol
-	 *
-	 * @return void
-	 */
-	public function setProtocol(?Types\ProtocolVersionType $protocol): void;
 
 }

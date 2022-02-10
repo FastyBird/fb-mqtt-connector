@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Schemas;
 
 use FastyBird\DevicesModule\Schemas as DevicesModuleSchemas;
 use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Metadata\Types as MetadataTypes;
 use Neomerx\JsonApi;
 
 /**
@@ -35,7 +36,7 @@ final class FbMqttConnectorSchema extends DevicesModuleSchemas\Connectors\Connec
 	/**
 	 * Define entity schema type string
 	 */
-	public const SCHEMA_TYPE = 'devices-module/connector-fb-mqtt';
+	public const SCHEMA_TYPE = MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT . '/connector/' . Entities\FbMqttConnector::CONNECTOR_TYPE;
 
 	/**
 	 * {@inheritDoc}

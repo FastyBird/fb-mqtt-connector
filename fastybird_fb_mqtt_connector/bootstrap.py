@@ -78,10 +78,14 @@ def create_connector(
     di["fb-mqtt-connector_events-dispatcher"] = di[EventDispatcher]
 
     # Registers
-    di[DevicesPropertiesRegistry] = DevicesPropertiesRegistry(event_dispatcher=di[EventDispatcher])
+    di[DevicesPropertiesRegistry] = DevicesPropertiesRegistry(  # type: ignore[call-arg]
+        event_dispatcher=di[EventDispatcher],
+    )
     di["fb-mqtt-connector_devices-properties-registry"] = di[DevicesPropertiesRegistry]
 
-    di[ChannelsPropertiesRegistry] = ChannelsPropertiesRegistry(event_dispatcher=di[EventDispatcher])
+    di[ChannelsPropertiesRegistry] = ChannelsPropertiesRegistry(  # type: ignore[call-arg]
+        event_dispatcher=di[EventDispatcher],
+    )
     di["fb-mqtt-connector_channels-properties-registry"] = di[ChannelsPropertiesRegistry]
 
     di[ChannelsRegistry] = ChannelsRegistry(

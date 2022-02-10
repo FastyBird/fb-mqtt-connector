@@ -19,7 +19,7 @@ use Consistence\Doctrine\Enum\EnumAnnotation as Enum;
 use Doctrine\ORM\Mapping as ORM;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\FbMqttConnector\Types;
-use IPub\DoctrineCrud\Mapping\Annotation as IPubDoctrine;
+use FastyBird\Metadata\Types as MetadataTypes;
 
 /**
  * @ORM\Entity
@@ -28,44 +28,6 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 {
 
 	public const CONNECTOR_TYPE = 'fb-mqtt';
-
-	/**
-	 * @var string|null
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?string $server = null;
-
-	/**
-	 * @var int|null
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?int $port = null;
-
-	/**
-	 * @var int|null
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?int $securedPort = null;
-
-	/**
-	 * @var string|null
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?string $username = null;
-
-	/**
-	 * @var string|null
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?string $password = null;
-
-	/**
-	 * @var Types\ProtocolVersionType|null
-	 *
-	 * @Enum(class=Types\ProtocolVersionType::class)
-	 * @IPubDoctrine\Crud(is="writable")
-	 */
-	protected ?Types\ProtocolVersionType $protocol = null;
 
 	/**
 	 * {@inheritDoc}
@@ -78,27 +40,19 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	/**
 	 * {@inheritDoc}
 	 */
-	public function setServer(?string $server): void
-	{
-		$this->setParam('server', $server);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public function getServer(): string
 	{
-		$server = $this->getParam('server', '127.0.0.1');
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SERVER);
 
-		return $server ?? '127.0.0.1';
-	}
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_string($property->getValue())
+		) {
+			return '127.0.0.1';
+		}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setPort(?int $port): void
-	{
-		$this->setParam('port', $port);
+		return $property->getValue();
 	}
 
 	/**
@@ -106,17 +60,17 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getPort(): int
 	{
-		$securedPort = $this->getParam('port', 1883);
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PORT);
 
-		return $securedPort === null ? 1883 : intval($securedPort);
-	}
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_int($property->getValue())
+		) {
+			return 1883;
+		}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setSecuredPort(?int $port): void
-	{
-		$this->setParam('secured_port', $port);
+		return $property->getValue();
 	}
 
 	/**
@@ -124,17 +78,17 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getSecuredPort(): int
 	{
-		$securedPort = $this->getParam('secured_port', 8883);
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SECURED_PORT);
 
-		return $securedPort === null ? 8883 : intval($securedPort);
-	}
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_int($property->getValue())
+		) {
+			return 8883;
+		}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setUsername(?string $username): void
-	{
-		$this->setParam('username', $username);
+		return $property->getValue();
 	}
 
 	/**
@@ -142,15 +96,17 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getUsername(): ?string
 	{
-		return $this->getParam('username');
-	}
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_USERNAME);
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setPassword(?string $password): void
-	{
-		$this->setParam('password', $password);
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_string($property->getValue())
+		) {
+			return null;
+		}
+
+		return $property->getValue();
 	}
 
 	/**
@@ -158,7 +114,17 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getPassword(): ?string
 	{
-		return $this->getParam('password');
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PASSWORD);
+
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_string($property->getValue())
+		) {
+			return null;
+		}
+
+		return $property->getValue();
 	}
 
 	/**
@@ -166,17 +132,18 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getProtocol(): Types\ProtocolVersionType
 	{
-		$protocol = $this->getParam('protocol', Types\ProtocolVersionType::VERSION_1);
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PROTOCOL);
 
-		return $protocol === null ? Types\ProtocolVersionType::get(Types\ProtocolVersionType::VERSION_1) : Types\ProtocolVersionType::get($protocol);
-	}
+		if (
+			$property === null
+			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			|| !is_numeric($property->getValue())
+			|| !Types\ProtocolVersionType::isValidValue($property->getValue())
+		) {
+			return Types\ProtocolVersionType::get(Types\ProtocolVersionType::VERSION_1);
+		}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setProtocol(?Types\ProtocolVersionType $protocol): void
-	{
-		$this->setParam('protocol', $protocol);
+		return Types\ProtocolVersionType::get($property->getValue());
 	}
 
 	/**
@@ -199,6 +166,14 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	public function getDiscriminatorName(): string
 	{
 		return self::CONNECTOR_TYPE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function getSource()
+	{
+		return MetadataTypes\ConnectorSourceType::get(MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT);
 	}
 
 }
