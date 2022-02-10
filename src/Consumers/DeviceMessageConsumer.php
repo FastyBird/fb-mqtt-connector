@@ -42,8 +42,8 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDeviceRepository */
-	private DevicesModuleModels\Devices\IDeviceRepository $deviceRepository;
+	/** @var DevicesModuleModels\Devices\IDevicesRepository */
+	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
 	/** @var DevicesModuleModels\Devices\IDevicesManager */
 	private DevicesModuleModels\Devices\IDevicesManager $devicesManager;
@@ -54,8 +54,8 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\Controls\IControlsManager */
 	private DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager;
 
-	/** @var DevicesModuleModels\Channels\IChannelRepository */
-	private DevicesModuleModels\Channels\IChannelRepository $channelRepository;
+	/** @var DevicesModuleModels\Channels\IChannelsRepository */
+	private DevicesModuleModels\Channels\IChannelsRepository $channelRepository;
 
 	/** @var DevicesModuleModels\Channels\IChannelsManager */
 	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
@@ -67,11 +67,11 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		DevicesModuleModels\Devices\IDeviceRepository $deviceRepository,
+		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
 		DevicesModuleModels\Devices\IDevicesManager $devicesManager,
 		DevicesModuleModels\Devices\Properties\IPropertiesManager $devicePropertiesManager,
 		DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager,
-		DevicesModuleModels\Channels\IChannelRepository $channelRepository,
+		DevicesModuleModels\Channels\IChannelsRepository $channelRepository,
 		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null

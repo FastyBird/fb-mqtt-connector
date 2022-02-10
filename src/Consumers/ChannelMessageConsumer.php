@@ -42,11 +42,11 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDeviceRepository */
-	private DevicesModuleModels\Devices\IDeviceRepository $deviceRepository;
+	/** @var DevicesModuleModels\Devices\IDevicesRepository */
+	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
-	/** @var DevicesModuleModels\Channels\IChannelRepository */
-	private DevicesModuleModels\Channels\IChannelRepository $channelRepository;
+	/** @var DevicesModuleModels\Channels\IChannelsRepository */
+	private DevicesModuleModels\Channels\IChannelsRepository $channelRepository;
 
 	/** @var DevicesModuleModels\Channels\IChannelsManager */
 	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
@@ -64,8 +64,8 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		DevicesModuleModels\Devices\IDeviceRepository $deviceRepository,
-		DevicesModuleModels\Channels\IChannelRepository $channelRepository,
+		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
+		DevicesModuleModels\Channels\IChannelsRepository $channelRepository,
 		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
 		DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager,
 		DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager,

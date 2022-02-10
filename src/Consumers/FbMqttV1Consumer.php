@@ -38,17 +38,17 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\Properties\IPropertyRepository */
-	private DevicesModuleModels\Devices\Properties\IPropertyRepository $devicesPropertiesRepository;
+	/** @var DevicesModuleModels\Devices\Properties\IPropertiesRepository */
+	private DevicesModuleModels\Devices\Properties\IPropertiesRepository $devicesPropertiesRepository;
 
-	/** @var DevicesModuleModels\Devices\Controls\IControlRepository */
-	private DevicesModuleModels\Devices\Controls\IControlRepository $devicesControlsRepository;
+	/** @var DevicesModuleModels\Devices\Controls\IControlsRepository */
+	private DevicesModuleModels\Devices\Controls\IControlsRepository $devicesControlsRepository;
 
-	/** @var DevicesModuleModels\Channels\Properties\IPropertyRepository */
-	private DevicesModuleModels\Channels\Properties\IPropertyRepository $channelsPropertiesRepository;
+	/** @var DevicesModuleModels\Channels\Properties\IPropertiesRepository */
+	private DevicesModuleModels\Channels\Properties\IPropertiesRepository $channelsPropertiesRepository;
 
-	/** @var DevicesModuleModels\Channels\Controls\IControlRepository */
-	private DevicesModuleModels\Channels\Controls\IControlRepository $channelsControlsRepository;
+	/** @var DevicesModuleModels\Channels\Controls\IControlsRepository */
+	private DevicesModuleModels\Channels\Controls\IControlsRepository $channelsControlsRepository;
 
 	/** @var API\V1Builder */
 	private API\V1Builder $apiBuilder;
@@ -58,10 +58,10 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 
 	public function __construct(
 		API\V1Builder $apiBuilder,
-		DevicesModuleModels\Devices\Properties\IPropertyRepository $devicesPropertiesRepository,
-		DevicesModuleModels\Devices\Controls\IControlRepository $devicesControlsRepository,
-		DevicesModuleModels\Channels\Properties\IPropertyRepository $channelsPropertiesRepository,
-		DevicesModuleModels\Channels\Controls\IControlRepository $channelsControlsRepository
+		DevicesModuleModels\Devices\Properties\IPropertiesRepository $devicesPropertiesRepository,
+		DevicesModuleModels\Devices\Controls\IControlsRepository $devicesControlsRepository,
+		DevicesModuleModels\Channels\Properties\IPropertiesRepository $channelsPropertiesRepository,
+		DevicesModuleModels\Channels\Controls\IControlsRepository $channelsControlsRepository
 	) {
 		$this->apiBuilder = $apiBuilder;
 

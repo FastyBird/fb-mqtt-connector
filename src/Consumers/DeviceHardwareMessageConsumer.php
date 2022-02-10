@@ -40,8 +40,8 @@ final class DeviceHardwareMessageConsumer implements Consumers\IConsumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDeviceRepository */
-	private DevicesModuleModels\Devices\IDeviceRepository $deviceRepository;
+	/** @var DevicesModuleModels\Devices\IDevicesRepository */
+	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
 	/** @var DevicesModuleModels\Devices\IDevicesManager */
 	private DevicesModuleModels\Devices\IDevicesManager $devicesManager;
@@ -53,7 +53,7 @@ final class DeviceHardwareMessageConsumer implements Consumers\IConsumer
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		DevicesModuleModels\Devices\IDeviceRepository $deviceRepository,
+		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
 		DevicesModuleModels\Devices\IDevicesManager $devicesManager,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null

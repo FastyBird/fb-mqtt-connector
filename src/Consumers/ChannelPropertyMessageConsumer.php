@@ -41,11 +41,11 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 	use Nette\SmartObject;
 	use TPropertyMessageConsumer;
 
-	/** @var DevicesModuleModels\Devices\IDeviceRepository */
-	private DevicesModuleModels\Devices\IDeviceRepository $deviceRepository;
+	/** @var DevicesModuleModels\Devices\IDevicesRepository */
+	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
-	/** @var DevicesModuleModels\Channels\IChannelRepository */
-	private DevicesModuleModels\Channels\IChannelRepository $channelRepository;
+	/** @var DevicesModuleModels\Channels\IChannelsRepository */
+	private DevicesModuleModels\Channels\IChannelsRepository $channelRepository;
 
 	/** @var DevicesModuleModels\Channels\Properties\IPropertiesManager */
 	private DevicesModuleModels\Channels\Properties\IPropertiesManager $propertiesManager;
@@ -53,8 +53,8 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\States\IChannelPropertiesManager|null */
 	private ?DevicesModuleModels\States\IChannelPropertiesManager $propertiesStatesManager;
 
-	/** @var DevicesModuleModels\States\IChannelPropertyRepository|null */
-	private ?DevicesModuleModels\States\IChannelPropertyRepository $propertyStateRepository;
+	/** @var DevicesModuleModels\States\IChannelPropertiesRepository|null */
+	private ?DevicesModuleModels\States\IChannelPropertiesRepository $propertyStateRepository;
 
 	/** @var Persistence\ManagerRegistry */
 	protected Persistence\ManagerRegistry $managerRegistry;
@@ -63,11 +63,11 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		DevicesModuleModels\Devices\IDeviceRepository $deviceRepository,
-		DevicesModuleModels\Channels\IChannelRepository $channelRepository,
+		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
+		DevicesModuleModels\Channels\IChannelsRepository $channelRepository,
 		DevicesModuleModels\Channels\Properties\IPropertiesManager $propertiesManager,
 		?DevicesModuleModels\States\IChannelPropertiesManager $propertiesStatesManager,
-		?DevicesModuleModels\States\IChannelPropertyRepository $propertyStateRepository,
+		?DevicesModuleModels\States\IChannelPropertiesRepository $propertyStateRepository,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null
 	) {

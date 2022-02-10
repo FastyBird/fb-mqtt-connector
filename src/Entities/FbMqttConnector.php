@@ -15,7 +15,6 @@
 
 namespace FastyBird\FbMqttConnector\Entities;
 
-use Consistence\Doctrine\Enum\EnumAnnotation as Enum;
 use Doctrine\ORM\Mapping as ORM;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\FbMqttConnector\Types;

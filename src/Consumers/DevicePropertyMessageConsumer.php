@@ -41,8 +41,8 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	use Nette\SmartObject;
 	use TPropertyMessageConsumer;
 
-	/** @var DevicesModuleModels\Devices\IDeviceRepository */
-	private DevicesModuleModels\Devices\IDeviceRepository $deviceRepository;
+	/** @var DevicesModuleModels\Devices\IDevicesRepository */
+	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
 	/** @var DevicesModuleModels\Devices\Properties\IPropertiesManager */
 	private DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager;
@@ -50,8 +50,8 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\States\IDevicePropertiesManager|null */
 	private ?DevicesModuleModels\States\IDevicePropertiesManager $propertiesStatesManager;
 
-	/** @var DevicesModuleModels\States\IDevicePropertyRepository|null */
-	private ?DevicesModuleModels\States\IDevicePropertyRepository $propertyStateRepository;
+	/** @var DevicesModuleModels\States\IDevicePropertiesRepository|null */
+	private ?DevicesModuleModels\States\IDevicePropertiesRepository $propertyStateRepository;
 
 	/** @var Persistence\ManagerRegistry */
 	protected Persistence\ManagerRegistry $managerRegistry;
@@ -60,10 +60,10 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	private Log\LoggerInterface $logger;
 
 	public function __construct(
-		DevicesModuleModels\Devices\IDeviceRepository $deviceRepository,
+		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
 		DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager,
 		?DevicesModuleModels\States\IDevicePropertiesManager $propertiesStatesManager,
-		?DevicesModuleModels\States\IDevicePropertyRepository $propertyStateRepository,
+		?DevicesModuleModels\States\IDevicePropertiesRepository $propertyStateRepository,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null
 	) {
