@@ -20,7 +20,7 @@ FastyBird MQTT connector module
 
 from .bootstrap import create_connector
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 __all__ = ["connector", "bootstrap"]
 
