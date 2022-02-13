@@ -104,6 +104,12 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
+    def id(self) -> uuid.UUID:
+        """Connector identifier"""
+        return self.__connector_id
+
+    # -----------------------------------------------------------------------------
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         connector_id: uuid.UUID,
