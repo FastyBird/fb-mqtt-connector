@@ -19,7 +19,7 @@ FastyBird MQTT connector types module
 """
 
 # Python base dependencies
-from enum import Enum, unique
+from enum import unique
 
 # Library dependencies
 from fastybird_metadata.devices_module import ConnectorPropertyName
@@ -34,7 +34,7 @@ DEFAULT_SERVER_SECURED_PORT: int = 8883
 
 
 @unique
-class ProtocolVersion(ExtendedEnum, Enum):
+class ProtocolVersion(ExtendedEnum):
     """
     Communication protocol version
 
@@ -53,7 +53,7 @@ class ProtocolVersion(ExtendedEnum, Enum):
 
 
 @unique
-class ConnectorAttribute(ExtendedEnum, Enum):
+class ConnectorAttribute(ExtendedEnum):
     """
     Known connector attribute name
 
