@@ -36,7 +36,6 @@ from fastybird_devices_module.entities.connector import ConnectorControlEntity
 from fastybird_devices_module.entities.device import (
     DeviceControlEntity,
     DeviceDynamicPropertyEntity,
-    DeviceEntity,
     DevicePropertyEntity,
 )
 from fastybird_devices_module.repositories.device import DevicesRepository
@@ -178,10 +177,10 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         )
 
         for device_property in device.properties:
-            self.initialize_device_property(device_property=device_property)
+            self.initialize_device_property(device=device, device_property=device_property)
 
         for channel in device.channels:
-            self.initialize_device_channel(channel=channel)
+            self.initialize_device_channel(device=device, channel=channel)
 
     # -----------------------------------------------------------------------------
 
@@ -197,7 +196,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
-    def initialize_device_property(self, device_property: DevicePropertyEntity) -> None:
+    def initialize_device_property(self, device: FbMqttDeviceEntity, device_property: DevicePropertyEntity) -> None:
         """Initialize device property aka attribute register in connector registry"""
         if isinstance(device_property, DeviceDynamicPropertyEntity):
             self.__devices_properties_registry.append(
@@ -214,19 +213,19 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
-    def remove_device_property(self, property_id: uuid.UUID) -> None:
+    def remove_device_property(self, device: FbMqttDeviceEntity, property_id: uuid.UUID) -> None:
         """Remove device property from connector registry"""
         self.__devices_properties_registry.remove(property_id=property_id, propagate=False)
 
     # -----------------------------------------------------------------------------
 
-    def reset_devices_properties(self, device: DeviceEntity) -> None:
+    def reset_devices_properties(self, device: FbMqttDeviceEntity) -> None:
         """Reset devices properties registry to initial state"""
         self.__devices_properties_registry.reset(device_id=device.id)
 
     # -----------------------------------------------------------------------------
 
-    def initialize_device_channel(self, channel: ChannelEntity) -> None:
+    def initialize_device_channel(self, device: FbMqttDeviceEntity, channel: ChannelEntity) -> None:
         """Initialize device channel aka registers group in connector registry"""
         self.__channels_registry.append(
             device_id=channel.device.id,
@@ -236,23 +235,27 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         )
 
         for channel_property in channel.properties:
-            self.initialize_device_channel_property(channel_property=channel_property)
+            self.initialize_device_channel_property(channel=channel, channel_property=channel_property)
 
     # -----------------------------------------------------------------------------
 
-    def remove_device_channel(self, channel_id: uuid.UUID) -> None:
+    def remove_device_channel(self, device: FbMqttDeviceEntity, channel_id: uuid.UUID) -> None:
         """Remove device channel from connector registry"""
         self.__channels_registry.remove(channel_id=channel_id, propagate=False)
 
     # -----------------------------------------------------------------------------
 
-    def reset_devices_channels(self, device: DeviceEntity) -> None:
+    def reset_devices_channels(self, device: FbMqttDeviceEntity) -> None:
         """Reset devices channels registry to initial state"""
         self.__channels_registry.reset(device_id=device.id)
 
     # -----------------------------------------------------------------------------
 
-    def initialize_device_channel_property(self, channel_property: ChannelPropertyEntity) -> None:
+    def initialize_device_channel_property(
+        self,
+        channel: ChannelEntity,
+        channel_property: ChannelPropertyEntity,
+    ) -> None:
         """Initialize device channel property aka input or output register in connector registry"""
         if isinstance(channel_property, ChannelDynamicPropertyEntity):
             self.__channels_properties_registry.append(
@@ -269,7 +272,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
-    def remove_device_channel_property(self, property_id: uuid.UUID) -> None:
+    def remove_device_channel_property(self, channel: ChannelEntity, property_id: uuid.UUID) -> None:
         """Remove device channel property from connector registry"""
         self.__channels_properties_registry.remove(property_id=property_id, propagate=False)
 

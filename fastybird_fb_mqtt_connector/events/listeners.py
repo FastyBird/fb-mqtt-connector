@@ -508,7 +508,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
 
             device_property = self.__devices_properties_manager.create(
                 data=property_data,
-                property_type=ChannelDynamicPropertyEntity,
+                property_type=DeviceDynamicPropertyEntity,
             )
 
             self.__logger.debug(
@@ -590,7 +590,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
 
             channel_property = self.__channels_properties_manager.create(
                 data=property_data,
-                property_type=DeviceDynamicPropertyEntity,
+                property_type=ChannelDynamicPropertyEntity,
             )
 
             self.__logger.debug(
