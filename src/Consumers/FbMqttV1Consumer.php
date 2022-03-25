@@ -105,8 +105,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 			$this->client->publish(
 				$this->apiBuilder->buildDeviceCommandTopic(
 					$control->getDevice()->getIdentifier(),
-					$control->getName(),
-					$control->getDevice()->getParent() !== null ? $control->getDevice()->getParent()->getIdentifier() : null
+					$control->getName()
 				),
 				$data->offsetGet('expected_value')
 			);
@@ -128,8 +127,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 			$this->client->publish(
 				$this->apiBuilder->buildDevicePropertyTopic(
 					$property->getDevice()->getIdentifier(),
-					$property->getIdentifier(),
-					$property->getDevice()->getParent() !== null ? $property->getDevice()->getParent()->getIdentifier() : null
+					$property->getIdentifier()
 				),
 				$data->offsetGet('expected_value')
 			);
@@ -152,8 +150,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 				$this->apiBuilder->buildChannelCommandTopic(
 					$control->getChannel()->getDevice()->getIdentifier(),
 					$control->getChannel()->getIdentifier(),
-					$control->getName(),
-					$control->getChannel()->getDevice()->getParent() !== null ? $control->getChannel()->getDevice()->getParent()->getIdentifier() : null
+					$control->getName()
 				),
 				$data->offsetGet('expected_value')
 			);
@@ -176,8 +173,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 				$this->apiBuilder->buildChannelPropertyTopic(
 					$property->getChannel()->getDevice()->getIdentifier(),
 					$property->getChannel()->getIdentifier(),
-					$property->getIdentifier(),
-					$property->getChannel()->getDevice()->getParent() !== null ? $property->getChannel()->getDevice()->getParent()->getIdentifier() : null
+					$property->getIdentifier()
 				),
 				$data->offsetGet('expected_value')
 			);

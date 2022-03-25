@@ -8,9 +8,4 @@ return [
 		Exceptions\ParseMessageException::class,
 		'Provided topic is not valid',
 	],
-	'child-hw-not-valid' => [
-		'/fb/v1/device-name/$child/child-name/$hw/not-valid',
-		Exceptions\ParseMessageException::class,
-		'Provided topic is not valid',
-	],
 ];

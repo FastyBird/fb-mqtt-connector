@@ -33,18 +33,12 @@ abstract class Entity implements IEntity
 	/** @var string */
 	private string $device;
 
-	/** @var string|null */
-	private ?string $parent;
-
 	/** @var bool */
 	private bool $retained = false;
 
-	public function __construct(
-		string $device,
-		?string $parent = null
-	) {
+	public function __construct(string $device)
+	{
 		$this->device = $device;
-		$this->parent = $parent;
 	}
 
 	/**
@@ -53,22 +47,6 @@ abstract class Entity implements IEntity
 	public function getDevice(): string
 	{
 		return $this->device;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getParent(): ?string
-	{
-		return $this->parent;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setParent(?string $parent): void
-	{
-		$this->parent = $parent;
 	}
 
 	/**
@@ -94,7 +72,6 @@ abstract class Entity implements IEntity
 	{
 		return [
 			'device'    => $this->getDevice(),
-			'parent'    => $this->getParent(),
 			'retained'  => $this->isRetained(),
 		];
 	}

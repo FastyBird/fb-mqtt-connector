@@ -37,31 +37,19 @@ final class V1Validator
 	// TOPIC: /fb/v1/*
 	public const API_VERSION_REGEXP = '/^\/fb\/v1\/.*$/';
 
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/*
-	public const DEVICE_CHILD_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/(.*)$/';
 	// TOPIC: /fb/v1/<device>/$channel/<channel>/*
 	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/$channel/<channel>/*
-	public const CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
 
 	// TOPIC: /fb/v1/<device>/<$name|$properties|$control|$channels|$extensions>
 	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/$name|<$properties|$control|$channels|$extensions>
-	public const DEVICE_CHILD_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
 
 	// TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
 	public const DEVICE_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/$hw/<mac-address|manufacturer|model|version>
-	public const DEVICE_CHILD_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
 	// TOPIC: /fb/v1/<device>/$fw/<manufacturer|name|version>
 	public const DEVICE_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/$fw/<manufacturer|name|version>
-	public const DEVICE_CHILD_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
 
 	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
 	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
-	// TOPIC: /fb/v1/<device>/$child/<child-device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-	public const DEVICE_CHILD_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
 
 	// TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
 	public const DEVICE_CONTROL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$control\/(configure|reset|reconnect|factory-reset|ota)((\/\$)(schema))?$/';
@@ -150,21 +138,7 @@ final class V1Validator
 	 */
 	public function validateDeviceAttribute(string $topic): bool
 	{
-		if (preg_match(self::DEVICE_ATTRIBUTE_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_ATTRIBUTE_REGEXP, $topic) === 1;
-	}
-
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
-	public function validateChildDevicePart(string $topic): bool
-	{
-		return preg_match(self::DEVICE_CHILD_PARTIAL_REGEXP, $topic) === 1;
+		return preg_match(self::DEVICE_ATTRIBUTE_REGEXP, $topic) === 1;
 	}
 
 	/**
@@ -174,11 +148,7 @@ final class V1Validator
 	 */
 	public function validateDeviceHardwareInfo(string $topic): bool
 	{
-		if (preg_match(self::DEVICE_HW_INFO_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_HW_INFO_REGEXP, $topic) === 1;
+		return preg_match(self::DEVICE_HW_INFO_REGEXP, $topic) === 1;
 	}
 
 	/**
@@ -188,11 +158,7 @@ final class V1Validator
 	 */
 	public function validateDeviceFirmwareInfo(string $topic): bool
 	{
-		if (preg_match(self::DEVICE_FW_INFO_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_FW_INFO_REGEXP, $topic) === 1;
+		return preg_match(self::DEVICE_FW_INFO_REGEXP, $topic) === 1;
 	}
 
 	/**
@@ -202,11 +168,7 @@ final class V1Validator
 	 */
 	public function validateDeviceProperty(string $topic): bool
 	{
-		if (preg_match(self::DEVICE_PROPERTY_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::DEVICE_CHILD_PROPERTY_REGEXP, $topic) === 1;
+		return preg_match(self::DEVICE_PROPERTY_REGEXP, $topic) === 1;
 	}
 
 	/**
@@ -216,11 +178,7 @@ final class V1Validator
 	 */
 	public function validateChannelPart(string $topic): bool
 	{
-		if (preg_match(self::CHANNEL_PARTIAL_REGEXP, $topic) === 1) {
-			return true;
-		}
-
-		return $this->validateChildDevicePart($topic) && preg_match(self::CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP, $topic) === 1;
+		return preg_match(self::CHANNEL_PARTIAL_REGEXP, $topic) === 1;
 	}
 
 	/**

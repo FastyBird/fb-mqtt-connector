@@ -40,16 +40,14 @@ final class ChannelAttribute extends Attribute
 	 * @param string $channel
 	 * @param string $attribute
 	 * @param string $value
-	 * @param string|null $parent
 	 */
 	public function __construct(
 		string $device,
 		string $channel,
 		string $attribute,
-		string $value,
-		?string $parent = null
+		string $value
 	) {
-		parent::__construct($device, $attribute, $value, $parent);
+		parent::__construct($device, $attribute, $value);
 
 		$this->channel = $channel;
 	}

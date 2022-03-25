@@ -125,17 +125,6 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 
 				$toUpdate = [];
 
-				if ($entity->getParent() !== null) {
-					$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
-					$findDeviceQuery->byIdentifier($entity->getParent());
-
-					$parent = $this->deviceRepository->findOneBy($findDeviceQuery);
-
-					if ($parent !== null) {
-						$toUpdate['parent'] = $parent;
-					}
-				}
-
 				if ($entity->getAttribute() === Entities\Messages\Attribute::NAME) {
 					$toUpdate['name'] = $entity->getValue();
 				}

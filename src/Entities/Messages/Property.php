@@ -39,10 +39,9 @@ abstract class Property extends Entity
 
 	public function __construct(
 		string $device,
-		string $property,
-		?string $parent = null
+		string $property
 	) {
-		parent::__construct($device, $parent);
+		parent::__construct($device);
 
 		$this->property = $property;
 

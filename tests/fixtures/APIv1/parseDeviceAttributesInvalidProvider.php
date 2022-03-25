@@ -8,9 +8,4 @@ return [
 		Exceptions\ParseMessageException::class,
 		'Provided topic is not valid',
 	],
-	'child-attr-unknown' => [
-		'/fb/v1/device-name/$child/child-name/$unknown',
-		Exceptions\ParseMessageException::class,
-		'Provided topic is not valid',
-	],
 ];

@@ -8,7 +8,6 @@ return [
 		'payload',
 		[
 			'device'                                  => 'device-name',
-			'parent'                                  => null,
 			'retained'                                => false,
 			'property'                                => 'some-property',
 			Entities\Messages\PropertyAttribute::NAME => 'payload',
@@ -19,7 +18,6 @@ return [
 		'typename',
 		[
 			'device'                                  => 'device-name',
-			'parent'                                  => null,
 			'retained'                                => false,
 			'property'                                => 'some-property',
 			Entities\Messages\PropertyAttribute::TYPE => 'typename',
@@ -30,7 +28,6 @@ return [
 		'true',
 		[
 			'device'                                      => 'device-name',
-			'parent'                                      => null,
 			'retained'                                    => false,
 			'property'                                    => 'some-property',
 			Entities\Messages\PropertyAttribute::SETTABLE => true,
@@ -41,51 +38,6 @@ return [
 		'invalid',
 		[
 			'device'                                       => 'device-name',
-			'parent'                                       => null,
-			'retained'                                     => false,
-			'property'                                     => 'some-property',
-			Entities\Messages\PropertyAttribute::QUERYABLE => false,
-		],
-	],
-	'child-attr-' . Entities\Messages\PropertyAttribute::NAME      => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::NAME,
-		'payload',
-		[
-			'device'                                  => 'child-name',
-			'parent'                                  => 'device-name',
-			'retained'                                => false,
-			'property'                                => 'some-property',
-			Entities\Messages\PropertyAttribute::NAME => 'payload',
-		],
-	],
-	'child-attr-' . Entities\Messages\PropertyAttribute::TYPE      => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::TYPE,
-		'typename',
-		[
-			'device'                                  => 'child-name',
-			'parent'                                  => 'device-name',
-			'retained'                                => false,
-			'property'                                => 'some-property',
-			Entities\Messages\PropertyAttribute::TYPE => 'typename',
-		],
-	],
-	'child-attr-' . Entities\Messages\PropertyAttribute::SETTABLE  => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::SETTABLE,
-		'true',
-		[
-			'device'                                      => 'child-name',
-			'parent'                                      => 'device-name',
-			'retained'                                    => false,
-			'property'                                    => 'some-property',
-			Entities\Messages\PropertyAttribute::SETTABLE => true,
-		],
-	],
-	'child-attr-' . Entities\Messages\PropertyAttribute::QUERYABLE => [
-		'/fb/v1/device-name/$child/child-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::QUERYABLE,
-		'invalid',
-		[
-			'device'                                       => 'child-name',
-			'parent'                                       => 'device-name',
 			'retained'                                     => false,
 			'property'                                     => 'some-property',
 			Entities\Messages\PropertyAttribute::QUERYABLE => false,

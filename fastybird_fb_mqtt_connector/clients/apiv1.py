@@ -81,12 +81,6 @@ class ApiV1Client(Client, IClient):  # pylint: disable=too-many-instance-attribu
         "/fb/v1/+/+/+/+/+",
         "/fb/v1/+/+/+/+/+/+",
         "/fb/v1/+/+/+/+/+/+/+",
-        "/fb/v1/+/$child/+/+",
-        "/fb/v1/+/$child/+/+/+",
-        "/fb/v1/+/$child/+/+/+/+",
-        "/fb/v1/+/$child/+/+/+/+/+",
-        "/fb/v1/+/$child/+/+/+/+/+/+",
-        "/fb/v1/+/$child/+/+/+/+/+/+/+",
     ]
 
     __COMMON_TOPICS: List[str] = [

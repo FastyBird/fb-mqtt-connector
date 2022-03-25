@@ -33,28 +33,18 @@ class V1Builder:
     """
 
     DEVICE_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$property/{IDENTIFIER}/set"
-    DEVICE_CHILD_PROPERTY_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$property/{IDENTIFIER}/set"
-
     DEVICE_CONTROL_TOPIC = "/fb/v1/{DEVICE_ID}/$control/{CONTROL}/set"
-    DEVICE_CHILD_CONTROL_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$control/{CONTROL}/set"
-
     CHANNEL_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
-    CHANNEL_CHILD_PROPERTY_TOPIC = (
-        "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"
-    )
-
     CHANNEL_CONTROL_TOPIC = "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
-    CHANNEL_CHILD_CONTROL_TOPIC = "/fb/v1/{PARENT_ID}/$child/{DEVICE_ID}/$channel/{CHANNEL_ID}/$control/{CONTROL}/set"
 
     # -----------------------------------------------------------------------------
 
     @staticmethod
-    def build_device_property(device: str, identifier: str, parent: Optional[str] = None) -> str:
+    def build_device_property(device: str, identifier: str) -> str:
         """Build set device property topic"""
         return V1Builder.build_topic(
-            topic=V1Builder.DEVICE_CHILD_PROPERTY_TOPIC if parent is not None else V1Builder.DEVICE_PROPERTY_TOPIC,
+            topic=V1Builder.DEVICE_PROPERTY_TOPIC,
             data={
-                "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "IDENTIFIER": identifier,
             },
@@ -63,12 +53,11 @@ class V1Builder:
     # -----------------------------------------------------------------------------
 
     @staticmethod
-    def build_device_command(device: str, command: str, parent: Optional[str] = None) -> str:
+    def build_device_command(device: str, command: str) -> str:
         """Build send device command topic"""
         return V1Builder.build_topic(
-            topic=V1Builder.DEVICE_CHILD_CONTROL_TOPIC if parent is not None else V1Builder.DEVICE_CONTROL_TOPIC,
+            topic=V1Builder.DEVICE_CONTROL_TOPIC,
             data={
-                "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CONTROL": command,
             },
@@ -77,12 +66,11 @@ class V1Builder:
     # -----------------------------------------------------------------------------
 
     @staticmethod
-    def build_channel_property(device: str, channel: str, identifier: str, parent: Optional[str] = None) -> str:
+    def build_channel_property(device: str, channel: str, identifier: str) -> str:
         """Build set channel property topic"""
         return V1Builder.build_topic(
-            topic=V1Builder.CHANNEL_CHILD_PROPERTY_TOPIC if parent is not None else V1Builder.CHANNEL_PROPERTY_TOPIC,
+            topic=V1Builder.CHANNEL_PROPERTY_TOPIC,
             data={
-                "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CHANNEL_ID": channel,
                 "IDENTIFIER": identifier,
@@ -92,12 +80,11 @@ class V1Builder:
     # -----------------------------------------------------------------------------
 
     @staticmethod
-    def build_channel_command(device: str, channel: str, command: str, parent: Optional[str] = None) -> str:
+    def build_channel_command(device: str, channel: str, command: str) -> str:
         """Build send channel command topic"""
         return V1Builder.build_topic(
-            topic=V1Builder.CHANNEL_CHILD_CONTROL_TOPIC if parent is not None else V1Builder.CHANNEL_CONTROL_TOPIC,
+            topic=V1Builder.CHANNEL_CONTROL_TOPIC,
             data={
-                "PARENT_ID": parent,
                 "DEVICE_ID": device,
                 "CHANNEL_ID": channel,
                 "CONTROL": command,

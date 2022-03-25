@@ -52,14 +52,12 @@ class BaseEntity(ABC):
     """
 
     __device: str
-    __parent: Optional[str] = None
     __retained: bool = False
 
     # -----------------------------------------------------------------------------
 
-    def __init__(self, device: str, parent: Optional[str] = None) -> None:
+    def __init__(self, device: str) -> None:
         self.__device = device
-        self.__parent = parent
 
     # -----------------------------------------------------------------------------
 
@@ -67,13 +65,6 @@ class BaseEntity(ABC):
     def device(self) -> str:
         """Entity device identifier"""
         return self.__device
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def parent(self) -> Optional[str]:
-        """Entity parent device identifier"""
-        return self.__parent
 
     # -----------------------------------------------------------------------------
 
@@ -117,12 +108,11 @@ class AttributeEntity(BaseEntity):
         device: str,
         attribute: str,
         value: str,
-        parent: Optional[str] = None,
     ) -> None:
         if attribute not in self.allowed_attributes:
             raise AttributeError(f"Provided attribute '{attribute}' is not in allowed range")
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(device=device)
 
         self.__attribute = attribute
         self.__parse_value(value)
@@ -215,14 +205,8 @@ class ChannelAttributeEntity(AttributeEntity):
         channel: str,
         attribute: str,
         value: str,
-        parent: Optional[str] = None,
     ) -> None:
-        super().__init__(
-            device=device,
-            attribute=attribute,
-            value=value,
-            parent=parent,
-        )
+        super().__init__(device=device, attribute=attribute, value=value)
 
         self.__channel = channel
 
@@ -270,12 +254,11 @@ class HardwareEntity(BaseEntity):
         device: str,
         parameter: str,
         value: str,
-        parent: Optional[str] = None,
     ) -> None:
         if parameter not in self.allowed_parameters:
             raise AttributeError(f"Provided hardware attribute '{parameter}' is not in allowed range")
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(device=device)
 
         self.__parameter = parameter
         self.__value = clean_payload(value)
@@ -330,12 +313,11 @@ class FirmwareEntity(BaseEntity):
         device: str,
         parameter: str,
         value: str,
-        parent: Optional[str] = None,
     ) -> None:
         if parameter not in self.allowed_parameters:
             raise AttributeError(f"Provided firmware attribute '{parameter}' is not in allowed range")
 
-        super().__init__(device=device, parent=parent)
+        super().__init__(device=device)
 
         self.__parameter = parameter
         self.__value = clean_payload(value)
@@ -385,9 +367,8 @@ class PropertyEntity(BaseEntity):
         self,
         device: str,
         name: str,
-        parent: Optional[str] = None,
     ) -> None:
-        super().__init__(device=device, parent=parent)
+        super().__init__(device=device)
 
         self.__name = name
 
@@ -456,9 +437,8 @@ class ChannelPropertyEntity(PropertyEntity):
         device: str,
         channel: str,
         name: str,
-        parent: Optional[str] = None,
     ) -> None:
-        super().__init__(device=device, name=name, parent=parent)
+        super().__init__(device=device, name=name)
 
         self.__channel = channel
 

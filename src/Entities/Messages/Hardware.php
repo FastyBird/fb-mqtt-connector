@@ -51,14 +51,13 @@ final class Hardware extends Entity
 	public function __construct(
 		string $device,
 		string $parameter,
-		string $value,
-		?string $parent = null
+		string $value
 	) {
 		if (!in_array($parameter, self::ALLOWED_PARAMETERS, true)) {
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided hardware attribute "%s" is not in allowed range', $parameter));
 		}
 
-		parent::__construct($device, $parent);
+		parent::__construct($device);
 
 		$this->parameter = $parameter;
 		$this->value = $value;

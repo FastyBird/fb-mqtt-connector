@@ -38,32 +38,16 @@ class V1Validator:
     # TOPIC: /fb/v1/*
     API_VERSION_REGEXP = r"^\/fb\/v1\/.*$"
 
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/*
-    DEVICE_CHILD_PARTIAL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/(.*)$"
     # TOPIC: /fb/v1/<device>/$channel/<channel>/*
     CHANNEL_PARTIAL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$"
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/$channel/<channel>/*
-    CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$"
-    )
 
     # TOPIC: /fb/v1/<device>/<$state|$name|$properties|$control|$channels|$extensions>
     DEVICE_ATTRIBUTE_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$"
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/<$state|$name|$properties|$control|$channels|$extensions>
-    DEVICE_CHILD_ATTRIBUTE_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$"
-    )
 
     # TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
     DEVICE_HW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$"
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/$hw/<mac-address|manufacturer|model|version>
-    DEVICE_CHILD_HW_INFO_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$"
-    )
     # TOPIC: /fb/v1/<device>/$fw/<manufacturer|version>
     DEVICE_FW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|version)$"
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/$fw/<manufacturer|version>
-    DEVICE_CHILD_FW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$fw\/(manufacturer|version)$"
 
     # TOPIC: /fb/v1/<device>/$property/<property>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
     DEVICE_PROPERTY_REGEXP = (
@@ -71,16 +55,6 @@ class V1Validator:
     )
     # TOPIC: /fb/v1/<device>/$property/<property>/set
     DEVICE_PROPERTY_SET_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)\/set?$"
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/$property/<property>
-    # [/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-    DEVICE_CHILD_PROPERTY_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)(\/\$("
-        r"name|type|settable|queryable|data-type|format|unit))?$"
-    )
-    # TOPIC: /fb/v1/<device>/$child/<child-device>/$property/<property>/set
-    DEVICE_CHILD_PROPERTY_SET_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$child\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)\/set?$"
-    )
 
     # TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>
     DEVICE_CONTROL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$control\/([a-z0-9-]+)?$"
@@ -149,72 +123,42 @@ class V1Validator:
     @classmethod
     def validate_device_attribute(cls, topic: str) -> bool:
         """Validate topic against device attribute regular expression"""
-        if len(re.findall(cls.DEVICE_ATTRIBUTE_REGEXP, topic)) == 1:
-            return True
-
-        return cls.validate_child_device_part(topic) and len(re.findall(cls.DEVICE_CHILD_ATTRIBUTE_REGEXP, topic)) == 1
-
-    # -----------------------------------------------------------------------------
-
-    @classmethod
-    def validate_child_device_part(cls, topic: str) -> bool:
-        """Validate topic against device child part regular expression"""
-        return len(re.findall(cls.DEVICE_CHILD_PARTIAL_REGEXP, topic)) == 1
+        return len(re.findall(cls.DEVICE_ATTRIBUTE_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 
     @classmethod
     def validate_device_hardware_info(cls, topic: str) -> bool:
         """Validate topic against device hardware info regular expression"""
-        if len(re.findall(cls.DEVICE_HW_INFO_REGEXP, topic)) == 1:
-            return True
-
-        return cls.validate_child_device_part(topic) and len(re.findall(cls.DEVICE_CHILD_HW_INFO_REGEXP, topic)) == 1
+        return len(re.findall(cls.DEVICE_HW_INFO_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 
     @classmethod
     def validate_device_firmware_info(cls, topic: str) -> bool:
         """Validate topic against device firmware info regular expression"""
-        if len(re.findall(cls.DEVICE_FW_INFO_REGEXP, topic)) == 1:
-            return True
-
-        return cls.validate_child_device_part(topic) and len(re.findall(cls.DEVICE_CHILD_FW_INFO_REGEXP, topic)) == 1
+        return len(re.findall(cls.DEVICE_FW_INFO_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 
     @classmethod
     def validate_device_property(cls, topic: str) -> bool:
         """Validate topic against device property regular expression"""
-        if len(re.findall(cls.DEVICE_PROPERTY_REGEXP, topic)) == 1:
-            return True
-
-        return cls.validate_child_device_part(topic) and len(re.findall(cls.DEVICE_CHILD_PROPERTY_REGEXP, topic)) == 1
+        return len(re.findall(cls.DEVICE_PROPERTY_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 
     @classmethod
     def validate_device_property_set(cls, topic: str) -> bool:
         """Validate topic against device property regular expression"""
-        if len(re.findall(cls.DEVICE_PROPERTY_SET_REGEXP, topic)) == 1:
-            return True
-
-        return (
-            cls.validate_child_device_part(topic) and len(re.findall(cls.DEVICE_CHILD_PROPERTY_SET_REGEXP, topic)) == 1
-        )
+        return len(re.findall(cls.DEVICE_PROPERTY_SET_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 
     @classmethod
     def validate_channel_part(cls, topic: str) -> bool:
         """Validate topic against channel part regular expression"""
-        if len(re.findall(cls.CHANNEL_PARTIAL_REGEXP, topic)) == 1:
-            return True
-
-        return (
-            cls.validate_child_device_part(topic)
-            and len(re.findall(cls.CHILD_DEVICE_CHANNEL_PARTIAL_REGEXP, topic)) == 1
-        )
+        return len(re.findall(cls.CHANNEL_PARTIAL_REGEXP, topic)) == 1
 
     # -----------------------------------------------------------------------------
 

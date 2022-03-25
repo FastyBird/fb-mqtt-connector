@@ -46,19 +46,17 @@ abstract class Attribute extends Entity
 	 * @param string $device
 	 * @param string $attribute
 	 * @param string $value
-	 * @param string|null $parent
 	 */
 	public function __construct(
 		string $device,
 		string $attribute,
-		string $value,
-		?string $parent = null
+		string $value
 	) {
 		if (!in_array($attribute, $this->getAllowedAttributes(), true)) {
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided attribute "%s" is not in allowed range', $attribute));
 		}
 
-		parent::__construct($device, $parent);
+		parent::__construct($device);
 
 		$this->attribute = $attribute;
 

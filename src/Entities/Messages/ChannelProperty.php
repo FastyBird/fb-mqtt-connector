@@ -32,10 +32,9 @@ final class ChannelProperty extends Property
 	public function __construct(
 		string $device,
 		string $channel,
-		string $property,
-		?string $parent = null
+		string $property
 	) {
-		parent::__construct($device, $property, $parent);
+		parent::__construct($device, $property);
 
 		$this->channel = $channel;
 	}

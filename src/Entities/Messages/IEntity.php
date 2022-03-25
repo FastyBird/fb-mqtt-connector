@@ -32,18 +32,6 @@ interface IEntity
 	public function getDevice(): string;
 
 	/**
-	 * @param string|null $parent
-	 *
-	 * @return void
-	 */
-	public function setParent(?string $parent): void;
-
-	/**
-	 * @return string|null
-	 */
-	public function getParent(): ?string;
-
-	/**
 	 * @param bool $retained
 	 */
 	public function setRetained(bool $retained): void;
