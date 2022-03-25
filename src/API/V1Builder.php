@@ -138,7 +138,7 @@ final class V1Builder
 	public function buildChannelPropertyTopic(
 		string $device,
 		string $channel,
-		string $property,
+		string $property
 	): string {
 		$topic = self::CHANNEL_PROPERTY_TOPIC;
 		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
