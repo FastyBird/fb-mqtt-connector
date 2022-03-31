@@ -73,7 +73,7 @@ from fastybird_fb_mqtt_connector.registry.records import (
 
 
 @inject(alias=IConnector)
-class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attributes
+class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """
     FastyBird MQTT connector
 
@@ -213,6 +213,11 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
+    def notify_device_property(self, device: FbMqttDeviceEntity, device_property: DevicePropertyEntity) -> None:
+        """Notify device property was reported to connector"""
+
+    # -----------------------------------------------------------------------------
+
     def remove_device_property(self, device: FbMqttDeviceEntity, property_id: uuid.UUID) -> None:
         """Remove device property from connector registry"""
         self.__devices_properties_registry.remove(property_id=property_id, propagate=False)
@@ -269,6 +274,15 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
                 property_queryable=channel_property.queryable,
                 property_settable=channel_property.settable,
             )
+
+    # -----------------------------------------------------------------------------
+
+    def notify_device_channel_property(
+        self,
+        channel: ChannelEntity,
+        channel_property: ChannelPropertyEntity,
+    ) -> None:
+        """Notify device channel property was reported to connector"""
 
     # -----------------------------------------------------------------------------
 
