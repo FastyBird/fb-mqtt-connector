@@ -704,6 +704,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                             "actual_value": property_state.actual_value,
                             "expected_value": property_state.expected_value,
                             "pending": property_state.pending,
+                            "valid": property_state.valid,
                         },
                     },
                 )
@@ -735,6 +736,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                             "actual_value": property_state.actual_value,
                             "expected_value": property_state.expected_value,
                             "pending": property_state.pending,
+                            "valid": property_state.valid,
                         },
                     },
                 )
@@ -752,6 +754,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                 "actual_value": event.updated_record.actual_value,
                 "expected_value": event.updated_record.expected_value,
                 "pending": event.updated_record.expected_pending is not None,
+                "valid": True,
             }
 
             try:
@@ -791,6 +794,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                             "actual_value": property_state.actual_value,
                             "expected_value": property_state.expected_value,
                             "pending": property_state.pending,
+                            "valid": property_state.valid,
                         },
                     },
                 )
@@ -825,6 +829,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                             "actual_value": property_state.actual_value,
                             "expected_value": property_state.expected_value,
                             "pending": property_state.pending,
+                            "valid": property_state.valid,
                         },
                     },
                 )

@@ -38,14 +38,13 @@ from fastybird_devices_module.entities.device import (
     DeviceDynamicPropertyEntity,
     DevicePropertyEntity,
 )
-from fastybird_devices_module.repositories.device import DevicesRepository
+from fastybird_devices_module.utils import normalize_value
 from fastybird_metadata.devices_module import (
     ConnectionState,
     DeviceModel,
     FirmwareManufacturer,
     HardwareManufacturer,
 )
-from fastybird_metadata.helpers import normalize_value
 from fastybird_metadata.types import (
     ButtonPayload,
     ControlAction,
@@ -57,7 +56,10 @@ from kink import inject
 # Library libs
 from fastybird_fb_mqtt_connector.clients.client import IClient
 from fastybird_fb_mqtt_connector.consumers.consumer import Consumer
-from fastybird_fb_mqtt_connector.entities import FbMqttDeviceEntity
+from fastybird_fb_mqtt_connector.entities import (
+    FbMqttConnectorEntity,
+    FbMqttDeviceEntity,
+)
 from fastybird_fb_mqtt_connector.events.listeners import EventsListener
 from fastybird_fb_mqtt_connector.logger import Logger
 from fastybird_fb_mqtt_connector.registry.model import (
@@ -87,8 +89,6 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     __connector_id: uuid.UUID
 
-    __devices_repository: DevicesRepository
-
     __consumer: Consumer
     __client: Optional[IClient] = None
 
@@ -113,7 +113,6 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
     def __init__(  # pylint: disable=too-many-arguments
         self,
         connector_id: uuid.UUID,
-        devices_repository: DevicesRepository,
         consumer: Consumer,
         client: Optional[IClient],
         devices_registry: DevicesRegistry,
@@ -124,8 +123,6 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         logger: Union[Logger, logging.Logger] = logging.getLogger("dummy"),
     ) -> None:
         self.__connector_id = connector_id
-
-        self.__devices_repository = devices_repository
 
         self.__client = client
         self.__consumer = consumer
@@ -141,11 +138,11 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     # -----------------------------------------------------------------------------
 
-    def initialize(self, settings: Optional[Dict] = None) -> None:
+    def initialize(self, connector: FbMqttConnectorEntity) -> None:
         """Set connector to initial state"""
         self.__devices_registry.reset()
 
-        for device in self.__devices_repository.get_all_by_connector(connector_id=self.__connector_id):
+        for device in connector.devices:
             self.initialize_device(device=device)
 
     # -----------------------------------------------------------------------------
@@ -383,6 +380,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
                     data_type=property_item.data_type,
                     value=data.get("expected_value", None),
                     value_format=property_item.format,
+                    value_invalid=property_item.invalid,
                 )
 
             else:

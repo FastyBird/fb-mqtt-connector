@@ -20,7 +20,7 @@ FastyBird MQTT connector api module parser for API v1
 
 # Python base dependencies
 import re
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 # Library libs
 from fastybird_fb_mqtt_connector.api.v1validator import V1Validator

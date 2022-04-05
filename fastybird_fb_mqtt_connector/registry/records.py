@@ -24,8 +24,8 @@ from datetime import datetime
 from typing import List, Optional, Set, Tuple, Union
 
 # Library dependencies
+from fastybird_devices_module.utils import normalize_value
 from fastybird_metadata.devices_module import ConnectionState
-from fastybird_metadata.helpers import normalize_value
 from fastybird_metadata.types import ButtonPayload, DataType, SwitchPayload
 
 
@@ -450,7 +450,12 @@ class ChannelPropertyRecord:  # pylint: disable=too-many-instance-attributes
     @property
     def actual_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
         """Property actual value"""
-        return normalize_value(data_type=self.data_type, value=self.__actual_value, value_format=self.format)
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__actual_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
 
     # -----------------------------------------------------------------------------
 
@@ -468,7 +473,12 @@ class ChannelPropertyRecord:  # pylint: disable=too-many-instance-attributes
     @property
     def expected_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
         """Property expected value"""
-        return normalize_value(data_type=self.data_type, value=self.__expected_value, value_format=self.format)
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__expected_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
 
     # -----------------------------------------------------------------------------
 
@@ -654,7 +664,12 @@ class DevicePropertyRecord:  # pylint: disable=too-many-instance-attributes
     @property
     def actual_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
         """Property actual value"""
-        return normalize_value(data_type=self.data_type, value=self.__actual_value, value_format=self.format)
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__actual_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
 
     # -----------------------------------------------------------------------------
 
@@ -672,7 +687,12 @@ class DevicePropertyRecord:  # pylint: disable=too-many-instance-attributes
     @property
     def expected_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
         """Property expected value"""
-        return normalize_value(data_type=self.data_type, value=self.__expected_value, value_format=self.format)
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__expected_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
 
     # -----------------------------------------------------------------------------
 

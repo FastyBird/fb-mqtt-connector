@@ -192,7 +192,7 @@ def create_connector(
     di["fb-mqtt-connector_events-listener"] = di[EventsListener]
 
     # Main connector service
-    connector_service = FbMqttConnector(  # type: ignore[call-arg]
+    connector_service = FbMqttConnector(
         connector_id=connector.id,
         consumer=di[Consumer],
         client=client,
