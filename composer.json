@@ -40,7 +40,7 @@
     "php": ">=7.4.0|>=8.0.0",
     "binsoul/net-mqtt": "^0.8",
     "cweagans/composer-patches": "^1.7",
-    "fastybird/devices-module": "^0.54",
+    "fastybird/devices-module": "^0.56",
     "fastybird/json-api": "^0.10",
     "fastybird/metadata": "^0.53",
     "nette/bootstrap": "^3.1",
