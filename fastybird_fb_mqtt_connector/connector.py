@@ -19,6 +19,7 @@ FastyBird MQTT connector module
 """
 
 # Python base dependencies
+import asyncio
 import logging
 import uuid
 from datetime import datetime
@@ -346,6 +347,9 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         # Continue processing devices
         if self.__client is not None:
             self.__client.handle()
+
+        # Be gentle to server
+        await asyncio.sleep(0.01)
 
     # -----------------------------------------------------------------------------
 
