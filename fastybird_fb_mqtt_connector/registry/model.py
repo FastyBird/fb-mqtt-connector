@@ -46,6 +46,7 @@ from fastybird_fb_mqtt_connector.events.events import (
     DevicePropertyRecordCreatedOrUpdatedEvent,
     DevicePropertyRecordDeletedEvent,
     DeviceRecordCreatedOrUpdatedEvent,
+    DeviceStateChangedEvent,
 )
 from fastybird_fb_mqtt_connector.exceptions import InvalidStateException
 from fastybird_fb_mqtt_connector.registry.records import (
@@ -116,21 +117,19 @@ class DevicesRegistry:
         device_id: uuid.UUID,
         device_identifier: str,
         device_name: Optional[str],
-        device_enabled: bool,
         device_state: ConnectionState = ConnectionState.UNKNOWN,
         hardware_manufacturer: Optional[str] = None,
         hardware_model: Optional[str] = None,
         hardware_version: Optional[str] = None,
         firmware_manufacturer: Optional[str] = None,
         firmware_version: Optional[str] = None,
-        controls: Optional[List[str]] = None,
+        controls: Union[List[str], None] = None,
     ) -> DeviceRecord:
         """Append device record into registry"""
         device_record = DeviceRecord(
             device_id=device_id,
             device_identifier=device_identifier,
             device_name=device_name,
-            device_enabled=device_enabled,
             device_state=device_state,
             hardware_manufacturer=hardware_manufacturer,
             hardware_model=hardware_model,
@@ -151,24 +150,24 @@ class DevicesRegistry:
         device_id: uuid.UUID,
         device_identifier: str,
         device_name: Optional[str],
-        device_enabled: bool,
         hardware_manufacturer: Optional[str] = None,
         hardware_model: Optional[str] = None,
         hardware_version: Optional[str] = None,
         firmware_manufacturer: Optional[str] = None,
         firmware_version: Optional[str] = None,
+        controls: Union[List[str], None] = None,
     ) -> DeviceRecord:
         """Create or update device record"""
         device_record = self.append(
             device_id=device_id,
             device_identifier=device_identifier,
             device_name=device_name,
-            device_enabled=device_enabled,
             hardware_manufacturer=hardware_manufacturer,
             hardware_model=hardware_model,
             hardware_version=hardware_version,
             firmware_manufacturer=firmware_manufacturer,
             firmware_version=firmware_version,
+            controls=controls,
         )
 
         self.__event_dispatcher.dispatch(
@@ -225,6 +224,11 @@ class DevicesRegistry:
 
         if updated_device is None:
             raise InvalidStateException("Device record could not be re-fetched from registry after update")
+
+        self.__event_dispatcher.dispatch(
+            event_id=DeviceStateChangedEvent.EVENT_NAME,
+            event=DeviceStateChangedEvent(record=updated_device),
+        )
 
         return updated_device
 
@@ -340,12 +344,13 @@ class ChannelsRegistry:
 
     # -----------------------------------------------------------------------------
 
-    def append(
+    def append(  # pylint: disable=too-many-arguments
         self,
         device_id: uuid.UUID,
         channel_id: uuid.UUID,
         channel_identifier: str,
         channel_name: Optional[str] = None,
+        controls: Union[List[str], None] = None,
     ) -> ChannelRecord:
         """Append channel record into registry"""
         channel_record: ChannelRecord = ChannelRecord(
@@ -353,6 +358,7 @@ class ChannelsRegistry:
             channel_id=channel_id,
             channel_identifier=channel_identifier,
             channel_name=channel_name,
+            controls=controls,
         )
 
         self.__items[channel_record.id.__str__()] = channel_record
@@ -361,12 +367,13 @@ class ChannelsRegistry:
 
     # -----------------------------------------------------------------------------
 
-    def create_or_update(
+    def create_or_update(  # pylint: disable=too-many-arguments
         self,
         device_id: uuid.UUID,
         channel_id: uuid.UUID,
         channel_identifier: str,
         channel_name: Optional[str] = None,
+        controls: Union[List[str], None] = None,
     ) -> ChannelRecord:
         """Create or update channel record"""
         channel_record = self.append(
@@ -374,6 +381,7 @@ class ChannelsRegistry:
             channel_id=channel_id,
             channel_identifier=channel_identifier,
             channel_name=channel_name,
+            controls=controls,
         )
 
         self.__event_dispatcher.dispatch(
@@ -536,7 +544,7 @@ class ChannelsPropertiesRegistry:
                     property_record.expected_value = stored_state.expected_value
                     property_record.expected_pending = stored_state.pending
 
-            except NotImplementedError:
+            except (NotImplementedError, AttributeError):
                 pass
 
         self.__items[property_record.id.__str__()] = property_record
@@ -635,7 +643,7 @@ class ChannelsPropertiesRegistry:
         updated_channel_property = self.get_by_id(property_id=channel_property.id)
 
         if updated_channel_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Channel property record could not be re-fetched from registry after update")
 
         self.__event_dispatcher.dispatch(
             event_id=ChannelPropertyActualValueEvent.EVENT_NAME,
@@ -655,6 +663,8 @@ class ChannelsPropertiesRegistry:
         value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None],
     ) -> ChannelPropertyRecord:
         """Set property expected value"""
+        existing_record = self.get_by_id(property_id=channel_property.id)
+
         channel_property.expected_value = value
 
         self.__update(channel_property=channel_property)
@@ -662,7 +672,15 @@ class ChannelsPropertiesRegistry:
         updated_channel_property = self.get_by_id(channel_property.id)
 
         if updated_channel_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Channel property record could not be re-fetched from registry after update")
+
+        self.__event_dispatcher.dispatch(
+            event_id=ChannelPropertyActualValueEvent.EVENT_NAME,
+            event=ChannelPropertyActualValueEvent(
+                original_record=existing_record,
+                updated_record=updated_channel_property,
+            ),
+        )
 
         return updated_channel_property
 
@@ -670,6 +688,8 @@ class ChannelsPropertiesRegistry:
 
     def set_expected_pending(self, channel_property: ChannelPropertyRecord, timestamp: float) -> ChannelPropertyRecord:
         """Set property expected value transmit timestamp"""
+        existing_record = self.get_by_id(property_id=channel_property.id)
+
         channel_property.expected_pending = timestamp
 
         self.__update(channel_property=channel_property)
@@ -677,7 +697,15 @@ class ChannelsPropertiesRegistry:
         updated_channel_property = self.get_by_id(channel_property.id)
 
         if updated_channel_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Channel property record could not be re-fetched from registry after update")
+
+        self.__event_dispatcher.dispatch(
+            event_id=ChannelPropertyActualValueEvent.EVENT_NAME,
+            event=ChannelPropertyActualValueEvent(
+                original_record=existing_record,
+                updated_record=updated_channel_property,
+            ),
+        )
 
         return updated_channel_property
 
@@ -837,7 +865,7 @@ class DevicesPropertiesRegistry:
                     property_record.expected_value = stored_state.expected_value
                     property_record.expected_pending = stored_state.pending
 
-            except NotImplementedError:
+            except (NotImplementedError, AttributeError):
                 pass
 
         self.__items[property_record.id.__str__()] = property_record
@@ -936,7 +964,7 @@ class DevicesPropertiesRegistry:
         updated_device_property = self.get_by_id(property_id=device_property.id)
 
         if updated_device_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Device property record could not be re-fetched from registry after update")
 
         self.__event_dispatcher.dispatch(
             event_id=DevicePropertyActualValueEvent.EVENT_NAME,
@@ -956,6 +984,8 @@ class DevicesPropertiesRegistry:
         value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None],
     ) -> DevicePropertyRecord:
         """Set property expected value"""
+        existing_record = self.get_by_id(property_id=device_property.id)
+
         device_property.expected_value = value
 
         self.__update(device_property=device_property)
@@ -963,7 +993,15 @@ class DevicesPropertiesRegistry:
         updated_device_property = self.get_by_id(device_property.id)
 
         if updated_device_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Device property record could not be re-fetched from registry after update")
+
+        self.__event_dispatcher.dispatch(
+            event_id=DevicePropertyActualValueEvent.EVENT_NAME,
+            event=DevicePropertyActualValueEvent(
+                original_record=existing_record,
+                updated_record=updated_device_property,
+            ),
+        )
 
         return updated_device_property
 
@@ -971,6 +1009,8 @@ class DevicesPropertiesRegistry:
 
     def set_expected_pending(self, device_property: DevicePropertyRecord, timestamp: float) -> DevicePropertyRecord:
         """Set property expected value transmit timestamp"""
+        existing_record = self.get_by_id(property_id=device_property.id)
+
         device_property.expected_pending = timestamp
 
         self.__update(device_property=device_property)
@@ -978,7 +1018,15 @@ class DevicesPropertiesRegistry:
         updated_device_property = self.get_by_id(device_property.id)
 
         if updated_device_property is None:
-            raise InvalidStateException("property record could not be re-fetched from registry after update")
+            raise InvalidStateException("Device property record could not be re-fetched from registry after update")
+
+        self.__event_dispatcher.dispatch(
+            event_id=DevicePropertyActualValueEvent.EVENT_NAME,
+            event=DevicePropertyActualValueEvent(
+                original_record=existing_record,
+                updated_record=updated_device_property,
+            ),
+        )
 
         return updated_device_property
 

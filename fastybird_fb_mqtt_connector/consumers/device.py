@@ -98,8 +98,6 @@ class DeviceAttributeItemConsumer(IConsumer):  # pylint: disable=too-few-public-
                 "device_id": device.id,
                 "device_identifier": device.identifier,
                 "device_name": device.name,
-                "device_enabled": device.enabled,
-                "device_state": device.state,
                 "hardware_manufacturer": device.hardware_manufacturer,
                 "hardware_model": device.hardware_model,
                 "hardware_version": device.hardware_version,
@@ -209,18 +207,16 @@ class DeviceHardwareItemConsumer(IConsumer):  # pylint: disable=too-few-public-m
             "device_id": device.id,
             "device_identifier": device.identifier,
             "device_name": device.name,
-            "device_enabled": device.enabled,
-            "device_state": device.state,
             "hardware_manufacturer": device.hardware_manufacturer,
             "hardware_model": device.hardware_model,
             "hardware_version": device.hardware_version,
             "firmware_manufacturer": device.firmware_manufacturer,
             "firmware_version": device.firmware_version,
-            "controls": device.controls,
         }
 
         if entity.parameter == HardwareEntity.MAC_ADDRESS:
-            to_update["hardware_mac_address"] = entity.value
+            # to_update["hardware_mac_address"] = entity.value
+            pass
 
         elif entity.parameter == HardwareEntity.MANUFACTURER:
             to_update["hardware_manufacturer"] = entity.value
@@ -283,14 +279,11 @@ class DeviceFirmwareItemConsumer(IConsumer):  # pylint: disable=too-few-public-m
             "device_id": device.id,
             "device_identifier": device.identifier,
             "device_name": device.name,
-            "device_enabled": device.enabled,
-            "device_state": device.state,
             "hardware_manufacturer": device.hardware_manufacturer,
             "hardware_model": device.hardware_model,
             "hardware_version": device.hardware_version,
             "firmware_manufacturer": device.firmware_manufacturer,
             "firmware_version": device.firmware_version,
-            "controls": device.controls,
         }
 
         if entity.parameter == FirmwareEntity.MANUFACTURER:

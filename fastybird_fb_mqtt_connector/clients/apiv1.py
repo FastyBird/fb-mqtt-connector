@@ -135,12 +135,6 @@ class ApiV1Client(Client, IClient):  # pylint: disable=too-many-instance-attribu
 
     # -----------------------------------------------------------------------------
 
-    def is_connected(self) -> bool:
-        """Check if client is connected to broker"""
-        return self.is_connected()
-
-    # -----------------------------------------------------------------------------
-
     def start(self) -> None:
         """Start communication"""
         if self.__server_username is not None:
@@ -166,9 +160,6 @@ class ApiV1Client(Client, IClient):  # pylint: disable=too-many-instance-attribu
     def handle(self) -> None:
         """Handle connector devices"""
         for device in self.__devices_registry:
-            if not device.enabled:
-                continue
-
             if device.id.__str__() not in self.__processed_devices:
                 self.__process_device(device=device)
 

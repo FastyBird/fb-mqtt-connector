@@ -168,7 +168,7 @@ def create_connector(
     if connector.protocol == ProtocolVersion.V1:
         di[ApiV1Client] = ApiV1Client(
             connector_id=connector.id,
-            server_host=connector.host,
+            server_host=connector.server,
             server_port=connector.port,
             server_username=connector.username,
             server_password=connector.password,
@@ -180,7 +180,7 @@ def create_connector(
             consumer=di[Consumer],
             logger=connector_logger,
         )
-        di["fb-mqtt-connector_clients-proxy"] = di[ApiV1Client]
+        di["fb-mqtt-connector_client_api_v1"] = di[ApiV1Client]
 
         client = di[ApiV1Client]
 

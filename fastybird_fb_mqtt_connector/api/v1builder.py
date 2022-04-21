@@ -32,6 +32,7 @@ class V1Builder:
     @author         Adam Kadlec <adam.kadlec@fastybird.com>
     """
 
+    BROADCAST_TOPIC = "/fb/v1/$broadcast/{ACTION}"
     DEVICE_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$property/{IDENTIFIER}/set"
     DEVICE_CONTROL_TOPIC = "/fb/v1/{DEVICE_ID}/$control/{CONTROL}/set"
     CHANNEL_PROPERTY_TOPIC = "/fb/v1/{DEVICE_ID}/$channel/{CHANNEL_ID}/$property/{IDENTIFIER}/set"

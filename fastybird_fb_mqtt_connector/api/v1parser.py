@@ -163,7 +163,7 @@ class V1Parser:
         payload: str,
     ) -> HardwareEntity:
         """Parse device hardware info topic & value"""
-        result = re.findall(V1Validator.DEVICE_ATTRIBUTE_REGEXP, topic)
+        result = re.findall(V1Validator.DEVICE_HW_INFO_REGEXP, topic)
         device, hardware = result.pop()
 
         return HardwareEntity(

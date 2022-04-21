@@ -51,7 +51,6 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
     __firmware_manufacturer: Optional[str] = None
     __firmware_version: Optional[str] = None
 
-    __enabled: bool = False
     __state: ConnectionState = ConnectionState.UNKNOWN
 
     __controls: Set[str] = set()
@@ -65,19 +64,17 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
         device_id: uuid.UUID,
         device_identifier: str,
         device_name: Optional[str],
-        device_enabled: bool = False,
         device_state: ConnectionState = ConnectionState.UNKNOWN,
         hardware_manufacturer: Optional[str] = None,
         hardware_model: Optional[str] = None,
         hardware_version: Optional[str] = None,
         firmware_manufacturer: Optional[str] = None,
         firmware_version: Optional[str] = None,
-        controls: Optional[List[str]] = None,
+        controls: Union[List[str], None] = None,
     ) -> None:
         self.__id = device_id
         self.__identifier = device_identifier
         self.__name = device_name
-        self.__enabled = device_enabled
         self.__state = device_state
 
         self.__hardware_manufacturer = hardware_manufacturer
@@ -111,20 +108,6 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
     def name(self) -> Optional[str]:
         """Device name"""
         return self.__name
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def enabled(self) -> bool:
-        """Is device enabled?"""
-        return self.__enabled
-
-    # -----------------------------------------------------------------------------
-
-    @enabled.setter
-    def enabled(self, enabled: bool) -> None:
-        """Enable or disable device"""
-        self.__enabled = enabled
 
     # -----------------------------------------------------------------------------
 
@@ -206,7 +189,6 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
             self.id == other.id
             and self.identifier == other.identifier
             and self.name == other.name
-            and self.enabled == other.enabled
             and self.hardware_manufacturer == other.hardware_manufacturer
             and self.hardware_model == other.hardware_model
             and self.hardware_version == other.hardware_version
@@ -248,7 +230,7 @@ class ChannelRecord:
         channel_id: uuid.UUID,
         channel_identifier: str,
         channel_name: Optional[str] = None,
-        controls: Optional[List[str]] = None,
+        controls: Union[List[str], None] = None,
     ) -> None:
         self.__device_id = device_id
 

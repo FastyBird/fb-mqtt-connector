@@ -39,10 +39,10 @@ class V1Validator:
     API_VERSION_REGEXP = r"^\/fb\/v1\/.*$"
 
     # TOPIC: /fb/v1/<device>/$channel/<channel>/*
-    CHANNEL_PARTIAL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$"
+    CHANNEL_PARTIAL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9_]+)\/.*$"
 
-    # TOPIC: /fb/v1/<device>/<$state|$name|$properties|$control|$channels|$extensions>
-    DEVICE_ATTRIBUTE_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$"
+    # TOPIC: /fb/v1/<device>/<$state|$name|$properties|$controls|$channels|$extensions>
+    DEVICE_ATTRIBUTE_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|controls|channels|extensions)$"
 
     # TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
     DEVICE_HW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$"
@@ -59,16 +59,16 @@ class V1Validator:
     # TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>
     DEVICE_CONTROL_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$control\/([a-z0-9-]+)?$"
 
-    # TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$control>
-    CHANNEL_ATTRIBUTE_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|control)$"
+    # TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$controls>
+    CHANNEL_ATTRIBUTE_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$(name|properties|controls)$"
     # TOPIC: /fb/v1/*/$channel/<channel>/$property/<property>
     # [/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
     CHANNEL_PROPERTY_REGEXP = (
-        r"\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)(\/\$("
+        r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$property\/([a-z0-9-]+)(\/\$("
         r"name|type|settable|queryable|data-type|format|unit))?$"
     )
     # TOPIC: /fb/v1/*/$channel/<channel>/$property/<property>/set
-    CHANNEL_PROPERTY_SET_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)\/set?$"
+    CHANNEL_PROPERTY_SET_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$property\/([a-z0-9-]+)\/set?$"
 
     # -----------------------------------------------------------------------------
 

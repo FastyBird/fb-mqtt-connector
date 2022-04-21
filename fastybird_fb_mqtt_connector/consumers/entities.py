@@ -38,7 +38,7 @@ def clean_name(name: str) -> str:
 
 def clean_payload(payload: str) -> str:
     """Clean payload value"""
-    return re.sub(r"[^A-Za-z0-9.:_°, -%µ³/\"]", "", payload)
+    return re.sub(r"[^A-Za-z0-9.:_°, %µ³/\"-]", "", payload)
 
 
 class BaseEntity(ABC):
@@ -110,7 +110,7 @@ class AttributeEntity(BaseEntity):
         value: str,
     ) -> None:
         if attribute not in self.allowed_attributes:
-            raise AttributeError(f"Provided attribute '{attribute}' is not in allowed range")
+            raise AttributeError(f"Attribute '{attribute}' is not valid")
 
         super().__init__(device=device)
 
@@ -256,7 +256,7 @@ class HardwareEntity(BaseEntity):
         value: str,
     ) -> None:
         if parameter not in self.allowed_parameters:
-            raise AttributeError(f"Provided hardware attribute '{parameter}' is not in allowed range")
+            raise AttributeError(f"Hardware attribute '{parameter}' is not valid")
 
         super().__init__(device=device)
 
@@ -315,7 +315,7 @@ class FirmwareEntity(BaseEntity):
         value: str,
     ) -> None:
         if parameter not in self.allowed_parameters:
-            raise AttributeError(f"Provided firmware attribute '{parameter}' is not in allowed range")
+            raise AttributeError(f"Firmware attribute '{parameter}' is not valid")
 
         super().__init__(device=device)
 
@@ -371,6 +371,7 @@ class PropertyEntity(BaseEntity):
         super().__init__(device=device)
 
         self.__name = name
+        self.__attributes = set()
 
     # -----------------------------------------------------------------------------
 
@@ -473,13 +474,15 @@ class PropertyAttributeEntity(ABC):
     ]
 
     __attribute: str
-    __value: Union[str, bool, Tuple[float, float], List[str], DataType, None] = None
+    __value: Union[
+        str, bool, Tuple[float, float], List[Union[str, Tuple[str, Optional[str], Optional[str]]]], DataType, None
+    ] = None
 
     # -----------------------------------------------------------------------------
 
     def __init__(self, attribute: str, value: str) -> None:
         if attribute not in self.allowed_attributes:
-            raise AttributeError(f"Provided property parameter '{attribute}' is not in allowed range")
+            raise AttributeError(f"Property attribute: '{attribute}' is not valid")
 
         self.__attribute = attribute
         self.__parse_value(value=value)
@@ -494,14 +497,12 @@ class PropertyAttributeEntity(ABC):
     # -----------------------------------------------------------------------------
 
     @property
-    def value(self) -> Union[str, bool, Tuple[float, float], List[str], DataType, None]:
+    def value(
+        self,
+    ) -> Union[
+        str, bool, DataType, Tuple[float, float], List[Union[str, Tuple[str, Optional[str], Optional[str]]]], None
+    ]:
         """Entity value"""
-        if self.__value is None:
-            return None
-
-        if self.attribute in (self.SETTABLE, self.QUERYABLE):
-            return self.__value == "true"
-
         return self.__value
 
     # -----------------------------------------------------------------------------
@@ -523,14 +524,21 @@ class PropertyAttributeEntity(ABC):
     def __parse_value(self, value: str) -> None:  # pylint: disable=too-many-branches
         cleaned_value = clean_payload(value)
 
-        if self.attribute in (
+        if self.attribute in (PropertyAttributeEntity.NAME, PropertyAttributeEntity.UNIT):
+            if self.attribute == PropertyAttributeEntity.NAME:
+                self.__value = clean_name(cleaned_value)
+
+            else:
+                self.__value = cleaned_value
+
+            if cleaned_value == "":
+                self.__value = None
+
+        elif self.attribute in (
             PropertyAttributeEntity.SETTABLE,
             PropertyAttributeEntity.QUERYABLE,
         ):
             self.__value = cleaned_value.lower() == "true"
-
-        elif self.attribute == PropertyAttributeEntity.NAME:
-            self.__value = clean_name(cleaned_value)
 
         elif self.attribute == PropertyAttributeEntity.DATA_TYPE:
             if not DataType.has_value(cleaned_value):
@@ -539,8 +547,8 @@ class PropertyAttributeEntity(ABC):
             self.__value = DataType(cleaned_value)
 
         elif self.attribute == PropertyAttributeEntity.FORMAT:
-            if len(re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":")) == 1:
-                start, end = re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", ":").pop()
+            if len(re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", cleaned_value)) == 1:
+                start, end = re.findall(r"([a-zA-Z0-9]+)?:([a-zA-Z0-9]+)?", cleaned_value).pop()
 
                 if start and start.isnumeric() is False:
                     raise ParsePayloadException("Provided payload is not valid")
@@ -562,7 +570,7 @@ class PropertyAttributeEntity(ABC):
 
                 self.__value = list(set(cleaned_value_parts))
 
-            elif cleaned_value == "none" or cleaned_value is False:
+            elif cleaned_value in ("none", ""):
                 self.__value = None
 
             elif cleaned_value not in PropertyAttributeEntity.FORMAT_ALLOWED_PAYLOADS:

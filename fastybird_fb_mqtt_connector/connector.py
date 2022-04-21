@@ -159,7 +159,6 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
             device_id=device.id,
             device_identifier=device.identifier,
             device_name=device.name,
-            device_enabled=device.enabled,
             hardware_manufacturer=device.hardware_manufacturer.value
             if isinstance(device.hardware_manufacturer, HardwareManufacturer)
             else device.hardware_manufacturer,
@@ -305,6 +304,9 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
             # ...set device state to unknown
             self.__devices_registry.set_state(device=device, state=ConnectionState.UNKNOWN)
 
+        if self.__client is not None:
+            self.__client.start()
+
         self.__logger.info("Connector has been started")
 
         self.__stopped = False
@@ -316,6 +318,9 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     def stop(self) -> None:
         """Close all opened connections & stop connector"""
+        if self.__client is not None:
+            self.__client.stop()
+
         # When connector is closing...
         for device in self.__devices_registry:
             # ...set device state to disconnected
@@ -354,9 +359,6 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
             elif isinstance(property_item, ChannelDynamicPropertyEntity):
                 property_record = self.__channels_properties_registry.get_by_id(property_id=property_item.id)
-
-            if property_record is None:
-                return
 
             if property_record is None:
                 return

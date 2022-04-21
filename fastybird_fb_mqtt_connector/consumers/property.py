@@ -106,23 +106,23 @@ class PropertyItemConsumer(IConsumer, ABC):  # pylint: disable=too-few-public-me
         }
 
         for attribute in entity.attributes:
-            if attribute.attribute == PropertyAttributeEntity.NAME:
-                to_update["property_name"] = entity.value
+            if attribute.attribute in PropertyAttributeEntity.NAME:
+                to_update["property_name"] = attribute.value
 
             if attribute.attribute == PropertyAttributeEntity.QUERYABLE:
-                to_update["property_queryable"] = str(entity.value).lower() == "true"
+                to_update["property_queryable"] = attribute.value
 
             if attribute.attribute == PropertyAttributeEntity.SETTABLE:
-                to_update["property_settable"] = str(entity.value).lower() == "true"
+                to_update["property_settable"] = attribute.value
 
-            if attribute.attribute == PropertyAttributeEntity.DATA_TYPE and DataType.has_value(str(entity.value)):
-                to_update["property_data_type"] = DataType(str(entity.value)).value
+            if attribute.attribute == PropertyAttributeEntity.DATA_TYPE:
+                to_update["property_data_type"] = attribute.value
 
             if attribute.attribute == PropertyAttributeEntity.UNIT:
-                to_update["property_unit"] = entity.value
+                to_update["property_unit"] = attribute.value
 
             if attribute.attribute == PropertyAttributeEntity.FORMAT:
-                to_update["property_value_format"] = entity.value
+                to_update["property_value_format"] = attribute.value
 
         return to_update
 

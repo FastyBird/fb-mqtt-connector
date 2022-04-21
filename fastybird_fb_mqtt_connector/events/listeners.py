@@ -18,17 +18,17 @@
 FastyBird MQTT connector events module listeners
 """
 
+# pylint: disable=too-many-lines
+
 # Python base dependencies
 import logging
 import uuid
-from typing import Union
+from datetime import datetime
+from typing import Dict, Union
 
 # Library dependencies
 from fastybird_devices_module.entities.channel import ChannelDynamicPropertyEntity
-from fastybird_devices_module.entities.device import (
-    DeviceDynamicPropertyEntity,
-    DeviceStaticPropertyEntity,
-)
+from fastybird_devices_module.entities.device import DeviceDynamicPropertyEntity
 from fastybird_devices_module.managers.channel import (
     ChannelControlsManager,
     ChannelPropertiesManager,
@@ -57,8 +57,9 @@ from fastybird_devices_module.repositories.state import (
     ChannelPropertiesStatesRepository,
     DevicePropertiesStatesRepository,
 )
+from fastybird_devices_module.utils import normalize_value
 from fastybird_metadata.devices_module import ConnectionState, DevicePropertyName
-from fastybird_metadata.types import DataType
+from fastybird_metadata.types import ButtonPayload, DataType, SwitchPayload
 from kink import inject
 from whistle import Event, EventDispatcher
 
@@ -117,6 +118,8 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
     __event_dispatcher: EventDispatcher
 
     __logger: Union[Logger, logging.Logger]
+
+    __UPDATE_ALL_EVENTS: bool = True
 
     # -----------------------------------------------------------------------------
 
@@ -299,7 +302,6 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
             "id": event.record.id,
             "identifier": event.record.identifier,
             "name": event.record.name,
-            "enabled": event.record.enabled,
             "hardware_manufacturer": event.record.hardware_manufacturer,
             "hardware_model": event.record.hardware_model,
             "hardware_version": event.record.hardware_version,
@@ -525,7 +527,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
 
         else:
             device_property = self.__devices_properties_manager.update(
-                data=device_property,
+                data=property_data,
                 device_property=device_property,
             )
 
@@ -610,7 +612,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
 
         else:
             channel_property = self.__channels_properties_manager.update(
-                data=channel_property,
+                data=property_data,
                 channel_property=channel_property,
             )
 
@@ -664,10 +666,24 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         device_property = self.__devices_properties_repository.get_by_id(property_id=event.updated_record.id)
 
         if device_property is not None:
+            actual_value = (
+                event.updated_record.actual_value
+                if isinstance(event.updated_record.actual_value, (str, int, float, bool))
+                or event.updated_record.actual_value is None
+                else str(event.updated_record.actual_value)
+            )
+            expected_value = (
+                event.updated_record.expected_value
+                if isinstance(event.updated_record.expected_value, (str, int, float, bool))
+                or event.updated_record.expected_value is None
+                else str(event.updated_record.expected_value)
+            )
+
             state_data = {
                 "actual_value": event.updated_record.actual_value,
                 "expected_value": event.updated_record.expected_value,
-                "pending": event.updated_record.expected_pending is not None,
+                "pending": actual_value != expected_value and expected_value is not None,
+                "valid": True,
             }
 
             try:
@@ -710,36 +726,44 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                 )
 
             else:
-                try:
-                    property_state = self.__devices_properties_states_manager.update(
-                        device_property=device_property,
-                        state=property_state,
-                        data=state_data,
-                    )
-
-                except NotImplementedError:
-                    self.__logger.warning("States manager is not configured. State could not be saved")
-
-                    return
-
-                self.__logger.debug(
-                    "Updating existing channel property state",
-                    extra={
-                        "device": {
-                            "id": device_property.device.id.__str__(),
-                        },
-                        "property": {
-                            "id": device_property.id.__str__(),
-                        },
-                        "state": {
-                            "id": property_state.id.__str__(),
-                            "actual_value": property_state.actual_value,
-                            "expected_value": property_state.expected_value,
-                            "pending": property_state.pending,
-                            "valid": property_state.valid,
-                        },
-                    },
+                stored_value = normalize_value(
+                    data_type=device_property.data_type,
+                    value=property_state.actual_value,
+                    value_format=device_property.format,
+                    value_invalid=device_property.invalid,
                 )
+
+                if self.__UPDATE_ALL_EVENTS or stored_value != event.updated_record.actual_value:
+                    try:
+                        property_state = self.__devices_properties_states_manager.update(
+                            device_property=device_property,
+                            state=property_state,
+                            data=state_data,
+                        )
+
+                    except NotImplementedError:
+                        self.__logger.warning("States manager is not configured. State could not be saved")
+
+                        return
+
+                    self.__logger.debug(
+                        "Updating existing channel property state",
+                        extra={
+                            "device": {
+                                "id": device_property.device.id.__str__(),
+                            },
+                            "property": {
+                                "id": device_property.id.__str__(),
+                            },
+                            "state": {
+                                "id": property_state.id.__str__(),
+                                "actual_value": property_state.actual_value,
+                                "expected_value": property_state.expected_value,
+                                "pending": property_state.pending,
+                                "valid": property_state.valid,
+                            },
+                        },
+                    )
 
     # -----------------------------------------------------------------------------
 
@@ -750,10 +774,23 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         channel_property = self.__channels_properties_repository.get_by_id(property_id=event.updated_record.id)
 
         if channel_property is not None:
+            actual_value = (
+                event.updated_record.actual_value
+                if isinstance(event.updated_record.actual_value, (str, int, float, bool))
+                or event.updated_record.actual_value is None
+                else str(event.updated_record.actual_value)
+            )
+            expected_value = (
+                event.updated_record.expected_value
+                if isinstance(event.updated_record.expected_value, (str, int, float, bool))
+                or event.updated_record.expected_value is None
+                else str(event.updated_record.expected_value)
+            )
+
             state_data = {
                 "actual_value": event.updated_record.actual_value,
                 "expected_value": event.updated_record.expected_value,
-                "pending": event.updated_record.expected_pending is not None,
+                "pending": actual_value != expected_value and expected_value is not None,
                 "valid": True,
             }
 
@@ -800,39 +837,47 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                 )
 
             else:
-                try:
-                    property_state = self.__channels_properties_states_manager.update(
-                        channel_property=channel_property,
-                        state=property_state,
-                        data=state_data,
-                    )
-
-                except NotImplementedError:
-                    self.__logger.warning("States manager is not configured. State could not be saved")
-
-                    return
-
-                self.__logger.debug(
-                    "Updating existing channel property state",
-                    extra={
-                        "device": {
-                            "id": channel_property.channel.device.id.__str__(),
-                        },
-                        "channel": {
-                            "id": channel_property.channel.id.__str__(),
-                        },
-                        "property": {
-                            "id": channel_property.id.__str__(),
-                        },
-                        "state": {
-                            "id": property_state.id.__str__(),
-                            "actual_value": property_state.actual_value,
-                            "expected_value": property_state.expected_value,
-                            "pending": property_state.pending,
-                            "valid": property_state.valid,
-                        },
-                    },
+                stored_value = normalize_value(
+                    data_type=channel_property.data_type,
+                    value=property_state.actual_value,
+                    value_format=channel_property.format,
+                    value_invalid=channel_property.invalid,
                 )
+
+                if self.__UPDATE_ALL_EVENTS or stored_value != event.updated_record.actual_value:
+                    try:
+                        property_state = self.__channels_properties_states_manager.update(
+                            channel_property=channel_property,
+                            state=property_state,
+                            data=state_data,
+                        )
+
+                    except NotImplementedError:
+                        self.__logger.warning("States manager is not configured. State could not be saved")
+
+                        return
+
+                    self.__logger.debug(
+                        "Updating existing channel property state",
+                        extra={
+                            "device": {
+                                "id": channel_property.channel.device.id.__str__(),
+                            },
+                            "channel": {
+                                "id": channel_property.channel.id.__str__(),
+                            },
+                            "property": {
+                                "id": channel_property.id.__str__(),
+                            },
+                            "state": {
+                                "id": property_state.id.__str__(),
+                                "actual_value": property_state.actual_value,
+                                "expected_value": property_state.expected_value,
+                                "pending": property_state.pending,
+                                "valid": property_state.valid,
+                            },
+                        },
+                    )
 
     # -----------------------------------------------------------------------------
 
@@ -852,7 +897,9 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
 
         if state_property is None:
             property_data = {
+                "device_id": device.id,
                 "identifier": DevicePropertyName.STATE.value,
+                "name": DevicePropertyName.STATE.value,
                 "data_type": DataType.ENUM,
                 "format": [
                     ConnectionState.CONNECTED.value,
@@ -870,12 +917,11 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                 "invalid": None,
                 "queryable": False,
                 "settable": False,
-                "value": device.state.value,
             }
 
             state_property = self.__devices_properties_manager.create(
                 data=property_data,
-                property_type=DeviceStaticPropertyEntity,
+                property_type=DeviceDynamicPropertyEntity,
             )
 
             self.__logger.debug(
@@ -890,22 +936,80 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                 },
             )
 
-        else:
-            property_data = {"value": device.state.value}
+        try:
+            state_property_state = self.__devices_properties_states_repository.get_by_id(property_id=state_property.id)
 
-            state_property = self.__devices_properties_manager.update(
-                data=property_data,
-                device_property=state_property,
-            )
+        except NotImplementedError:
+            self.__logger.warning("States repository is not configured. State could not be fetched")
+
+            return
+
+        state_data: Dict[str, Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]] = {
+            "actual_value": device.state.value,
+            "expected_value": None,
+            "pending": False,
+            "valid": True,
+        }
+
+        if state_property_state is None:
+            try:
+                state_property_state = self.__devices_properties_states_manager.create(
+                    device_property=state_property,
+                    data=state_data,
+                )
+
+            except NotImplementedError:
+                self.__logger.warning("States manager is not configured. State could not be saved")
+
+                return
 
             self.__logger.debug(
-                "Updating device state property",
+                "Creating new device property state",
                 extra={
                     "device": {
-                        "id": device.id.__str__(),
+                        "id": state_property.device.id.__str__(),
                     },
                     "property": {
                         "id": state_property.id.__str__(),
+                    },
+                    "state": {
+                        "id": state_property_state.id.__str__(),
+                        "actual_value": state_property_state.actual_value,
+                        "expected_value": state_property_state.expected_value,
+                        "pending": state_property_state.pending,
+                        "valid": state_property_state.valid,
+                    },
+                },
+            )
+
+        else:
+            try:
+                state_property_state = self.__devices_properties_states_manager.update(
+                    device_property=state_property,
+                    state=state_property_state,
+                    data=state_data,
+                )
+
+            except NotImplementedError:
+                self.__logger.warning("States manager is not configured. State could not be saved")
+
+                return
+
+            self.__logger.debug(
+                "Updating existing device property state",
+                extra={
+                    "device": {
+                        "id": state_property.device.id.__str__(),
+                    },
+                    "property": {
+                        "id": state_property.id.__str__(),
+                    },
+                    "state": {
+                        "id": state_property_state.id.__str__(),
+                        "actual_value": state_property_state.actual_value,
+                        "expected_value": state_property_state.expected_value,
+                        "pending": state_property_state.pending,
+                        "valid": state_property_state.valid,
                     },
                 },
             )
