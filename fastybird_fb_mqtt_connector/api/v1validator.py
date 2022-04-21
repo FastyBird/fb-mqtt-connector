@@ -46,12 +46,12 @@ class V1Validator:
 
     # TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
     DEVICE_HW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$"
-    # TOPIC: /fb/v1/<device>/$fw/<manufacturer|version>
-    DEVICE_FW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|version)$"
+    # TOPIC: /fb/v1/<device>/$fw/<name|manufacturer|version>
+    DEVICE_FW_INFO_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(name|manufacturer|version)$"
 
-    # TOPIC: /fb/v1/<device>/$property/<property>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
+    # TOPIC: /fb/v1/<device>/$property/<property>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
     DEVICE_PROPERTY_REGEXP = (
-        r"^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)(\/\$(name|type|settable|queryable|data-type|format|unit))?$"
+        r"^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)(\/\$(name|settable|queryable|data-type|format|unit))?$"
     )
     # TOPIC: /fb/v1/<device>/$property/<property>/set
     DEVICE_PROPERTY_SET_REGEXP = r"^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)\/set?$"
@@ -62,10 +62,10 @@ class V1Validator:
     # TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$controls>
     CHANNEL_ATTRIBUTE_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$(name|properties|controls)$"
     # TOPIC: /fb/v1/*/$channel/<channel>/$property/<property>
-    # [/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
+    # [/<$name|$settable|$queryable|$data-type|$format|$unit>]
     CHANNEL_PROPERTY_REGEXP = (
         r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$property\/([a-z0-9-]+)(\/\$("
-        r"name|type|settable|queryable|data-type|format|unit))?$"
+        r"name|settable|queryable|data-type|format|unit))?$"
     )
     # TOPIC: /fb/v1/*/$channel/<channel>/$property/<property>/set
     CHANNEL_PROPERTY_SET_REGEXP = r"\/(.*)\/\$channel\/([a-z0-9_]+)\/\$property\/([a-z0-9-]+)\/set?$"
