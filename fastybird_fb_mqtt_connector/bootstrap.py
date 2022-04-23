@@ -35,11 +35,8 @@ from fastybird_fb_mqtt_connector.clients.client import IClient
 from fastybird_fb_mqtt_connector.connector import FbMqttConnector
 from fastybird_fb_mqtt_connector.consumers.channel import ChannelAttributeItemConsumer
 from fastybird_fb_mqtt_connector.consumers.consumer import Consumer
-from fastybird_fb_mqtt_connector.consumers.device import (
-    DeviceAttributeItemConsumer,
-    DeviceFirmwareItemConsumer,
-    DeviceHardwareItemConsumer,
-)
+from fastybird_fb_mqtt_connector.consumers.device import DeviceAttributeItemConsumer
+from fastybird_fb_mqtt_connector.consumers.extension import DeviceExtensionItemConsumer
 from fastybird_fb_mqtt_connector.consumers.property import (
     ChannelPropertyItemConsumer,
     DevicePropertyItemConsumer,
@@ -53,6 +50,7 @@ from fastybird_fb_mqtt_connector.logger import Logger
 from fastybird_fb_mqtt_connector.registry.model import (
     ChannelsPropertiesRegistry,
     ChannelsRegistry,
+    DevicesAttributesRegistry,
     DevicesPropertiesRegistry,
     DevicesRegistry,
 )
@@ -83,6 +81,11 @@ def create_connector(
     )
     di["fb-mqtt-connector_devices-properties-registry"] = di[DevicesPropertiesRegistry]
 
+    di[DevicesAttributesRegistry] = DevicesAttributesRegistry(
+        event_dispatcher=di[EventDispatcher],
+    )
+    di["fb-mqtt-connector_devices-attributes-registry"] = di[DevicesAttributesRegistry]
+
     di[ChannelsPropertiesRegistry] = ChannelsPropertiesRegistry(  # type: ignore[call-arg]
         event_dispatcher=di[EventDispatcher],
     )
@@ -96,6 +99,7 @@ def create_connector(
 
     di[DevicesRegistry] = DevicesRegistry(
         properties_registry=di[DevicesPropertiesRegistry],
+        attributes_registry=di[DevicesAttributesRegistry],
         channels_registry=di[ChannelsRegistry],
         event_dispatcher=di[EventDispatcher],
     )
@@ -108,23 +112,19 @@ def create_connector(
     # Messages consumers
     di[DeviceAttributeItemConsumer] = DeviceAttributeItemConsumer(
         devices_registry=di[DevicesRegistry],
+        attributes_registry=di[DevicesAttributesRegistry],
         properties_registry=di[DevicesPropertiesRegistry],
         channels_registry=di[ChannelsRegistry],
         logger=connector_logger,
     )
     di["fb-bus-connector_device-attribute-consumer"] = di[DeviceAttributeItemConsumer]
 
-    di[DeviceHardwareItemConsumer] = DeviceHardwareItemConsumer(
+    di[DeviceExtensionItemConsumer] = DeviceExtensionItemConsumer(
         devices_registry=di[DevicesRegistry],
+        attributes_registry=di[DevicesAttributesRegistry],
         logger=connector_logger,
     )
-    di["fb-bus-connector_hardware-info-consumer"] = di[DeviceHardwareItemConsumer]
-
-    di[DeviceFirmwareItemConsumer] = DeviceFirmwareItemConsumer(
-        devices_registry=di[DevicesRegistry],
-        logger=connector_logger,
-    )
-    di["fb-bus-connector_firmware-info-consumer"] = di[DeviceFirmwareItemConsumer]
+    di["fb-bus-connector_extension-consumer"] = di[DeviceExtensionItemConsumer]
 
     di[ChannelAttributeItemConsumer] = ChannelAttributeItemConsumer(
         devices_registry=di[DevicesRegistry],
@@ -152,8 +152,7 @@ def create_connector(
     di[Consumer] = Consumer(
         consumers=[
             di[DeviceAttributeItemConsumer],
-            di[DeviceHardwareItemConsumer],
-            di[DeviceFirmwareItemConsumer],
+            di[DeviceExtensionItemConsumer],
             di[ChannelAttributeItemConsumer],
             di[DevicePropertyItemConsumer],
             di[ChannelPropertyItemConsumer],
@@ -198,6 +197,7 @@ def create_connector(
         client=client,
         devices_registry=di[DevicesRegistry],
         devices_properties_registry=di[DevicesPropertiesRegistry],
+        devices_attributes_registry=di[DevicesAttributesRegistry],
         channels_registry=di[ChannelsRegistry],
         channels_properties_registry=di[ChannelsPropertiesRegistry],
         events_listener=di[EventsListener],

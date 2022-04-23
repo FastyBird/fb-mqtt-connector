@@ -44,13 +44,6 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
     __identifier: str
     __name: Optional[str]
 
-    __hardware_manufacturer: Optional[str] = None
-    __hardware_model: Optional[str] = None
-    __hardware_version: Optional[str] = None
-
-    __firmware_manufacturer: Optional[str] = None
-    __firmware_version: Optional[str] = None
-
     __state: ConnectionState = ConnectionState.UNKNOWN
 
     __controls: Set[str] = set()
@@ -65,24 +58,12 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
         device_identifier: str,
         device_name: Optional[str],
         device_state: ConnectionState = ConnectionState.UNKNOWN,
-        hardware_manufacturer: Optional[str] = None,
-        hardware_model: Optional[str] = None,
-        hardware_version: Optional[str] = None,
-        firmware_manufacturer: Optional[str] = None,
-        firmware_version: Optional[str] = None,
         controls: Union[List[str], None] = None,
     ) -> None:
         self.__id = device_id
         self.__identifier = device_identifier
         self.__name = device_name
         self.__state = device_state
-
-        self.__hardware_manufacturer = hardware_manufacturer
-        self.__hardware_model = hardware_model
-        self.__hardware_version = hardware_version
-
-        self.__firmware_manufacturer = firmware_manufacturer
-        self.__firmware_version = firmware_version
 
         self.__controls = set(controls) if controls is not None else set()
 
@@ -126,41 +107,6 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
     # -----------------------------------------------------------------------------
 
     @property
-    def hardware_manufacturer(self) -> Optional[str]:
-        """Hardware manufacturer"""
-        return self.__hardware_manufacturer
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def hardware_model(self) -> Optional[str]:
-        """Hardware model"""
-        return self.__hardware_model
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def hardware_version(self) -> Optional[str]:
-        """Hardware revision"""
-        return self.__hardware_version
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def firmware_manufacturer(self) -> Optional[str]:
-        """Firmware manufacturer"""
-        return self.__firmware_manufacturer
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def firmware_version(self) -> Optional[str]:
-        """Firmware version"""
-        return self.__firmware_version
-
-    # -----------------------------------------------------------------------------
-
-    @property
     def controls(self) -> List[str]:
         """List of allowed device controls"""
         return list(self.__controls)
@@ -189,13 +135,306 @@ class DeviceRecord:  # pylint: disable=too-many-instance-attributes
             self.id == other.id
             and self.identifier == other.identifier
             and self.name == other.name
-            and self.hardware_manufacturer == other.hardware_manufacturer
-            and self.hardware_model == other.hardware_model
-            and self.hardware_version == other.hardware_version
-            and self.firmware_manufacturer == other.firmware_manufacturer
-            and self.firmware_version == other.firmware_version
             and self.controls == other.controls
         )
+
+    # -----------------------------------------------------------------------------
+
+    def __hash__(self) -> int:
+        return self.__id.__hash__()
+
+
+class DevicePropertyRecord:  # pylint: disable=too-many-instance-attributes
+    """
+    Device property record
+
+    @package        FastyBird:FbMqttConnector!
+    @module         registry/records
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    __device_id: uuid.UUID
+
+    __id: uuid.UUID
+
+    __identifier: str
+    __name: Optional[str]
+    __value_format: Union[
+        Tuple[Optional[int], Optional[int]],
+        Tuple[Optional[float], Optional[float]],
+        List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
+        None,
+    ] = None
+    __unit: Optional[str]
+    __data_type: DataType
+
+    __queryable: bool = False
+    __settable: bool = False
+
+    __actual_value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None] = None
+    __expected_value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None] = None
+    __expected_pending: Optional[float] = None
+
+    # -----------------------------------------------------------------------------
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        device_id: uuid.UUID,
+        property_id: uuid.UUID,
+        property_identifier: str,
+        property_name: Optional[str],
+        property_data_type: DataType,
+        property_value_format: Union[
+            Tuple[Optional[int], Optional[int]],
+            Tuple[Optional[float], Optional[float]],
+            List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
+            None,
+        ] = None,
+        property_unit: Optional[str] = None,
+        property_queryable: bool = False,
+        property_settable: bool = False,
+    ) -> None:
+        self.__device_id = device_id
+
+        self.__id = property_id
+        self.__identifier = property_identifier
+        self.__name = property_name
+        self.__value_format = property_value_format
+        self.__unit = property_unit
+        self.__data_type = property_data_type
+
+        self.__queryable = property_queryable
+        self.__settable = property_settable
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def device_id(self) -> uuid.UUID:
+        """Property device unique identifier"""
+        return self.__device_id
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def id(self) -> uuid.UUID:  # pylint: disable=invalid-name
+        """Property unique database identifier"""
+        return self.__id
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def identifier(self) -> str:
+        """Property unique identifier"""
+        return self.__identifier
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def name(self) -> Optional[str]:
+        """Property name"""
+        return self.__name
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def data_type(self) -> DataType:
+        """Property optional value data type"""
+        return self.__data_type
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def format(
+        self,
+    ) -> Union[
+        Tuple[Optional[int], Optional[int]],
+        Tuple[Optional[float], Optional[float]],
+        List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
+        None,
+    ]:
+        """Property optional value format"""
+        return self.__value_format
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def unit(self) -> Optional[str]:
+        """Property value unit"""
+        return self.__unit
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def queryable(self) -> bool:
+        """Is Property queryable?"""
+        return self.__queryable
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def settable(self) -> bool:
+        """Is Property settable?"""
+        return self.__settable
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def actual_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
+        """Property actual value"""
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__actual_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
+
+    # -----------------------------------------------------------------------------
+
+    @actual_value.setter
+    def actual_value(self, value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]) -> None:
+        """Set Property actual value"""
+        self.__actual_value = value
+
+        if value == self.expected_value:
+            self.expected_value = None
+            self.expected_pending = None
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def expected_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
+        """Property expected value"""
+        return normalize_value(
+            data_type=self.data_type,
+            value=self.__expected_value,
+            value_format=self.format,
+            value_invalid=None,
+        )
+
+    # -----------------------------------------------------------------------------
+
+    @expected_value.setter
+    def expected_value(self, value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]) -> None:
+        """Set Property expected value"""
+        self.__expected_value = value
+
+        if value is not None:
+            self.expected_pending = None
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def expected_pending(self) -> Optional[float]:
+        """Property expected value pending status"""
+        return self.__expected_pending
+
+    # -----------------------------------------------------------------------------
+
+    @expected_pending.setter
+    def expected_pending(self, timestamp: Optional[float]) -> None:
+        """Set Property expected value transmit timestamp"""
+        self.__expected_pending = timestamp
+
+    # -----------------------------------------------------------------------------
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DevicePropertyRecord):
+            return False
+
+        return (
+            self.device_id == other.device_id
+            and self.id == other.id
+            and self.identifier == other.identifier
+            and self.data_type == other.data_type
+            and self.format == other.format
+            and self.settable == other.settable
+            and self.queryable == other.queryable
+        )
+
+    # -----------------------------------------------------------------------------
+
+    def __hash__(self) -> int:
+        return self.__id.__hash__()
+
+
+class DeviceAttributeRecord:
+    """
+    Device attribute record
+
+    @package        FastyBird:FbMqttConnector!
+    @module         registry/records
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    __device_id: uuid.UUID
+
+    __id: uuid.UUID
+
+    __identifier: str
+    __name: Optional[str]
+    __value: Optional[str]
+
+    # -----------------------------------------------------------------------------
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        device_id: uuid.UUID,
+        attribute_id: uuid.UUID,
+        attribute_identifier: str,
+        attribute_name: Optional[str],
+        attribute_value: Optional[str],
+    ) -> None:
+        self.__device_id = device_id
+
+        self.__id = attribute_id
+        self.__identifier = attribute_identifier
+        self.__name = attribute_name
+        self.__value = attribute_value
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def device_id(self) -> uuid.UUID:
+        """Attribute device unique identifier"""
+        return self.__device_id
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def id(self) -> uuid.UUID:  # pylint: disable=invalid-name
+        """Attribute unique database identifier"""
+        return self.__id
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def identifier(self) -> str:
+        """Attribute unique identifier"""
+        return self.__identifier
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def name(self) -> Optional[str]:
+        """Attribute name"""
+        return self.__name
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def value(self) -> Optional[str]:
+        """Attribute value"""
+        return self.__value
+
+    # -----------------------------------------------------------------------------
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DeviceAttributeRecord):
+            return False
+
+        return self.device_id == other.device_id and self.id == other.id and self.identifier == other.identifier
 
     # -----------------------------------------------------------------------------
 
@@ -494,220 +733,6 @@ class ChannelPropertyRecord:  # pylint: disable=too-many-instance-attributes
 
         return (
             self.channel_id == other.channel_id
-            and self.id == other.id
-            and self.identifier == other.identifier
-            and self.data_type == other.data_type
-            and self.format == other.format
-            and self.settable == other.settable
-            and self.queryable == other.queryable
-        )
-
-    # -----------------------------------------------------------------------------
-
-    def __hash__(self) -> int:
-        return self.__id.__hash__()
-
-
-class DevicePropertyRecord:  # pylint: disable=too-many-instance-attributes
-    """
-    Device property record
-
-    @package        FastyBird:FbMqttConnector!
-    @module         registry/records
-
-    @author         Adam Kadlec <adam.kadlec@fastybird.com>
-    """
-
-    __device_id: uuid.UUID
-
-    __id: uuid.UUID
-
-    __identifier: str
-    __name: Optional[str]
-    __value_format: Union[
-        Tuple[Optional[int], Optional[int]],
-        Tuple[Optional[float], Optional[float]],
-        List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
-        None,
-    ] = None
-    __unit: Optional[str]
-    __data_type: DataType
-
-    __queryable: bool = False
-    __settable: bool = False
-
-    __actual_value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None] = None
-    __expected_value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None] = None
-    __expected_pending: Optional[float] = None
-
-    # -----------------------------------------------------------------------------
-
-    def __init__(  # pylint: disable=too-many-arguments
-        self,
-        device_id: uuid.UUID,
-        property_id: uuid.UUID,
-        property_identifier: str,
-        property_name: Optional[str],
-        property_data_type: DataType,
-        property_value_format: Union[
-            Tuple[Optional[int], Optional[int]],
-            Tuple[Optional[float], Optional[float]],
-            List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
-            None,
-        ] = None,
-        property_unit: Optional[str] = None,
-        property_queryable: bool = False,
-        property_settable: bool = False,
-    ) -> None:
-        self.__device_id = device_id
-
-        self.__id = property_id
-        self.__identifier = property_identifier
-        self.__name = property_name
-        self.__value_format = property_value_format
-        self.__unit = property_unit
-        self.__data_type = property_data_type
-
-        self.__queryable = property_queryable
-        self.__settable = property_settable
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def device_id(self) -> uuid.UUID:
-        """Property device unique identifier"""
-        return self.__device_id
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def id(self) -> uuid.UUID:  # pylint: disable=invalid-name
-        """Property unique database identifier"""
-        return self.__id
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def identifier(self) -> str:
-        """Property unique identifier"""
-        return self.__identifier
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def name(self) -> Optional[str]:
-        """Property name"""
-        return self.__name
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def data_type(self) -> DataType:
-        """Property optional value data type"""
-        return self.__data_type
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def format(
-        self,
-    ) -> Union[
-        Tuple[Optional[int], Optional[int]],
-        Tuple[Optional[float], Optional[float]],
-        List[Union[str, Tuple[str, Optional[str], Optional[str]]]],
-        None,
-    ]:
-        """Property optional value format"""
-        return self.__value_format
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def unit(self) -> Optional[str]:
-        """Property value unit"""
-        return self.__unit
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def queryable(self) -> bool:
-        """Is Property queryable?"""
-        return self.__queryable
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def settable(self) -> bool:
-        """Is Property settable?"""
-        return self.__settable
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def actual_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
-        """Property actual value"""
-        return normalize_value(
-            data_type=self.data_type,
-            value=self.__actual_value,
-            value_format=self.format,
-            value_invalid=None,
-        )
-
-    # -----------------------------------------------------------------------------
-
-    @actual_value.setter
-    def actual_value(self, value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]) -> None:
-        """Set Property actual value"""
-        self.__actual_value = value
-
-        if value == self.expected_value:
-            self.expected_value = None
-            self.expected_pending = None
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def expected_value(self) -> Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]:
-        """Property expected value"""
-        return normalize_value(
-            data_type=self.data_type,
-            value=self.__expected_value,
-            value_format=self.format,
-            value_invalid=None,
-        )
-
-    # -----------------------------------------------------------------------------
-
-    @expected_value.setter
-    def expected_value(self, value: Union[str, int, float, bool, datetime, ButtonPayload, SwitchPayload, None]) -> None:
-        """Set Property expected value"""
-        self.__expected_value = value
-
-        if value is not None:
-            self.expected_pending = None
-
-    # -----------------------------------------------------------------------------
-
-    @property
-    def expected_pending(self) -> Optional[float]:
-        """Property expected value pending status"""
-        return self.__expected_pending
-
-    # -----------------------------------------------------------------------------
-
-    @expected_pending.setter
-    def expected_pending(self, timestamp: Optional[float]) -> None:
-        """Set Property expected value transmit timestamp"""
-        self.__expected_pending = timestamp
-
-    # -----------------------------------------------------------------------------
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DevicePropertyRecord):
-            return False
-
-        return (
-            self.device_id == other.device_id
             and self.id == other.id
             and self.identifier == other.identifier
             and self.data_type == other.data_type

@@ -24,7 +24,7 @@ import uuid
 from typing import List, Union
 
 # Library dependencies
-from fastybird_metadata.devices_module import ConnectionState
+from fastybird_metadata.devices_module import ConnectionState, DeviceAttributeName
 from kink import inject
 
 # Library libs
@@ -32,16 +32,16 @@ from fastybird_fb_mqtt_connector.consumers.consumer import IConsumer
 from fastybird_fb_mqtt_connector.consumers.entities import (
     BaseEntity,
     DeviceAttributeEntity,
-    FirmwareEntity,
-    HardwareEntity,
 )
 from fastybird_fb_mqtt_connector.logger import Logger
 from fastybird_fb_mqtt_connector.registry.model import (
     ChannelsRegistry,
+    DevicesAttributesRegistry,
     DevicesPropertiesRegistry,
     DevicesRegistry,
 )
 from fastybird_fb_mqtt_connector.registry.records import DeviceRecord
+from fastybird_fb_mqtt_connector.types import ExtensionType
 
 
 @inject(alias=IConsumer)
@@ -57,21 +57,24 @@ class DeviceAttributeItemConsumer(IConsumer):  # pylint: disable=too-few-public-
 
     __devices_registry: DevicesRegistry
     __properties_registry: DevicesPropertiesRegistry
+    __attributes_registry: DevicesAttributesRegistry
     __channels_registry: ChannelsRegistry
 
     __logger: Union[Logger, logging.Logger]
 
     # -----------------------------------------------------------------------------
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         devices_registry: DevicesRegistry,
         properties_registry: DevicesPropertiesRegistry,
+        attributes_registry: DevicesAttributesRegistry,
         channels_registry: ChannelsRegistry,
         logger: Union[Logger, logging.Logger] = logging.getLogger("dummy"),
     ) -> None:
         self.__devices_registry = devices_registry
         self.__properties_registry = properties_registry
+        self.__attributes_registry = attributes_registry
         self.__channels_registry = channels_registry
 
         self.__logger = logger
@@ -98,11 +101,6 @@ class DeviceAttributeItemConsumer(IConsumer):  # pylint: disable=too-few-public-
                 "device_id": device.id,
                 "device_identifier": device.identifier,
                 "device_name": device.name,
-                "hardware_manufacturer": device.hardware_manufacturer,
-                "hardware_model": device.hardware_model,
-                "hardware_version": device.hardware_version,
-                "firmware_manufacturer": device.firmware_manufacturer,
-                "firmware_version": device.firmware_version,
                 "controls": device.controls,
             }
 
@@ -117,6 +115,9 @@ class DeviceAttributeItemConsumer(IConsumer):  # pylint: disable=too-few-public-
 
             if entity.attribute == DeviceAttributeEntity.CHANNELS and isinstance(entity.value, list):
                 self.__process_channels(device=device, values=entity.value)
+
+            if entity.attribute == DeviceAttributeEntity.EXTENSIONS and isinstance(entity.value, list):
+                self.__process_extensions(device=device, values=entity.value)
 
             self.__devices_registry.update(**to_update)  # type: ignore[arg-type]
 
@@ -162,139 +163,43 @@ class DeviceAttributeItemConsumer(IConsumer):  # pylint: disable=too-few-public-
             if channel.identifier not in values:
                 self.__channels_registry.remove(channel_id=channel.id)
 
-
-@inject(alias=IConsumer)
-class DeviceHardwareItemConsumer(IConsumer):  # pylint: disable=too-few-public-methods
-    """
-    Device hardware info message consumer
-
-    @package        FastyBird:FbMqttConnector!
-    @module         consumers/device
-
-    @author         Adam Kadlec <adam.kadlec@fastybird.com>
-    """
-
-    __devices_registry: DevicesRegistry
-
-    __logger: Union[Logger, logging.Logger]
-
     # -----------------------------------------------------------------------------
 
-    def __init__(
-        self,
-        devices_registry: DevicesRegistry,
-        logger: Union[Logger, logging.Logger] = logging.getLogger("dummy"),
-    ) -> None:
-        self.__devices_registry = devices_registry
+    def __process_extensions(self, device: DeviceRecord, values: List) -> None:
+        for extension in values:
+            if extension == ExtensionType.FASTYBIRD_HARDWARE:
+                for attribute_identifier in [
+                    DeviceAttributeName.HARDWARE_MANUFACTURER.value,
+                    DeviceAttributeName.HARDWARE_MODEL.value,
+                    DeviceAttributeName.HARDWARE_VERSION.value,
+                    DeviceAttributeName.HARDWARE_MAC_ADDRESS.value,
+                ]:
+                    device_attribute = self.__attributes_registry.get_by_identifier(
+                        device_id=device.id,
+                        attribute_identifier=attribute_identifier,
+                    )
 
-        self.__logger = logger
+                    if device_attribute is None:
+                        self.__attributes_registry.create_or_update(
+                            device_id=device.id,
+                            attribute_id=uuid.uuid4(),
+                            attribute_identifier=attribute_identifier,
+                        )
 
-    # -----------------------------------------------------------------------------
+            if extension == ExtensionType.FASTYBIRD_FIRMWARE:
+                for attribute_identifier in [
+                    DeviceAttributeName.FIRMWARE_MANUFACTURER.value,
+                    DeviceAttributeName.FIRMWARE_NAME.value,
+                    DeviceAttributeName.FIRMWARE_VERSION.value,
+                ]:
+                    device_attribute = self.__attributes_registry.get_by_identifier(
+                        device_id=device.id,
+                        attribute_identifier=attribute_identifier,
+                    )
 
-    def consume(self, entity: BaseEntity) -> None:
-        """Consume received message"""
-        if not isinstance(entity, HardwareEntity):
-            return
-
-        device = self.__devices_registry.get_by_identifier(device_identifier=entity.device)
-
-        if device is None:
-            self.__logger.error("Message is for unknown device %s", entity.device)
-
-            return
-
-        to_update = {
-            "device_id": device.id,
-            "device_identifier": device.identifier,
-            "device_name": device.name,
-            "hardware_manufacturer": device.hardware_manufacturer,
-            "hardware_model": device.hardware_model,
-            "hardware_version": device.hardware_version,
-            "firmware_manufacturer": device.firmware_manufacturer,
-            "firmware_version": device.firmware_version,
-        }
-
-        if entity.parameter == HardwareEntity.MAC_ADDRESS:
-            # to_update["hardware_mac_address"] = entity.value
-            pass
-
-        elif entity.parameter == HardwareEntity.MANUFACTURER:
-            to_update["hardware_manufacturer"] = entity.value
-
-        elif entity.parameter == HardwareEntity.MODEL:
-            to_update["hardware_model"] = entity.value
-
-        elif entity.parameter == HardwareEntity.VERSION:
-            to_update["hardware_version"] = entity.value
-
-        else:
-            return
-
-        self.__devices_registry.update(**to_update)  # type: ignore[arg-type]
-
-        self.__logger.debug("Consumed device hardware info message for: %s", device.identifier)
-
-
-@inject(alias=IConsumer)
-class DeviceFirmwareItemConsumer(IConsumer):  # pylint: disable=too-few-public-methods
-    """
-    Device firmware info message consumer
-
-    @package        FastyBird:FbMqttConnector!
-    @module         consumers/device
-
-    @author         Adam Kadlec <adam.kadlec@fastybird.com>
-    """
-
-    __devices_registry: DevicesRegistry
-
-    __logger: Union[Logger, logging.Logger]
-
-    # -----------------------------------------------------------------------------
-
-    def __init__(
-        self,
-        devices_registry: DevicesRegistry,
-        logger: Union[Logger, logging.Logger] = logging.getLogger("dummy"),
-    ) -> None:
-        self.__devices_registry = devices_registry
-
-        self.__logger = logger
-
-    # -----------------------------------------------------------------------------
-
-    def consume(self, entity: BaseEntity) -> None:
-        """Consume received message"""
-        if not isinstance(entity, FirmwareEntity):
-            return
-
-        device = self.__devices_registry.get_by_identifier(device_identifier=entity.device)
-
-        if device is None:
-            self.__logger.error("Message is for unknown device %s", entity.device)
-
-            return
-
-        to_update = {
-            "device_id": device.id,
-            "device_identifier": device.identifier,
-            "device_name": device.name,
-            "hardware_manufacturer": device.hardware_manufacturer,
-            "hardware_model": device.hardware_model,
-            "hardware_version": device.hardware_version,
-            "firmware_manufacturer": device.firmware_manufacturer,
-            "firmware_version": device.firmware_version,
-        }
-
-        if entity.parameter == FirmwareEntity.MANUFACTURER:
-            to_update["firmware_manufacturer"] = entity.value
-
-        elif entity.parameter == FirmwareEntity.VERSION:
-            to_update["firmware_version"] = entity.value
-
-        else:
-            return
-
-        self.__devices_registry.update(**to_update)  # type: ignore[arg-type]
-
-        self.__logger.debug("Consumed device firmware info message for: %s", device.identifier)
+                    if device_attribute is None:
+                        self.__attributes_registry.create_or_update(
+                            device_id=device.id,
+                            attribute_id=uuid.uuid4(),
+                            attribute_identifier=attribute_identifier,
+                        )

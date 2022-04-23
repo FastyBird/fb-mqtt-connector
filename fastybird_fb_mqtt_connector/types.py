@@ -53,6 +53,26 @@ class ProtocolVersion(ExtendedEnum):
 
 
 @unique
+class ExtensionType(ExtendedEnum):
+    """
+    Communication protocol extension
+
+    @package        FastyBird:FbMqttConnector!
+    @module         types
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    FASTYBIRD_HARDWARE: str = "com.fastybird.hardware"
+    FASTYBIRD_FIRMWARE: str = "com.fastybird.firmware"
+
+    # -----------------------------------------------------------------------------
+
+    def __hash__(self) -> int:
+        return hash(self._name_)  # pylint: disable=no-member
+
+
+@unique
 class ConnectorAttribute(ExtendedEnum):
     """
     Known connector attribute name

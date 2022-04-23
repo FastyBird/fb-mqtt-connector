@@ -29,6 +29,7 @@ from fastybird_metadata.types import DataType
 
 # Library libs
 from fastybird_fb_mqtt_connector.exceptions import ParsePayloadException
+from fastybird_fb_mqtt_connector.types import ExtensionType
 
 
 def clean_name(name: str) -> str:
@@ -226,6 +227,79 @@ class ChannelAttributeEntity(AttributeEntity):
             self.NAME,
             self.PROPERTIES,
             self.CONTROLS,
+        ]
+
+
+class ExtensionAttributeEntity(BaseEntity):
+    """
+    Device extension message entity
+
+    @package        FastyBird:FbMqttConnector!
+    @module         consumers/entities
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    MAC_ADDRESS = "mac-address"
+    MANUFACTURER = "manufacturer"
+    MODEL = "model"
+    VERSION = "version"
+    NAME = "name"
+
+    __extension: ExtensionType
+    __parameter: str
+    __value: str
+
+    # -----------------------------------------------------------------------------
+
+    def __init__(
+        self,
+        device: str,
+        extension: ExtensionType,
+        parameter: str,
+        value: str,
+    ) -> None:
+        if parameter not in self.allowed_parameters:
+            raise AttributeError(f"Hardware attribute '{parameter}' is not valid")
+
+        super().__init__(device=device)
+
+        self.__extension = extension
+        self.__parameter = parameter
+        self.__value = clean_payload(value)
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def extension(self) -> ExtensionType:
+        """Entity extension"""
+        return self.__extension
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def parameter(self) -> str:
+        """Entity parameter"""
+        return self.__parameter
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def value(self) -> str:
+        """Entity parameter value"""
+        return self.__value
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def allowed_parameters(self) -> List[str]:
+        """List of entity allowed parameters"""
+        return [
+            self.MAC_ADDRESS,
+            self.MANUFACTURER,
+            self.MODEL,
+            self.VERSION,
+            self.NAME,
         ]
 
 

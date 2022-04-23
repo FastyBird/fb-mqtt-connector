@@ -28,14 +28,15 @@ from whistle import Event
 from fastybird_fb_mqtt_connector.registry.records import (
     ChannelPropertyRecord,
     ChannelRecord,
+    DeviceAttributeRecord,
     DevicePropertyRecord,
     DeviceRecord,
 )
 
 
-class DeviceRecordCreatedOrUpdatedEvent(Event):  # pylint: disable=too-few-public-methods
+class DeviceRecordUpdatedEvent(Event):  # pylint: disable=too-few-public-methods
     """
-    Device record was created or updated in registry
+    Device record was updated in registry
 
     @package        FastyBird:FbMqttConnector!
     @module         events/events
@@ -165,6 +166,60 @@ class DevicePropertyRecordDeletedEvent(Event):  # pylint: disable=too-few-public
     @property
     def record(self) -> DevicePropertyRecord:
         """Deleted property record"""
+        return self.__record
+
+
+class DeviceAttributeRecordCreatedOrUpdatedEvent(Event):  # pylint: disable=too-few-public-methods
+    """
+    Device attribute record was created or updated in registry
+
+    @package        FastyBird:FbMqttConnector!
+    @module         events/events
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    __record: DeviceAttributeRecord
+
+    EVENT_NAME: str = "registry.deviceAttributeRecordCreatedOrUpdated"
+
+    # -----------------------------------------------------------------------------
+
+    def __init__(self, record: DeviceAttributeRecord) -> None:
+        self.__record = record
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def record(self) -> DeviceAttributeRecord:
+        """Created or updated attribute record"""
+        return self.__record
+
+
+class DeviceAttributeRecordDeletedEvent(Event):  # pylint: disable=too-few-public-methods
+    """
+    Device attribute record was deleted from registry
+
+    @package        FastyBird:FbMqttConnector!
+    @module         events/events
+
+    @author         Adam Kadlec <adam.kadlec@fastybird.com>
+    """
+
+    __record: DeviceAttributeRecord
+
+    EVENT_NAME: str = "registry.deviceAttributeRecordDeleted"
+
+    # -----------------------------------------------------------------------------
+
+    def __init__(self, record: DeviceAttributeRecord) -> None:
+        self.__record = record
+
+    # -----------------------------------------------------------------------------
+
+    @property
+    def record(self) -> DeviceAttributeRecord:
+        """Deleted attribute record"""
         return self.__record
 
 

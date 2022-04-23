@@ -30,11 +30,11 @@ from fastybird_fb_mqtt_connector.consumers.entities import (
     ChannelPropertyEntity,
     DeviceAttributeEntity,
     DevicePropertyEntity,
-    FirmwareEntity,
-    HardwareEntity,
+    ExtensionAttributeEntity,
     PropertyAttributeEntity,
 )
 from fastybird_fb_mqtt_connector.exceptions import ParsePayloadException
+from fastybird_fb_mqtt_connector.types import ExtensionType
 
 
 class V1Parser:
@@ -161,13 +161,14 @@ class V1Parser:
     def parse_device_hardware_info(
         topic: str,
         payload: str,
-    ) -> HardwareEntity:
-        """Parse device hardware info topic & value"""
+    ) -> ExtensionAttributeEntity:
+        """Parse device hardware extension info topic & value"""
         result = re.findall(V1Validator.DEVICE_HW_INFO_REGEXP, topic)
         device, hardware = result.pop()
 
-        return HardwareEntity(
+        return ExtensionAttributeEntity(
             device=device,
+            extension=ExtensionType.FASTYBIRD_HARDWARE,
             parameter=hardware,
             value=payload,
         )
@@ -178,13 +179,14 @@ class V1Parser:
     def parse_device_firmware_info(
         topic: str,
         payload: str,
-    ) -> FirmwareEntity:
+    ) -> ExtensionAttributeEntity:
         """Parse device firmware info topic & value"""
         result = re.findall(V1Validator.DEVICE_FW_INFO_REGEXP, topic)
         device, firmware = result.pop()
 
-        return FirmwareEntity(
+        return ExtensionAttributeEntity(
             device=device,
+            extension=ExtensionType.FASTYBIRD_FIRMWARE,
             parameter=firmware,
             value=payload,
         )

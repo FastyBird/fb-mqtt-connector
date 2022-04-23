@@ -35,6 +35,7 @@ from fastybird_devices_module.managers.channel import (
     ChannelsManager,
 )
 from fastybird_devices_module.managers.device import (
+    DeviceAttributesManager,
     DeviceControlsManager,
     DevicePropertiesManager,
     DevicesManager,
@@ -49,6 +50,7 @@ from fastybird_devices_module.repositories.channel import (
     ChannelsRepository,
 )
 from fastybird_devices_module.repositories.device import (
+    DeviceAttributesRepository,
     DeviceControlsRepository,
     DevicePropertiesRepository,
     DevicesRepository,
@@ -70,10 +72,12 @@ from fastybird_fb_mqtt_connector.events.events import (
     ChannelPropertyRecordDeletedEvent,
     ChannelRecordCreatedOrUpdatedEvent,
     ChannelRecordDeletedEvent,
+    DeviceAttributeRecordCreatedOrUpdatedEvent,
+    DeviceAttributeRecordDeletedEvent,
     DevicePropertyActualValueEvent,
     DevicePropertyRecordCreatedOrUpdatedEvent,
     DevicePropertyRecordDeletedEvent,
-    DeviceRecordCreatedOrUpdatedEvent,
+    DeviceRecordUpdatedEvent,
     DeviceStateChangedEvent,
 )
 from fastybird_fb_mqtt_connector.logger import Logger
@@ -104,6 +108,9 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
     __devices_controls_repository: DeviceControlsRepository
     __devices_controls_manager: DeviceControlsManager
 
+    __devices_attributes_repository: DeviceAttributesRepository
+    __devices_attributes_manager: DeviceAttributesManager
+
     __channels_repository: ChannelsRepository
     __channels_manager: ChannelsManager
 
@@ -131,6 +138,8 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         devices_properties_manager: DevicePropertiesManager,
         devices_controls_repository: DeviceControlsRepository,
         devices_controls_manager: DeviceControlsManager,
+        devices_attributes_repository: DeviceAttributesRepository,
+        devices_attributes_manager: DeviceAttributesManager,
         channels_repository: ChannelsRepository,
         channels_manager: ChannelsManager,
         channels_properties_repository: ChannelPropertiesRepository,
@@ -155,6 +164,9 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         self.__devices_controls_repository = devices_controls_repository
         self.__devices_controls_manager = devices_controls_manager
 
+        self.__devices_attributes_repository = devices_attributes_repository
+        self.__devices_attributes_manager = devices_attributes_manager
+
         self.__channels_repository = channels_repository
         self.__channels_manager = channels_manager
 
@@ -175,7 +187,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
     def open(self) -> None:
         """Open all listeners callbacks"""
         self.__event_dispatcher.add_listener(
-            event_id=DeviceRecordCreatedOrUpdatedEvent.EVENT_NAME,
+            event_id=DeviceRecordUpdatedEvent.EVENT_NAME,
             listener=self.__handle_update_device,
         )
 
@@ -197,6 +209,16 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         self.__event_dispatcher.add_listener(
             event_id=DevicePropertyRecordDeletedEvent.EVENT_NAME,
             listener=self.__handle_delete_device_property,
+        )
+
+        self.__event_dispatcher.add_listener(
+            event_id=DeviceAttributeRecordCreatedOrUpdatedEvent.EVENT_NAME,
+            listener=self.__handle_create_or_update_device_attribute,
+        )
+
+        self.__event_dispatcher.add_listener(
+            event_id=DeviceAttributeRecordDeletedEvent.EVENT_NAME,
+            listener=self.__handle_delete_device_attribute,
         )
 
         self.__event_dispatcher.add_listener(
@@ -229,7 +251,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
     def close(self) -> None:
         """Close all listeners registrations"""
         self.__event_dispatcher.remove_listener(
-            event_id=DeviceRecordCreatedOrUpdatedEvent.EVENT_NAME,
+            event_id=DeviceRecordUpdatedEvent.EVENT_NAME,
             listener=self.__handle_update_device,
         )
 
@@ -251,6 +273,16 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
         self.__event_dispatcher.remove_listener(
             event_id=DevicePropertyRecordDeletedEvent.EVENT_NAME,
             listener=self.__handle_delete_device_property,
+        )
+
+        self.__event_dispatcher.remove_listener(
+            event_id=DeviceAttributeRecordCreatedOrUpdatedEvent.EVENT_NAME,
+            listener=self.__handle_create_or_update_device_attribute,
+        )
+
+        self.__event_dispatcher.remove_listener(
+            event_id=DeviceAttributeRecordDeletedEvent.EVENT_NAME,
+            listener=self.__handle_delete_device_attribute,
         )
 
         self.__event_dispatcher.remove_listener(
@@ -281,7 +313,7 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
     # -----------------------------------------------------------------------------
 
     def __handle_update_device(self, event: Event) -> None:
-        if not isinstance(event, DeviceRecordCreatedOrUpdatedEvent):
+        if not isinstance(event, DeviceRecordUpdatedEvent):
             return
 
         device = self.__devices_repository.get_by_id(device_id=event.record.id)
@@ -302,11 +334,6 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
             "id": event.record.id,
             "identifier": event.record.identifier,
             "name": event.record.name,
-            "hardware_manufacturer": event.record.hardware_manufacturer,
-            "hardware_model": event.record.hardware_model,
-            "hardware_version": event.record.hardware_version,
-            "firmware_manufacturer": event.record.firmware_manufacturer,
-            "firmware_version": event.record.firmware_version,
         }
 
         device = self.__devices_manager.update(data=device_data, device=device)
@@ -562,6 +589,80 @@ class EventsListener:  # pylint: disable=too-many-instance-attributes
                     },
                     "property": {
                         "id": device_property.id.__str__(),
+                    },
+                },
+            )
+
+    # -----------------------------------------------------------------------------
+
+    def __handle_create_or_update_device_attribute(self, event: Event) -> None:
+        if not isinstance(event, DeviceAttributeRecordCreatedOrUpdatedEvent):
+            return
+
+        attribute_data = {
+            "id": event.record.id,
+            "identifier": event.record.identifier,
+            "name": event.record.name,
+            "content": event.record.value,
+        }
+
+        device_attribute = self.__devices_attributes_repository.get_by_id(attribute_id=event.record.id)
+
+        if device_attribute is None:
+            # Define relation between channel and it's device
+            attribute_data["device_id"] = event.record.device_id
+
+            device_attribute = self.__devices_attributes_manager.create(data=attribute_data)
+
+            self.__logger.debug(
+                "Creating new device attribute",
+                extra={
+                    "device": {
+                        "id": device_attribute.device.id.__str__(),
+                    },
+                    "attribute": {
+                        "id": device_attribute.id.__str__(),
+                    },
+                },
+            )
+
+        else:
+            device_attribute = self.__devices_attributes_manager.update(
+                data=attribute_data,
+                device_attribute=device_attribute,
+            )
+
+            self.__logger.debug(
+                "Updating existing device attribute",
+                extra={
+                    "device": {
+                        "id": device_attribute.device.id.__str__(),
+                    },
+                    "attribute": {
+                        "id": device_attribute.id.__str__(),
+                    },
+                },
+            )
+
+    # -----------------------------------------------------------------------------
+
+    def __handle_delete_device_attribute(self, event: Event) -> None:
+        if not isinstance(event, DeviceAttributeRecordDeletedEvent):
+            return
+
+        device_attribute = self.__devices_attributes_repository.get_by_id(attribute_id=event.record.id)
+
+        if device_attribute is not None:
+            self.__devices_attributes_manager.delete(device_attribute=device_attribute)
+
+            self.__logger.debug(
+                "Removing existing device attribute",
+                extra={
+                    "device": {
+                        "id": device_attribute.device.id.__str__(),
+                    },
+                    "attribute": {
+                        "id": device_attribute.id.__str__(),
                     },
                 },
             )

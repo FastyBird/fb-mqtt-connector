@@ -35,17 +35,13 @@ from fastybird_devices_module.entities.channel import (
 )
 from fastybird_devices_module.entities.connector import ConnectorControlEntity
 from fastybird_devices_module.entities.device import (
+    DeviceAttributeEntity,
     DeviceControlEntity,
     DeviceDynamicPropertyEntity,
     DevicePropertyEntity,
 )
 from fastybird_devices_module.utils import normalize_value
-from fastybird_metadata.devices_module import (
-    ConnectionState,
-    DeviceModel,
-    FirmwareManufacturer,
-    HardwareManufacturer,
-)
+from fastybird_metadata.devices_module import ConnectionState
 from fastybird_metadata.types import (
     ButtonPayload,
     ControlAction,
@@ -66,6 +62,7 @@ from fastybird_fb_mqtt_connector.logger import Logger
 from fastybird_fb_mqtt_connector.registry.model import (
     ChannelsPropertiesRegistry,
     ChannelsRegistry,
+    DevicesAttributesRegistry,
     DevicesPropertiesRegistry,
     DevicesRegistry,
 )
@@ -95,6 +92,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
     __devices_registry: DevicesRegistry
     __devices_properties_registry: DevicesPropertiesRegistry
+    __devices_attributes_registry: DevicesAttributesRegistry
     __channels_registry: ChannelsRegistry
     __channels_properties_registry: ChannelsPropertiesRegistry
 
@@ -118,6 +116,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         client: Optional[IClient],
         devices_registry: DevicesRegistry,
         devices_properties_registry: DevicesPropertiesRegistry,
+        devices_attributes_registry: DevicesAttributesRegistry,
         channels_registry: ChannelsRegistry,
         channels_properties_registry: ChannelsPropertiesRegistry,
         events_listener: EventsListener,
@@ -130,6 +129,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
 
         self.__devices_registry = devices_registry
         self.__devices_properties_registry = devices_properties_registry
+        self.__devices_attributes_registry = devices_attributes_registry
         self.__channels_registry = channels_registry
         self.__channels_properties_registry = channels_properties_registry
 
@@ -159,22 +159,14 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
             device_id=device.id,
             device_identifier=device.identifier,
             device_name=device.name,
-            hardware_manufacturer=device.hardware_manufacturer.value
-            if isinstance(device.hardware_manufacturer, HardwareManufacturer)
-            else device.hardware_manufacturer,
-            hardware_model=device.hardware_model.value
-            if isinstance(device.hardware_model, DeviceModel)
-            else device.hardware_model,
-            hardware_version=device.hardware_version,
-            firmware_manufacturer=device.firmware_manufacturer.value
-            if isinstance(device.firmware_manufacturer, FirmwareManufacturer)
-            else device.firmware_manufacturer,
-            firmware_version=device.firmware_version,
             controls=device_controls,
         )
 
         for device_property in device.properties:
             self.initialize_device_property(device=device, device_property=device_property)
+
+        for device_attribute in device.attributes:
+            self.initialize_device_attribute(device=device, device_attribute=device_attribute)
 
         for channel in device.channels:
             self.initialize_device_channel(device=device, channel=channel)
@@ -224,6 +216,38 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
     def reset_devices_properties(self, device: FbMqttDeviceEntity) -> None:
         """Reset devices properties registry to initial state"""
         self.__devices_properties_registry.reset(device_id=device.id)
+
+    # -----------------------------------------------------------------------------
+
+    def initialize_device_attribute(self, device: FbMqttDeviceEntity, device_attribute: DeviceAttributeEntity) -> None:
+        """Initialize device attribute aka attribute register in connector registry"""
+        if isinstance(device_attribute, DeviceAttributeEntity):
+            self.__devices_attributes_registry.append(
+                device_id=device_attribute.device.id,
+                attribute_id=device_attribute.id,
+                attribute_identifier=device_attribute.identifier,
+                attribute_name=device_attribute.name,
+                attribute_value=device_attribute.content
+                if isinstance(device_attribute.content, str) or device_attribute.content is None
+                else str(device_attribute.content),
+            )
+
+    # -----------------------------------------------------------------------------
+
+    def notify_device_attribute(self, device: FbMqttDeviceEntity, device_attribute: DeviceAttributeEntity) -> None:
+        """Notify device attribute was reported to connector"""
+
+    # -----------------------------------------------------------------------------
+
+    def remove_device_attribute(self, device: FbMqttDeviceEntity, attribute_id: uuid.UUID) -> None:
+        """Remove device attribute from connector registry"""
+        self.__devices_attributes_registry.remove(attribute_id=attribute_id, propagate=False)
+
+    # -----------------------------------------------------------------------------
+
+    def reset_devices_attributes(self, device: FbMqttDeviceEntity) -> None:
+        """Reset devices attributes registry to initial state"""
+        self.__devices_attributes_registry.reset(device_id=device.id)
 
     # -----------------------------------------------------------------------------
 
