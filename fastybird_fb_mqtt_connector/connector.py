@@ -186,7 +186,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
     # -----------------------------------------------------------------------------
 
     def initialize_device_property(self, device: FbMqttDeviceEntity, device_property: DevicePropertyEntity) -> None:
-        """Initialize device property aka attribute register in connector registry"""
+        """Initialize device property"""
         if isinstance(device_property, DeviceDynamicPropertyEntity):
             self.__devices_properties_registry.append(
                 device_id=device_property.device.id,
@@ -220,7 +220,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
     # -----------------------------------------------------------------------------
 
     def initialize_device_attribute(self, device: FbMqttDeviceEntity, device_attribute: DeviceAttributeEntity) -> None:
-        """Initialize device attribute aka attribute register in connector registry"""
+        """Initialize device attribute"""
         if isinstance(device_attribute, DeviceAttributeEntity):
             self.__devices_attributes_registry.append(
                 device_id=device_attribute.device.id,
@@ -252,7 +252,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
     # -----------------------------------------------------------------------------
 
     def initialize_device_channel(self, device: FbMqttDeviceEntity, channel: ChannelEntity) -> None:
-        """Initialize device channel aka registers group in connector registry"""
+        """Initialize device channel"""
         self.__channels_registry.append(
             device_id=channel.device.id,
             channel_id=channel.id,
@@ -282,7 +282,7 @@ class FbMqttConnector(IConnector):  # pylint: disable=too-many-instance-attribut
         channel: ChannelEntity,
         channel_property: ChannelPropertyEntity,
     ) -> None:
-        """Initialize device channel property aka input or output register in connector registry"""
+        """Initialize device channel property"""
         if isinstance(channel_property, ChannelDynamicPropertyEntity):
             self.__channels_properties_registry.append(
                 channel_id=channel_property.channel.id,
