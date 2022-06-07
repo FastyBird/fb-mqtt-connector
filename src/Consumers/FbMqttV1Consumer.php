@@ -20,10 +20,9 @@ use FastyBird\DevicesModule\Queries as  DevicesModuleQueries;
 use FastyBird\Exchange as FastyBirdExchange;
 use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Client;
+use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
-use Nette\Utils;
-use Ramsey\Uuid;
 
 /**
  * Exchange messages consumer
@@ -82,19 +81,19 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 	/**
 	 * {@inheritDoc}
 	 */
-	public function consume($origin, MetadataTypes\RoutingKeyType $routingKey, ?Utils\ArrayHash $data): void
+	public function consume($origin, MetadataTypes\RoutingKeyType $routingKey, ?MetadataEntities\IEntity $entity): void
 	{
-		if ($this->client === null || $data === null) {
+		if ($this->client === null || $entity === null) {
 			return;
 		}
 
-		if ($routingKey->equalsValue(MetadataTypes\RoutingKeyType::ROUTE_DEVICE_ACTION)) {
-			if ($data->offsetGet('action') !== MetadataTypes\ControlActionType::ACTION_SET) {
+		if ($entity instanceof MetadataEntities\Actions\ActionDeviceEntity) {
+			if (!$entity->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
 				return;
 			}
 
 			$findControlQuery = new DevicesModuleQueries\FindDeviceControlsQuery();
-			$findControlQuery->byId(Uuid\Uuid::fromString($data->offsetGet('control')));
+			$findControlQuery->byId($entity->getControl());
 
 			$control = $this->devicesControlsRepository->findOneBy($findControlQuery);
 
@@ -107,16 +106,16 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$control->getDevice()->getIdentifier(),
 					$control->getName()
 				),
-				$data->offsetGet('expected_value')
+				$entity->getExpectedValue()
 			);
 
-		} elseif ($routingKey->equalsValue(MetadataTypes\RoutingKeyType::ROUTE_DEVICE_PROPERTY_ACTION)) {
-			if ($data->offsetGet('action') !== MetadataTypes\PropertyActionType::ACTION_SET) {
+		} elseif ($entity instanceof MetadataEntities\Actions\ActionDevicePropertyEntity) {
+			if (!$entity->getAction()->equalsValue(MetadataTypes\PropertyActionType::ACTION_SET)) {
 				return;
 			}
 
 			$findPropertyQuery = new DevicesModuleQueries\FindDevicePropertiesQuery();
-			$findPropertyQuery->byId(Uuid\Uuid::fromString($data->offsetGet('property')));
+			$findPropertyQuery->byId($entity->getProperty());
 
 			$property = $this->devicesPropertiesRepository->findOneBy($findPropertyQuery);
 
@@ -129,16 +128,16 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$property->getDevice()->getIdentifier(),
 					$property->getIdentifier()
 				),
-				$data->offsetGet('expected_value')
+				$entity->getExpectedValue()
 			);
 
-		} elseif ($routingKey->equalsValue(MetadataTypes\RoutingKeyType::ROUTE_CHANNEL_ACTION)) {
-			if ($data->offsetGet('action') !== MetadataTypes\ControlActionType::ACTION_SET) {
+		} elseif ($entity instanceof MetadataEntities\Actions\ActionChannelEntity) {
+			if (!$entity->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
 				return;
 			}
 
 			$findControlQuery = new DevicesModuleQueries\FindChannelControlsQuery();
-			$findControlQuery->byId(Uuid\Uuid::fromString($data->offsetGet('control')));
+			$findControlQuery->byId($entity->getControl());
 
 			$control = $this->channelsControlsRepository->findOneBy($findControlQuery);
 
@@ -152,16 +151,16 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$control->getChannel()->getIdentifier(),
 					$control->getName()
 				),
-				$data->offsetGet('expected_value')
+				$entity->getExpectedValue()
 			);
 
-		} elseif ($routingKey->equalsValue(MetadataTypes\RoutingKeyType::ROUTE_CHANNEL_PROPERTY_ACTION)) {
-			if ($data->offsetGet('action') !== MetadataTypes\PropertyActionType::ACTION_SET) {
+		} elseif ($entity instanceof MetadataEntities\Actions\ActionChannelPropertyEntity) {
+			if (!$entity->getAction()->equalsValue(MetadataTypes\PropertyActionType::ACTION_SET)) {
 				return;
 			}
 
 			$findPropertyQuery = new DevicesModuleQueries\FindChannelPropertiesQuery();
-			$findPropertyQuery->byId(Uuid\Uuid::fromString($data->offsetGet('property')));
+			$findPropertyQuery->byId($entity->getProperty());
 
 			$property = $this->channelsPropertiesRepository->findOneBy($findPropertyQuery);
 
@@ -175,7 +174,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$property->getChannel()->getIdentifier(),
 					$property->getIdentifier()
 				),
-				$data->offsetGet('expected_value')
+				$entity->getExpectedValue()
 			);
 		}
 	}
