@@ -106,7 +106,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$control->getDevice()->getIdentifier(),
 					$control->getName()
 				),
-				$entity->getExpectedValue()
+				$entity->getExpectedValue() !== null ? strval($entity->getExpectedValue()) : null
 			);
 
 		} elseif ($entity instanceof MetadataEntities\Actions\ActionDevicePropertyEntity) {
@@ -128,7 +128,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$property->getDevice()->getIdentifier(),
 					$property->getIdentifier()
 				),
-				$entity->getExpectedValue()
+				$entity->getExpectedValue() !== null ? strval($entity->getExpectedValue()) : null
 			);
 
 		} elseif ($entity instanceof MetadataEntities\Actions\ActionChannelEntity) {
@@ -151,7 +151,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$control->getChannel()->getIdentifier(),
 					$control->getName()
 				),
-				$entity->getExpectedValue()
+				$entity->getExpectedValue() !== null ? strval($entity->getExpectedValue()) : null
 			);
 
 		} elseif ($entity instanceof MetadataEntities\Actions\ActionChannelPropertyEntity) {
@@ -174,7 +174,7 @@ class FbMqttV1Consumer implements FastyBirdExchange\Consumer\IConsumer
 					$property->getChannel()->getIdentifier(),
 					$property->getIdentifier()
 				),
-				$entity->getExpectedValue()
+				$entity->getExpectedValue() !== null ? strval($entity->getExpectedValue()) : null
 			);
 		}
 	}
