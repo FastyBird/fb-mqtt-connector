@@ -160,10 +160,10 @@ class ApiV1Client(Client, IClient):  # pylint: disable=too-many-instance-attribu
     def handle(self) -> None:
         """Handle connector devices"""
         for device in self.__devices_registry:
-            if device.id.__str__() not in self.__processed_devices:
+            if str(device.id) not in self.__processed_devices:
                 self.__process_device(device=device)
 
-                self.__processed_devices.append(device.id.__str__())
+                self.__processed_devices.append(str(device.id))
 
                 return
 

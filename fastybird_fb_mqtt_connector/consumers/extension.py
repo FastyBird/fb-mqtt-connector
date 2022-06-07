@@ -90,44 +90,44 @@ class DeviceExtensionItemConsumer(IConsumer):  # pylint: disable=too-few-public-
 
         # HARDWARE INFO
         if (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_HARDWARE)
+            entity.extension == ExtensionType.FASTYBIRD_HARDWARE
             and entity.parameter == ExtensionAttributeEntity.MANUFACTURER
         ):
             attribute_identifier = DeviceAttributeName.HARDWARE_MANUFACTURER.value
 
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_HARDWARE)
+            entity.extension == ExtensionType.FASTYBIRD_HARDWARE
             and entity.parameter == ExtensionAttributeEntity.MODEL
         ):
             attribute_identifier = DeviceAttributeName.HARDWARE_MODEL.value
 
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_HARDWARE)
+            entity.extension == ExtensionType.FASTYBIRD_HARDWARE
             and entity.parameter == ExtensionAttributeEntity.VERSION
         ):
             attribute_identifier = DeviceAttributeName.HARDWARE_VERSION.value
 
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_HARDWARE)
+            entity.extension == ExtensionType.FASTYBIRD_HARDWARE
             and entity.parameter == ExtensionAttributeEntity.MAC_ADDRESS
         ):
             attribute_identifier = DeviceAttributeName.HARDWARE_MAC_ADDRESS.value
 
         # FIRMWARE INFO
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_FIRMWARE)
+            entity.extension == ExtensionType.FASTYBIRD_FIRMWARE
             and entity.parameter == ExtensionAttributeEntity.MANUFACTURER
         ):
             attribute_identifier = DeviceAttributeName.FIRMWARE_MANUFACTURER.value
 
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_FIRMWARE)
+            entity.extension == ExtensionType.FASTYBIRD_FIRMWARE
             and entity.parameter == ExtensionAttributeEntity.NAME
         ):
             attribute_identifier = DeviceAttributeName.FIRMWARE_NAME.value
 
         elif (
-            entity.extension.__eq__(ExtensionType.FASTYBIRD_FIRMWARE)
+            entity.extension == ExtensionType.FASTYBIRD_FIRMWARE
             and entity.parameter == ExtensionAttributeEntity.VERSION
         ):
             attribute_identifier = DeviceAttributeName.FIRMWARE_VERSION.value

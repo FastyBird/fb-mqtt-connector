@@ -104,7 +104,7 @@ class DevicesRegistry:
         items = self.__items.copy()
 
         return next(
-            iter([record for record in items.values() if device_id.__eq__(record.id)]),
+            iter([record for record in items.values() if device_id == record.id]),
             None,
         )
 
@@ -135,7 +135,7 @@ class DevicesRegistry:
             controls=controls,
         )
 
-        self.__items[device_record.id.__str__()] = device_record
+        self.__items[str(device_record.id)] = device_record
 
         return device_record
 
@@ -170,9 +170,9 @@ class DevicesRegistry:
         items = self.__items.copy()
 
         for record in items.values():
-            if device_id.__eq__(record.id):
+            if device_id == record.id:
                 try:
-                    del self.__items[record.id.__str__()]
+                    del self.__items[str(record.id)]
 
                     self.__properties_registry.reset(device_id=record.id)
                     self.__attributes_registry.reset(device_id=record.id)
@@ -227,7 +227,7 @@ class DevicesRegistry:
 
         for record in items.values():
             if record.id == device.id:
-                self.__items[device.id.__str__()] = device
+                self.__items[str(device.id)] = device
 
                 return True
 
@@ -304,7 +304,7 @@ class DevicesPropertiesRegistry:
         items = self.__items.copy()
 
         return next(
-            iter([record for record in items.values() if property_id.__eq__(record.id)]),
+            iter([record for record in items.values() if property_id == record.id]),
             None,
         )
 
@@ -319,7 +319,7 @@ class DevicesPropertiesRegistry:
                 [
                     record
                     for record in items.values()
-                    if device_id.__eq__(record.device_id) and record.identifier == property_identifier
+                    if device_id == record.device_id and record.identifier == property_identifier
                 ]
             ),
             None,
@@ -331,7 +331,7 @@ class DevicesPropertiesRegistry:
         """Find properties in registry by device unique identifier"""
         items = self.__items.copy()
 
-        return [record for record in items.values() if device_id.__eq__(record.device_id)]
+        return [record for record in items.values() if device_id == record.device_id]
 
     # -----------------------------------------------------------------------------
 
@@ -379,7 +379,7 @@ class DevicesPropertiesRegistry:
             except (NotImplementedError, AttributeError):
                 pass
 
-        self.__items[property_record.id.__str__()] = property_record
+        self.__items[str(property_record.id)] = property_record
 
         return property_record
 
@@ -429,9 +429,9 @@ class DevicesPropertiesRegistry:
         items = self.__items.copy()
 
         for record in items.values():
-            if property_id.__eq__(record.id):
+            if property_id == record.id:
                 try:
-                    del self.__items[record.id.__str__()]
+                    del self.__items[str(record.id)]
 
                     if propagate:
                         self.__event_dispatcher.dispatch(
@@ -452,7 +452,7 @@ class DevicesPropertiesRegistry:
 
         if device_id is not None:
             for record in items.values():
-                if device_id.__eq__(record.device_id):
+                if device_id == record.device_id:
                     self.remove(property_id=record.id)
 
         else:
@@ -548,7 +548,7 @@ class DevicesPropertiesRegistry:
 
         for record in items.values():
             if record.id == device_property.id:
-                self.__items[device_property.id.__str__()] = device_property
+                self.__items[str(device_property.id)] = device_property
 
                 return True
 
@@ -620,7 +620,7 @@ class DevicesAttributesRegistry:
         items = self.__items.copy()
 
         return next(
-            iter([record for record in items.values() if attribute_id.__eq__(record.id)]),
+            iter([record for record in items.values() if attribute_id == record.id]),
             None,
         )
 
@@ -635,7 +635,7 @@ class DevicesAttributesRegistry:
                 [
                     record
                     for record in items.values()
-                    if device_id.__eq__(record.device_id) and record.identifier == attribute_identifier
+                    if device_id == record.device_id and record.identifier == attribute_identifier
                 ]
             ),
             None,
@@ -647,7 +647,7 @@ class DevicesAttributesRegistry:
         """Find attributes in registry by device unique identifier"""
         items = self.__items.copy()
 
-        return [record for record in items.values() if device_id.__eq__(record.device_id)]
+        return [record for record in items.values() if device_id == record.device_id]
 
     # -----------------------------------------------------------------------------
 
@@ -668,7 +668,7 @@ class DevicesAttributesRegistry:
             attribute_value=attribute_value,
         )
 
-        self.__items[attribute_record.id.__str__()] = attribute_record
+        self.__items[str(attribute_record.id)] = attribute_record
 
         return attribute_record
 
@@ -705,9 +705,9 @@ class DevicesAttributesRegistry:
         items = self.__items.copy()
 
         for record in items.values():
-            if attribute_id.__eq__(record.id):
+            if attribute_id == record.id:
                 try:
-                    del self.__items[record.id.__str__()]
+                    del self.__items[str(record.id)]
 
                     if propagate:
                         self.__event_dispatcher.dispatch(
@@ -728,7 +728,7 @@ class DevicesAttributesRegistry:
 
         if device_id is not None:
             for record in items.values():
-                if device_id.__eq__(record.device_id):
+                if device_id == record.device_id:
                     self.remove(attribute_id=record.id)
 
         else:
@@ -802,7 +802,7 @@ class ChannelsRegistry:
         items = self.__items.copy()
 
         return next(
-            iter([record for record in items.values() if channel_id.__eq__(record.id)]),
+            iter([record for record in items.values() if channel_id == record.id]),
             None,
         )
 
@@ -817,7 +817,7 @@ class ChannelsRegistry:
                 [
                     record
                     for record in items.values()
-                    if device_id.__eq__(record.device_id) and record.identifier == channel_identifier
+                    if device_id == record.device_id and record.identifier == channel_identifier
                 ]
             ),
             None,
@@ -829,7 +829,7 @@ class ChannelsRegistry:
         """Find channels in registry by device unique identifier"""
         items = self.__items.copy()
 
-        return list(iter([record for record in items.values() if device_id.__eq__(record.device_id)]))
+        return list(iter([record for record in items.values() if device_id == record.device_id]))
 
     # -----------------------------------------------------------------------------
 
@@ -850,7 +850,7 @@ class ChannelsRegistry:
             controls=controls,
         )
 
-        self.__items[channel_record.id.__str__()] = channel_record
+        self.__items[str(channel_record.id)] = channel_record
 
         return channel_record
 
@@ -887,9 +887,9 @@ class ChannelsRegistry:
         items = self.__items.copy()
 
         for record in items.values():
-            if channel_id.__eq__(record.id):
+            if channel_id == record.id:
                 try:
-                    del self.__items[record.id.__str__()]
+                    del self.__items[str(record.id)]
 
                     if propagate:
                         self.__event_dispatcher.dispatch(
@@ -912,7 +912,7 @@ class ChannelsRegistry:
 
         if device_id is not None:
             for record in items.values():
-                if device_id.__eq__(record.device_id):
+                if device_id == record.device_id:
                     self.remove(channel_id=record.id)
 
         else:
@@ -961,7 +961,7 @@ class ChannelsPropertiesRegistry:
         items = self.__items.copy()
 
         return next(
-            iter([record for record in items.values() if property_id.__eq__(record.id)]),
+            iter([record for record in items.values() if property_id == record.id]),
             None,
         )
 
@@ -976,7 +976,7 @@ class ChannelsPropertiesRegistry:
                 [
                     record
                     for record in items.values()
-                    if channel_id.__eq__(record.channel_id) and record.identifier == property_identifier
+                    if channel_id == record.channel_id and record.identifier == property_identifier
                 ]
             ),
             None,
@@ -988,7 +988,7 @@ class ChannelsPropertiesRegistry:
         """Find properties in registry by channel unique identifier"""
         items = self.__items.copy()
 
-        return [record for record in items.values() if channel_id.__eq__(record.channel_id)]
+        return [record for record in items.values() if channel_id == record.channel_id]
 
     # -----------------------------------------------------------------------------
 
@@ -1036,7 +1036,7 @@ class ChannelsPropertiesRegistry:
             except (NotImplementedError, AttributeError):
                 pass
 
-        self.__items[property_record.id.__str__()] = property_record
+        self.__items[str(property_record.id)] = property_record
 
         return property_record
 
@@ -1086,9 +1086,9 @@ class ChannelsPropertiesRegistry:
         items = self.__items.copy()
 
         for record in items.values():
-            if property_id.__eq__(record.id):
+            if property_id == record.id:
                 try:
-                    del self.__items[record.id.__str__()]
+                    del self.__items[str(record.id)]
 
                     if propagate:
                         self.__event_dispatcher.dispatch(
@@ -1109,7 +1109,7 @@ class ChannelsPropertiesRegistry:
 
         if channel_id is not None:
             for record in items.values():
-                if channel_id.__eq__(record.channel_id):
+                if channel_id == record.channel_id:
                     self.remove(property_id=record.id)
 
         else:
@@ -1205,7 +1205,7 @@ class ChannelsPropertiesRegistry:
 
         for record in items.values():
             if record.id == channel_property.id:
-                self.__items[channel_property.id.__str__()] = channel_property
+                self.__items[str(channel_property.id)] = channel_property
 
                 return True
 
