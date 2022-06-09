@@ -36,6 +36,7 @@ extensions:
 
 services:
     - {factory: Symfony\Component\Console\Application}
+    - {factory: React\EventLoop\ExtEventLoop}
     - {factory: IPub\SlimRouter\Http\ResponseFactory}
     -
         factory: IPub\SlimRouter\Routing\Router
