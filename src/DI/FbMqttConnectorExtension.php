@@ -18,6 +18,7 @@ namespace FastyBird\FbMqttConnector\DI;
 use Doctrine\Persistence;
 use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Client;
+use FastyBird\FbMqttConnector\Connector;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Hydrators;
 use FastyBird\FbMqttConnector\Schemas;
@@ -62,8 +63,8 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 	public function getConfigSchema(): Schema\Schema
 	{
 		return Schema\Expect::structure([
-			'worker' => Schema\Expect::bool(false),
-			'loop'   => Schema\Expect::anyOf(Schema\Expect::string(), Schema\Expect::type(DI\Definitions\Statement::class))->nullable(),
+			'loop' => Schema\Expect::anyOf(Schema\Expect::string(), Schema\Expect::type(DI\Definitions\Statement::class))
+				->nullable(),
 		]);
 	}
 
@@ -76,52 +77,51 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		/** @var stdClass $configuration */
 		$configuration = $this->getConfig();
 
-		if ($configuration->worker) {
-			if ($configuration->loop === null && $builder->getByType(EventLoop\LoopInterface::class) === null) {
-				$builder->addDefinition($this->prefix('client.loop'), new DI\Definitions\ServiceDefinition())
-					->setType(EventLoop\LoopInterface::class)
-					->setFactory('React\EventLoop\Factory::create');
-			}
-
-			// MQTT v1 API client factory
-			$builder->addDefinition($this->prefix('client.apiv1'), new DI\Definitions\ServiceDefinition())
-				->setFactory(Client\FbMqttV1Client::class);
-
-			// MQTT API
-			$builder->addDefinition($this->prefix('api.v1parser'), new DI\Definitions\ServiceDefinition())
-				->setType(API\V1Parser::class);
-
-			$builder->addDefinition($this->prefix('api.v1validator'), new DI\Definitions\ServiceDefinition())
-				->setType(API\V1Validator::class);
-
-			$builder->addDefinition($this->prefix('api.v1builder'), new DI\Definitions\ServiceDefinition())
-				->setType(API\V1Builder::class);
-
-			// Consumers
-			$builder->addDefinition($this->prefix('consumer.proxy'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\Consumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.device.attribute.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\DeviceMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.device.hardware.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\DeviceHardwareMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.device.firmware.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\DeviceFirmwareMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.device.property.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\DevicePropertyMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.channel.attribute.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\ChannelMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.channel.property.message'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\ChannelPropertyMessageConsumer::class);
-
-			$builder->addDefinition($this->prefix('consumer.apiv1.exchange.consumer'), new DI\Definitions\ServiceDefinition())
-				->setType(Consumers\FbMqttV1Consumer::class);
+		if ($configuration->loop === null && $builder->getByType(EventLoop\LoopInterface::class) === null) {
+			$builder->addDefinition($this->prefix('client.loop'), new DI\Definitions\ServiceDefinition())
+				->setType(EventLoop\LoopInterface::class)
+				->setFactory('React\EventLoop\Factory::create');
 		}
+
+		// Connector
+		$builder->addDefinition($this->prefix('connector.factory'), new DI\Definitions\ServiceDefinition())
+			->setFactory(Connector\ConnectorFactory::class);
+
+		// MQTT v1 API client
+		$builder->addDefinition($this->prefix('client.apiv1'), new DI\Definitions\ServiceDefinition())
+			->setFactory(Client\FbMqttV1Client::class);
+
+		// MQTT API
+		$builder->addDefinition($this->prefix('api.v1parser'), new DI\Definitions\ServiceDefinition())
+			->setType(API\V1Parser::class);
+
+		$builder->addDefinition($this->prefix('api.v1validator'), new DI\Definitions\ServiceDefinition())
+			->setType(API\V1Validator::class);
+
+		$builder->addDefinition($this->prefix('api.v1builder'), new DI\Definitions\ServiceDefinition())
+			->setType(API\V1Builder::class);
+
+		// Consumers
+		$builder->addDefinition($this->prefix('consumer.proxy'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\Consumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.device.attribute.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\DeviceMessageConsumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.device.hardware.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\DeviceHardwareMessageConsumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.device.firmware.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\DeviceFirmwareMessageConsumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.device.property.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\DevicePropertyMessageConsumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.channel.attribute.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\ChannelMessageConsumer::class);
+
+		$builder->addDefinition($this->prefix('consumer.channel.property.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\ChannelPropertyMessageConsumer::class);
 
 		// API schemas
 		$builder->addDefinition($this->prefix('schemas.connector.fbMqtt'), new DI\Definitions\ServiceDefinition())
@@ -146,29 +146,25 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		parent::beforeCompile();
 
 		$builder = $this->getContainerBuilder();
-		/** @var stdClass $configuration */
-		$configuration = $this->getConfig();
 
-		if ($configuration->worker) {
-			// Register data consumers
+		// Register data consumers
 
-			/** @var string $consumerServiceName */
-			$consumerServiceName = $builder->getByType(Consumers\Consumer::class, true);
+		/** @var string $consumerServiceName */
+		$consumerServiceName = $builder->getByType(Consumers\Consumer::class, true);
 
-			/** @var DI\Definitions\ServiceDefinition $consumerService */
-			$consumerService = $builder->getDefinition($consumerServiceName);
+		/** @var DI\Definitions\ServiceDefinition $consumerService */
+		$consumerService = $builder->getDefinition($consumerServiceName);
 
-			$consumersServices = $builder->findByType(Consumers\IConsumer::class);
+		$consumersServices = $builder->findByType(Consumers\IConsumer::class);
 
-			foreach ($consumersServices as $service) {
-				if ($service->getType() !== Consumers\Consumer::class) {
-					$service->setAutowired(false);
+		foreach ($consumersServices as $service) {
+			if ($service->getType() !== Consumers\Consumer::class) {
+				$service->setAutowired(false);
 
-					$consumerService->addSetup('?->addConsumer(?)', [
-						'@self',
-						$service,
-					]);
-				}
+				$consumerService->addSetup('?->addConsumer(?)', [
+					'@self',
+					$service,
+				]);
 			}
 		}
 

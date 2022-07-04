@@ -15,6 +15,7 @@ php:
 
 extensions:
     contributteTranslation              : Contributte\Translation\DI\TranslationExtension
+    contributeFlysystem                 : Contributte\Flysystem\DI\FlysystemExtension
     nettrineAnnotations                 : Nettrine\Annotations\DI\AnnotationsExtension
     nettrineCache                       : Nettrine\Cache\DI\CacheExtension
     nettrineDbal                        : Nettrine\DBAL\DI\DbalExtension
@@ -28,6 +29,7 @@ extensions:
     ipubDoctrineTimestampable           : IPub\DoctrineTimestampable\DI\DoctrineTimestampableExtension
     ipubPhone                           : IPub\Phone\DI\PhoneExtension
     fbDateTimeFactory                   : FastyBird\DateTimeFactory\DI\DateTimeFactoryExtension
+    fbSocketServerFactory               : FastyBird\SocketServerFactory\DI\SocketServerFactoryExtension
     fbExchange                          : FastyBird\Exchange\DI\ExchangeExtension
     fbJsonApi                           : FastyBird\JsonApi\DI\JsonApiExtension
     fbMetadata                          : FastyBird\Metadata\DI\MetadataExtension
@@ -36,7 +38,6 @@ extensions:
 
 services:
     - {factory: Symfony\Component\Console\Application}
-    - {factory: React\EventLoop\ExtEventLoop}
     - {factory: IPub\SlimRouter\Http\ResponseFactory}
     -
         factory: IPub\SlimRouter\Routing\Router
@@ -51,6 +52,12 @@ contributteTranslation:
     dirs:
         - %appDir%/../vendor/fastybird/json-api/src/Translations
         - %appDir%/../vendor/fastybird/devices-module/src/Translations
+
+contributeFlysystem:
+	filesystem:
+		default:
+			adapter: League\Flysystem\Local\LocalFilesystemAdapter(%tempDir%)
+			autowired: true
 
 nettrineDbal:
     connection:
@@ -110,5 +117,4 @@ fbJsonApi:
         copyright: FastyBird s.r.o
 
 fbFbMqttConnector:
-    worker: true
     loop: @fbSocketServerFactory.react.eventLoop

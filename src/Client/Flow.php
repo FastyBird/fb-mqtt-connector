@@ -36,7 +36,7 @@ class Flow implements Mqtt\Flow
 	private Promise\Deferred $deferred;
 
 	/** @var Mqtt\Packet|null */
-	private ?Mqtt\Packet $packet = null;
+	private ?Mqtt\Packet $packet;
 
 	/** @var bool */
 	private bool $isSilent;

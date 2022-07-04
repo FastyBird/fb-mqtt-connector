@@ -15,7 +15,10 @@
 
 namespace FastyBird\FbMqttConnector\Client;
 
+use BinSoul\Net\Mqtt;
 use FastyBird\FbMqttConnector;
+use FastyBird\FbMqttConnector\Types;
+use FastyBird\Metadata\Entities as MetadataEntities;
 use React\Promise;
 
 /**
@@ -28,6 +31,70 @@ use React\Promise;
  */
 interface IClient
 {
+
+	/**
+	 * @return Types\ProtocolVersionType
+	 */
+	public function getProtocol(): Types\ProtocolVersionType;
+
+	/**
+	 * @param MetadataEntities\Actions\IActionDeviceEntity $action
+	 *
+	 * @return void
+	 */
+	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceEntity $action): void;
+
+	/**
+	 * @param MetadataEntities\Actions\IActionChannelEntity $action
+	 *
+	 * @return void
+	 */
+	public function writeChannelControl(MetadataEntities\Actions\IActionChannelEntity $action): void;
+
+	/**
+	 * @return bool
+	 */
+	public function isConnected(): bool;
+
+	/**
+	 * Connects to a broker
+	 *
+	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
+	 * @param int $timeout
+	 *
+	 * @return Promise\ExtendedPromiseInterface
+	 */
+	public function connect(
+		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
+		int $timeout = 5
+	): Promise\ExtendedPromiseInterface;
+
+	/**
+	 * Disconnects from a broker
+	 *
+	 * @param int $timeout
+	 *
+	 * @return Promise\ExtendedPromiseInterface
+	 */
+	public function disconnect(int $timeout = 5): Promise\ExtendedPromiseInterface;
+
+	/**
+	 * Subscribes to a topic filter
+	 *
+	 * @param Mqtt\Subscription $subscription
+	 *
+	 * @return Promise\ExtendedPromiseInterface
+	 */
+	public function subscribe(Mqtt\Subscription $subscription): Promise\ExtendedPromiseInterface;
+
+	/**
+	 * Unsubscribes from a topic filter
+	 *
+	 * @param Mqtt\Subscription $subscription
+	 *
+	 * @return Promise\ExtendedPromiseInterface
+	 */
+	public function unsubscribe(Mqtt\Subscription $subscription): Promise\ExtendedPromiseInterface;
 
 	/**
 	 * @param string $topic

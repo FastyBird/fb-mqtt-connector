@@ -57,4 +57,8 @@ final class Constants
 
 	public const VALUE_NOT_SET = 'none';
 
+	public const BROKER_LOCALHOST_ADDRESS = '127.0.0.1';
+	public const BROKER_LOCALHOST_PORT = 1883;
+	public const BROKER_LOCALHOST_SECURED_PORT = 8883;
+
 }

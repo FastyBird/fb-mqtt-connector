@@ -15,7 +15,6 @@
 
 namespace FastyBird\FbMqttConnector\Entities;
 
-use Doctrine\ORM\Mapping as ORM;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\Metadata\Types as MetadataTypes;
 

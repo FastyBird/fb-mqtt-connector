@@ -15,8 +15,8 @@
 
 namespace FastyBird\FbMqttConnector\Entities;
 
-use Doctrine\ORM\Mapping as ORM;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
+use FastyBird\FbMqttConnector\Constants;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Types as MetadataTypes;
 
@@ -44,11 +44,10 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SERVER);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_string($property->getValue())
 		) {
-			return '127.0.0.1';
+			return Constants::BROKER_LOCALHOST_ADDRESS;
 		}
 
 		return $property->getValue();
@@ -62,11 +61,10 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PORT);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_int($property->getValue())
 		) {
-			return 1883;
+			return Constants::BROKER_LOCALHOST_PORT;
 		}
 
 		return $property->getValue();
@@ -80,11 +78,10 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SECURED_PORT);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_int($property->getValue())
 		) {
-			return 8883;
+			return Constants::BROKER_LOCALHOST_SECURED_PORT;
 		}
 
 		return $property->getValue();
@@ -98,8 +95,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_USERNAME);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_string($property->getValue())
 		) {
 			return null;
@@ -116,8 +112,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PASSWORD);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_string($property->getValue())
 		) {
 			return null;
@@ -134,8 +129,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PROTOCOL);
 
 		if (
-			$property === null
-			|| !$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
+			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
 			|| !is_numeric($property->getValue())
 			|| !Types\ProtocolVersionType::isValidValue($property->getValue())
 		) {
