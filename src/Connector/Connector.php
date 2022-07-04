@@ -16,8 +16,6 @@
 namespace FastyBird\FbMqttConnector\Connector;
 
 use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
-use FastyBird\DevicesModule\Models as DevicesModuleModels;
-use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Client;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Types as MetadataTypes;

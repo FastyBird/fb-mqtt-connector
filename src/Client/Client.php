@@ -427,7 +427,8 @@ abstract class Client implements IClient
 	protected function onOpen(Mqtt\Connection $connection): void
 	{
 		// Network connection established
-		$this->logger->info('Established connection to MQTT broker',
+		$this->logger->info(
+			'Established connection to MQTT broker',
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',
@@ -446,7 +447,8 @@ abstract class Client implements IClient
 	protected function onClose(Mqtt\Connection $connection): void
 	{
 		// Network connection closed
-		$this->logger->info('Connection to MQTT broker',
+		$this->logger->info(
+			'Connection to MQTT broker',
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',
@@ -467,7 +469,8 @@ abstract class Client implements IClient
 	protected function onConnect(Mqtt\Connection $connection): void
 	{
 		// Broker connected
-		$this->logger->info(sprintf('Connected to MQTT broker with client id %s', $connection->getClientID()),
+		$this->logger->info(
+			sprintf('Connected to MQTT broker with client id %s', $connection->getClientID()),
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',
@@ -492,7 +495,8 @@ abstract class Client implements IClient
 	protected function onDisconnect(Mqtt\Connection $connection): void
 	{
 		// Broker disconnected
-		$this->logger->info(sprintf('Disconnected from MQTT broker with client id %s', $connection->getClientID()),
+		$this->logger->info(
+			sprintf('Disconnected from MQTT broker with client id %s', $connection->getClientID()),
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',
@@ -511,7 +515,8 @@ abstract class Client implements IClient
 	protected function onWarning(Throwable $ex): void
 	{
 		// Broker warning occur
-		$this->logger->warning(sprintf('There was an error  %s', $ex->getMessage()),
+		$this->logger->warning(
+			sprintf('There was an error  %s', $ex->getMessage()),
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',
@@ -533,7 +538,8 @@ abstract class Client implements IClient
 	protected function onError(Throwable $ex): void
 	{
 		// Broker error occur
-		$this->logger->error(sprintf('There was an error  %s', $ex->getMessage()),
+		$this->logger->error(
+			sprintf('There was an error  %s', $ex->getMessage()),
 			[
 				'source'    => 'fastybird-fb-mqtt-connector',
 				'type'      => 'client',

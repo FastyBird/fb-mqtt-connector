@@ -466,11 +466,7 @@ final class FbMqttV1Client extends Client
 			return true;
 		}
 
-		if ($this->writeChannelsProperties($device)) {
-			return true;
-		}
-
-		return false;
+		return $this->writeChannelsProperties($device);
 	}
 
 	/**
@@ -535,4 +531,5 @@ final class FbMqttV1Client extends Client
 
 		return false;
 	}
+
 }
