@@ -37,7 +37,7 @@ class ConnectorPropertyType extends Consistence\Enum\Enum
 	public const NAME_SECURED_PORT = MetadataTypes\ConnectorPropertyNameType::NAME_SECURED_PORT;
 	public const NAME_USERNAME = 'username';
 	public const NAME_PASSWORD = 'password';
-	public const NAME_PROTOCOL = 'protocol';
+	public const NAME_PROTOCOL_VERSION = 'protocol';
 
 	/**
 	 * @return string

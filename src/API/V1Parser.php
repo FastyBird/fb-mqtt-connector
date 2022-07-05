@@ -18,6 +18,7 @@ namespace FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Helpers;
+use FastyBird\FbMqttConnector\Types;
 use Nette;
 
 /**
@@ -132,32 +133,42 @@ final class V1Parser
 	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return Entities\Messages\Hardware
+	 * @return Entities\Messages\ExtensionAttribute
 	 */
 	private function parseDeviceHardwareInfo(
 		string $topic,
 		string $payload
-	): Entities\Messages\Hardware {
+	): Entities\Messages\ExtensionAttribute {
 		preg_match(V1Validator::DEVICE_HW_INFO_REGEXP, $topic, $matches);
 		[, $device, $hardware] = $matches;
 
-		return new Entities\Messages\Hardware($device, $hardware, Helpers\PayloadHelper::cleanName(strtolower($payload)));
+		return new Entities\Messages\ExtensionAttribute(
+			$device,
+			Types\ExtensionTypeType::get(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE),
+			$hardware,
+			Helpers\PayloadHelper::cleanName(strtolower($payload))
+		);
 	}
 
 	/**
 	 * @param string $topic
 	 * @param string $payload
 	 *
-	 * @return Entities\Messages\Firmware
+	 * @return Entities\Messages\ExtensionAttribute
 	 */
 	private function parseDeviceFirmwareInfo(
 		string $topic,
 		string $payload
-	): Entities\Messages\Firmware {
+	): Entities\Messages\ExtensionAttribute {
 		preg_match(V1Validator::DEVICE_FW_INFO_REGEXP, $topic, $matches);
 		[, $device, $firmware] = $matches;
 
-		return new Entities\Messages\Firmware($device, $firmware, Helpers\PayloadHelper::cleanName(strtolower($payload)));
+		return new Entities\Messages\ExtensionAttribute(
+			$device,
+			Types\ExtensionTypeType::get(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE),
+			$firmware,
+			Helpers\PayloadHelper::cleanName(strtolower($payload))
+		);
 	}
 
 	/**

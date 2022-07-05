@@ -85,9 +85,6 @@ class DeviceExtensionItemConsumer(IConsumer):  # pylint: disable=too-few-public-
 
         attribute_identifier: Optional[str] = None
 
-        if attribute_identifier is None:
-            return
-
         # HARDWARE INFO
         if (
             entity.extension == ExtensionType.FASTYBIRD_HARDWARE
@@ -131,6 +128,9 @@ class DeviceExtensionItemConsumer(IConsumer):  # pylint: disable=too-few-public-
             and entity.parameter == ExtensionAttributeEntity.VERSION
         ):
             attribute_identifier = DeviceAttributeName.FIRMWARE_VERSION.value
+
+        if attribute_identifier is None:
+            return
 
         device_attribute = self.__attributes_registry.get_by_identifier(
             device_id=device.id,

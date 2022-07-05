@@ -30,13 +30,13 @@ return [
 			Entities\Messages\Attribute::CHANNELS => ['channel-one', 'channel-two'],
 		],
 	],
-	'attr-' . Entities\Messages\Attribute::CONTROL          => [
-		'/fb/v1/device-name/$' . Entities\Messages\Attribute::CONTROL,
+	'attr-' . Entities\Messages\Attribute::CONTROLS          => [
+		'/fb/v1/device-name/$' . Entities\Messages\Attribute::CONTROLS,
 		'configure,reset',
 		[
 			'device'                             => 'device-name',
 			'retained'                           => false,
-			Entities\Messages\Attribute::CONTROL => ['configure', 'reset'],
+			Entities\Messages\Attribute::CONTROLS => ['configure', 'reset'],
 		],
 	],
 ];

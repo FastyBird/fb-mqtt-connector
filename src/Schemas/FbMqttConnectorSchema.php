@@ -18,7 +18,6 @@ namespace FastyBird\FbMqttConnector\Schemas;
 use FastyBird\DevicesModule\Schemas as DevicesModuleSchemas;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\Metadata\Types as MetadataTypes;
-use Neomerx\JsonApi;
 
 /**
  * FastyBird MQTT connector entity schema
@@ -52,25 +51,6 @@ final class FbMqttConnectorSchema extends DevicesModuleSchemas\Connectors\Connec
 	public function getType(): string
 	{
 		return self::SCHEMA_TYPE;
-	}
-
-	/**
-	 * @param Entities\IFbMqttConnector $connector
-	 * @param JsonApi\Contracts\Schema\ContextInterface $context
-	 *
-	 * @return iterable<string, mixed>
-	 *
-	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
-	 */
-	public function getAttributes($connector, JsonApi\Contracts\Schema\ContextInterface $context): iterable
-	{
-		return array_merge((array) parent::getAttributes($connector, $context), [
-			'server'       => $connector->getServer(),
-			'port'         => $connector->getPort(),
-			'secured_port' => $connector->getSecuredPort(),
-			'username'     => $connector->getUsername(),
-			'password'     => $connector->getPassword(),
-		]);
 	}
 
 }

@@ -15,14 +15,17 @@
 
 namespace FastyBird\FbMqttConnector\Consumers;
 
+use Doctrine\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
+use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\FbMqttConnector\Types\ExtensionTypeType;
 use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
@@ -54,11 +57,20 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\Controls\IControlsManager */
 	private DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager;
 
+	/** @var DevicesModuleModels\Devices\Attributes\IAttributesManager */
+	private DevicesModuleModels\Devices\Attributes\IAttributesManager $deviceAttributesManager;
+
 	/** @var DevicesModuleModels\Channels\IChannelsRepository */
 	private DevicesModuleModels\Channels\IChannelsRepository $channelRepository;
 
 	/** @var DevicesModuleModels\Channels\IChannelsManager */
 	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
+
+	/** @var DevicesModuleModels\States\DevicePropertiesRepository */
+	private DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository;
+
+	/** @var DevicesModuleModels\States\DevicePropertiesManager */
+	private DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager;
 
 	/** @var Persistence\ManagerRegistry */
 	protected Persistence\ManagerRegistry $managerRegistry;
@@ -71,8 +83,11 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 		DevicesModuleModels\Devices\IDevicesManager $devicesManager,
 		DevicesModuleModels\Devices\Properties\IPropertiesManager $devicePropertiesManager,
 		DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager,
+		DevicesModuleModels\Devices\Attributes\IAttributesManager $deviceAttributesManager,
 		DevicesModuleModels\Channels\IChannelsRepository $channelRepository,
 		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
+		DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository,
+		DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null
 	) {
@@ -80,8 +95,11 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 		$this->devicesManager = $devicesManager;
 		$this->devicePropertiesManager = $devicePropertiesManager;
 		$this->deviceControlManager = $deviceControlManager;
+		$this->deviceAttributesManager = $deviceAttributesManager;
 		$this->channelRepository = $channelRepository;
 		$this->channelsManager = $channelsManager;
+		$this->propertyStateRepository = $propertyStateRepository;
+		$this->propertiesStatesManager = $propertiesStatesManager;
 
 		$this->managerRegistry = $managerRegistry;
 
@@ -91,7 +109,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @throws Exceptions\InvalidStateException
+	 * @throws DBAL\Exception
 	 */
 	public function consume(
 		Entities\Messages\IEntity $entity
@@ -109,8 +127,8 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'client',
+					'source' => 'fastybird-fb-mqtt-connector',
+					'type'   => 'consumer',
 				]
 			);
 
@@ -139,12 +157,16 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 					$this->setDeviceProperties($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
+				if ($entity->getAttribute() === Entities\Messages\Attribute::EXTENSIONS && is_array($entity->getValue())) {
+					$this->setDeviceExtensions($device, Utils\ArrayHash::from($entity->getValue()));
+				}
+
 				if ($entity->getAttribute() === Entities\Messages\Attribute::CHANNELS && is_array($entity->getValue())) {
 					$this->setDeviceChannels($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
-				if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROL && is_array($entity->getValue())) {
-					$this->setDeviceControl($device, Utils\ArrayHash::from($entity->getValue()));
+				if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROLS && is_array($entity->getValue())) {
+					$this->setDeviceControls($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
 				if ($toUpdate !== []) {
@@ -238,6 +260,75 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 
 	/**
 	 * @param DevicesModuleEntities\Devices\IDevice $device
+	 * @param Utils\ArrayHash<string> $extensions
+	 *
+	 * @return void
+	 */
+	private function setDeviceExtensions(
+		DevicesModuleEntities\Devices\IDevice $device,
+		Utils\ArrayHash $extensions
+	): void {
+		foreach ($extensions as $extensionName) {
+			if ($extensionName === ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE) {
+				foreach ([
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MAC_ADDRESS,
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MANUFACTURER,
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MODEL,
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_VERSION,
+						 ] as $attributeName) {
+					if (!$device->hasAttribute($attributeName)) {
+						$this->deviceAttributesManager->create(Utils\ArrayHash::from([
+							'device'     => $device,
+							'identifier' => $attributeName,
+						]));
+					}
+				}
+			} elseif ($extensionName === ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE) {
+				foreach ([
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_MANUFACTURER,
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_NAME,
+							 MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_VERSION,
+						 ] as $attributeName) {
+					if (!$device->hasAttribute($attributeName)) {
+						$this->deviceAttributesManager->create(Utils\ArrayHash::from([
+							'device'     => $device,
+							'identifier' => $attributeName,
+						]));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param DevicesModuleEntities\Devices\IDevice $device
+	 * @param Utils\ArrayHash<string> $controls
+	 *
+	 * @return void
+	 */
+	private function setDeviceControls(
+		DevicesModuleEntities\Devices\IDevice $device,
+		Utils\ArrayHash $controls
+	): void {
+		foreach ($controls as $controlName) {
+			if (!$device->hasControl($controlName)) {
+				$this->deviceControlManager->create(Utils\ArrayHash::from([
+					'device' => $device,
+					'name'   => $controlName,
+				]));
+			}
+		}
+
+		// Cleanup for unused control
+		foreach ($device->getControls() as $control) {
+			if (!in_array($control->getName(), (array) $controls, true)) {
+				$this->deviceControlManager->delete($control);
+			}
+		}
+	}
+
+	/**
+	 * @param DevicesModuleEntities\Devices\IDevice $device
 	 * @param Utils\ArrayHash<string> $channels
 	 *
 	 * @return void
@@ -273,33 +364,6 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 
 	/**
 	 * @param DevicesModuleEntities\Devices\IDevice $device
-	 * @param Utils\ArrayHash<string> $controls
-	 *
-	 * @return void
-	 */
-	private function setDeviceControl(
-		DevicesModuleEntities\Devices\IDevice $device,
-		Utils\ArrayHash $controls
-	): void {
-		foreach ($controls as $controlName) {
-			if (!$device->hasControl($controlName)) {
-				$this->deviceControlManager->create(Utils\ArrayHash::from([
-					'device' => $device,
-					'name'   => $controlName,
-				]));
-			}
-		}
-
-		// Cleanup for unused control
-		foreach ($device->getControls() as $control) {
-			if (!in_array($control->getName(), (array) $controls, true)) {
-				$this->deviceControlManager->delete($control);
-			}
-		}
-	}
-
-	/**
-	 * @param DevicesModuleEntities\Devices\IDevice $device
 	 * @param MetadataTypes\ConnectionStateType $state
 	 *
 	 * @return void
@@ -311,20 +375,81 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 		$stateProperty = $device->getProperty(MetadataTypes\DevicePropertyNameType::NAME_STATE);
 
 		if ($stateProperty === null) {
-			$this->devicePropertiesManager->create(Utils\ArrayHash::from([
-				'entity'     => DevicesModuleEntities\Devices\Properties\StaticProperty::class,
+			$stateProperty = $this->devicePropertiesManager->create(Utils\ArrayHash::from([
+				'entity'     => DevicesModuleEntities\Devices\Properties\DynamicProperty::class,
 				'device'     => $device,
 				'identifier' => MetadataTypes\DevicePropertyNameType::NAME_STATE,
 				'settable'   => false,
 				'queryable'  => false,
-				'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_STRING,
-				'value'      => $state->getValue(),
+				'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_ENUM,
+				'unit'       => null,
+				'invalid'    => null,
+				'format'     => [
+					MetadataTypes\ConnectionStateType::STATE_CONNECTED,
+					MetadataTypes\ConnectionStateType::STATE_DISCONNECTED,
+					MetadataTypes\ConnectionStateType::STATE_INIT,
+					MetadataTypes\ConnectionStateType::STATE_READY,
+					MetadataTypes\ConnectionStateType::STATE_RUNNING,
+					MetadataTypes\ConnectionStateType::STATE_SLEEPING,
+					MetadataTypes\ConnectionStateType::STATE_STOPPED,
+					MetadataTypes\ConnectionStateType::STATE_LOST,
+					MetadataTypes\ConnectionStateType::STATE_ALERT,
+					MetadataTypes\ConnectionStateType::STATE_UNKNOWN,
+				],
 			]));
+		}
 
+		try {
+			$statePropertyState = $this->propertyStateRepository->findOne($stateProperty);
+
+		} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+			$this->logger->warning(
+				'States repository is not configured. State could not be fetched',
+				[
+					'source' => 'fastybird-fb-mqtt-connector',
+					'type'   => 'consumer',
+				]
+			);
+
+			return;
+		}
+
+		if ($statePropertyState === null) {
+			try {
+				$this->propertiesStatesManager->create($stateProperty, Utils\ArrayHash::from([
+					'actualValue'   => $state->getValue(),
+					'expectedValue' => null,
+					'pending'       => false,
+					'valid'         => true,
+				]));
+
+			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+				$this->logger->warning(
+					'States manager is not configured. State could not be saved',
+					[
+						'source' => 'fastybird-fb-mqtt-connector',
+						'type'   => 'consumer',
+					]
+				);
+			}
 		} else {
-			$this->devicePropertiesManager->update($stateProperty, Utils\ArrayHash::from([
-				'value' => $state->getValue(),
-			]));
+			try {
+				$this->propertiesStatesManager->update($stateProperty, $statePropertyState, Utils\ArrayHash::from([
+					'actualValue'   => $state->getValue(),
+					'expectedValue' => null,
+					'pending'       => false,
+					'valid'         => true,
+				]));
+
+			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+				$this->logger->warning(
+					'States manager is not configured. State could not be saved',
+					[
+						'source' => 'fastybird-fb-mqtt-connector',
+						'type'   => 'consumer',
+					]
+				);
+			}
 		}
 	}
 

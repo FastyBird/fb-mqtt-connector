@@ -121,7 +121,7 @@ final class FbMqttV1Client extends Client
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getProtocol(): Types\ProtocolVersionType
+	public function getVersion(): Types\ProtocolVersionType
 	{
 		return Types\ProtocolVersionType::get(Types\ProtocolVersionType::VERSION_1);
 	}
@@ -455,11 +455,11 @@ final class FbMqttV1Client extends Client
 	 */
 	private function processDevice(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
 	{
-		if ($this->writeDeviceProperties($device)) {
+		if ($this->writeDeviceProperty($device)) {
 			return true;
 		}
 
-		return $this->writeChannelsProperties($device);
+		return $this->writeChannelsProperty($device);
 	}
 
 	/**
@@ -467,7 +467,7 @@ final class FbMqttV1Client extends Client
 	 *
 	 * @return bool
 	 */
-	private function writeDeviceProperties(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
+	private function writeDeviceProperty(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
 	{
 		foreach ($this->devicePropertiesRepository->findAllByDevice($device->getId()) as $property) {
 			if (
@@ -494,7 +494,7 @@ final class FbMqttV1Client extends Client
 	 *
 	 * @return bool
 	 */
-	private function writeChannelsProperties(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
+	private function writeChannelsProperty(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
 	{
 		foreach ($this->channelsRepository->findAllByDevice($device->getId()) as $channel) {
 			foreach ($this->channelPropertiesRepository->findAllByChannel($channel->getId()) as $property) {

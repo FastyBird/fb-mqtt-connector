@@ -15,6 +15,7 @@
 
 namespace FastyBird\FbMqttConnector\Consumers;
 
+use Doctrine\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
@@ -86,7 +87,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @throws Exceptions\InvalidStateException
+	 * @throws DBAL\Exception
 	 */
 	public function consume(
 		Entities\Messages\IEntity $entity
@@ -105,7 +106,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
 					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'client',
+					'type'      => 'consumer',
 				]
 			);
 
@@ -123,7 +124,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				sprintf('Device channel "%s" is not registered', $entity->getChannel()),
 				[
 					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'client',
+					'type'      => 'consumer',
 				]
 			);
 
@@ -144,8 +145,8 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				$this->setChannelProperties($channel, Utils\ArrayHash::from($entity->getValue()));
 			}
 
-			if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROL && is_array($entity->getValue())) {
-				$this->setChannelControl($channel, Utils\ArrayHash::from($entity->getValue()));
+			if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROLS && is_array($entity->getValue())) {
+				$this->setChannelControls($channel, Utils\ArrayHash::from($entity->getValue()));
 			}
 
 			if ($toUpdate !== []) {
@@ -202,7 +203,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	 *
 	 * @return void
 	 */
-	private function setChannelControl(
+	private function setChannelControls(
 		DevicesModuleEntities\Channels\IChannel $channel,
 		Utils\ArrayHash $controls
 	): void {

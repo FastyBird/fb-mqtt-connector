@@ -32,7 +32,7 @@ final class DeviceAttribute extends Attribute
 		self::PROPERTIES,
 		self::CHANNELS,
 		self::EXTENSIONS,
-		self::CONTROL,
+		self::CONTROLS,
 	];
 
 	/**

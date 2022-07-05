@@ -108,11 +108,8 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		$builder->addDefinition($this->prefix('consumer.device.attribute.message'), new DI\Definitions\ServiceDefinition())
 			->setType(Consumers\DeviceMessageConsumer::class);
 
-		$builder->addDefinition($this->prefix('consumer.device.hardware.message'), new DI\Definitions\ServiceDefinition())
-			->setType(Consumers\DeviceHardwareMessageConsumer::class);
-
-		$builder->addDefinition($this->prefix('consumer.device.firmware.message'), new DI\Definitions\ServiceDefinition())
-			->setType(Consumers\DeviceFirmwareMessageConsumer::class);
+		$builder->addDefinition($this->prefix('consumer.device.extension.message'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\ExtensionAttributeMessageConsumer::class);
 
 		$builder->addDefinition($this->prefix('consumer.device.property.message'), new DI\Definitions\ServiceDefinition())
 			->setType(Consumers\DevicePropertyMessageConsumer::class);

@@ -40,24 +40,23 @@ final class V1Validator
 	// TOPIC: /fb/v1/<device>/$channel/<channel>/*
 	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
 
-	// TOPIC: /fb/v1/<device>/<$name|$properties|$control|$channels|$extensions>
-	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
+	// TOPIC: /fb/v1/<device>/<$state|$name|$properties|$controls|$channels|$extensions>
+	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|controls|channels|extensions)$/';
 
 	// TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
 	public const DEVICE_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
+
 	// TOPIC: /fb/v1/<device>/$fw/<manufacturer|name|version>
 	public const DEVICE_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
 
-	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
+	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
+	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
-	// TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
-	public const DEVICE_CONTROL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$control\/(configure|reset|reconnect|factory-reset|ota)((\/\$)(schema))?$/';
+	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$controls>
+	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|controls)$/';
 
-	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$control>
-	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|control)$/';
-	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
+	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
+	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
 	/**
 	 * @param string $topic

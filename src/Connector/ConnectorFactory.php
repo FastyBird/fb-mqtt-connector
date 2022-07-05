@@ -76,26 +76,25 @@ final class ConnectorFactory implements DevicesModuleConnectors\IConnectorFactor
 	public function create(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	): DevicesModuleConnectors\IConnector {
-		$protocolProperty = $this->connectorPropertiesRepository->findByIdentifier(
+		$versionProperty = $this->connectorPropertiesRepository->findByIdentifier(
 			$connector->getId(),
-			Types\ConnectorPropertyType::NAME_PROTOCOL
+			Types\ConnectorPropertyType::NAME_PROTOCOL_VERSION
 		);
 
 		if (
-			!$protocolProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			|| Types\ProtocolVersionType::isValidValue($protocolProperty->getValue())
+			!$versionProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
+			|| Types\ProtocolVersionType::isValidValue($versionProperty->getValue())
 		) {
 			throw new DevicesModuleExceptions\TerminateException('Connector protocol version is not configured');
 		}
 
-		$protocol = Types\ProtocolVersionType::get($protocolProperty->getValue());
+		$version = Types\ProtocolVersionType::get($versionProperty->getValue());
 
 		foreach ($this->clients as $client) {
-			if ($client->getProtocol()->equals($protocol)) {
+			if ($client->getVersion()->equals($version)) {
 				return new Connector(
 					$connector,
-					$client,
-					$this->logger
+					$client
 				);
 			}
 		}

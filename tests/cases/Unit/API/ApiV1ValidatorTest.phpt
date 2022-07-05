@@ -28,26 +28,26 @@ final class ApiV1ValidatorTest extends BaseTestCase
 		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::PROPERTIES));
 		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::CHANNELS));
 		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::EXTENSIONS));
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::CONTROL));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::CONTROLS));
 		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$invalid'));
 		Assert::false($apiV1Validator->validate('/fb/v1/device-name/invalid'));
 		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$' . Entities\Messages\Attribute::NAME . '/test'));
 		Assert::false($apiV1Validator->validate('/fb/v1/device-name/' . Entities\Messages\Attribute::NAME));
 		Assert::false($apiV1Validator->validate('/fb/v1/Device-Name/$' . Entities\Messages\Attribute::EXTENSIONS));
 
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MAC_ADDRESS));
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MANUFACTURER));
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::MODEL));
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\Hardware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$mw/' . Entities\Messages\Hardware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$hardware/' . Entities\Messages\Hardware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$hware/' . Entities\Messages\Hardware::VERSION));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\ExtensionAttribute::MAC_ADDRESS));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\ExtensionAttribute::MANUFACTURER));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\ExtensionAttribute::MODEL));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$hw/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$mw/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$hardware/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$hware/' . Entities\Messages\ExtensionAttribute::VERSION));
 
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$fw/' . Entities\Messages\Firmware::MANUFACTURER));
-		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$fw/' . Entities\Messages\Firmware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$mw/' . Entities\Messages\Firmware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$firmware/' . Entities\Messages\Firmware::VERSION));
-		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$fware/' . Entities\Messages\Firmware::VERSION));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$fw/' . Entities\Messages\ExtensionAttribute::MANUFACTURER));
+		Assert::true($apiV1Validator->validate('/fb/v1/device-name/$fw/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$mw/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$firmware/' . Entities\Messages\ExtensionAttribute::VERSION));
+		Assert::false($apiV1Validator->validate('/fb/v1/device-name/$fware/' . Entities\Messages\ExtensionAttribute::VERSION));
 
 		Assert::false($apiV1Validator->validate('/fb/v1/device-name'));
 		Assert::false($apiV1Validator->validate('/fb/v1/$device-name/$' . Entities\Messages\Attribute::NAME));
@@ -70,15 +70,14 @@ final class ApiV1ValidatorTest extends BaseTestCase
 
 		Assert::true($apiV1Validator->validateChannelAttribute('/fb/v1/whatever/$channel/channel-name/$' . Entities\Messages\Attribute::NAME));
 		Assert::true($apiV1Validator->validateChannelAttribute('/fb/v1/whatever/$channel/channel-name/$' . Entities\Messages\Attribute::PROPERTIES));
-		Assert::true($apiV1Validator->validateChannelAttribute('/fb/v1/whatever/$channel/channel-name/$' . Entities\Messages\Attribute::CONTROL));
+		Assert::true($apiV1Validator->validateChannelAttribute('/fb/v1/whatever/$channel/channel-name/$' . Entities\Messages\Attribute::CONTROLS));
 		Assert::false($apiV1Validator->validateChannelAttribute('/fb/v1/whatever/$channel/channel-name/$unknown'));
 
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name'));
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::NAME));
-		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::TYPE));
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::SETTABLE));
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::QUERYABLE));
-		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::DATATYPE));
+		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::DATA_TYPE));
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::FORMAT));
 		Assert::true($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/$' . Entities\Messages\PropertyAttribute::UNIT));
 		Assert::false($apiV1Validator->validateChannelProperty('/fb/v1/whatever/$channel/channel-name/$property/property-name/' . Entities\Messages\PropertyAttribute::UNIT));

@@ -57,6 +57,6 @@ interface IFbMqttConnector extends DevicesModuleEntities\Connectors\IConnector
 	/**
 	 * @return Types\ProtocolVersionType
 	 */
-	public function getProtocol(): Types\ProtocolVersionType;
+	public function getVersion(): Types\ProtocolVersionType;
 
 }

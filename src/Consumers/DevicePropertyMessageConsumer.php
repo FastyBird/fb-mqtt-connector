@@ -15,10 +15,13 @@
 
 namespace FastyBird\FbMqttConnector\Consumers;
 
+use Doctrine\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence;
+use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
+use FastyBird\DevicesModule\Utilities as DevicesModuleUtilities;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
@@ -47,11 +50,11 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\Properties\IPropertiesManager */
 	private DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager;
 
-	/** @var DevicesModuleModels\States\IDevicePropertiesManager|null */
-	private ?DevicesModuleModels\States\IDevicePropertiesManager $propertiesStatesManager;
+	/** @var DevicesModuleModels\States\DevicePropertiesRepository */
+	private DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository;
 
-	/** @var DevicesModuleModels\States\IDevicePropertiesRepository|null */
-	private ?DevicesModuleModels\States\IDevicePropertiesRepository $propertyStateRepository;
+	/** @var DevicesModuleModels\States\DevicePropertiesManager */
+	private DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager;
 
 	/** @var Persistence\ManagerRegistry */
 	protected Persistence\ManagerRegistry $managerRegistry;
@@ -62,8 +65,8 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	public function __construct(
 		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
 		DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager,
-		?DevicesModuleModels\States\IDevicePropertiesManager $propertiesStatesManager,
-		?DevicesModuleModels\States\IDevicePropertiesRepository $propertyStateRepository,
+		DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository,
+		DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager,
 		Persistence\ManagerRegistry $managerRegistry,
 		?Log\LoggerInterface $logger = null
 	) {
@@ -80,7 +83,7 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @throws Exceptions\InvalidStateException
+	 * @throws DBAL\Exception
 	 */
 	public function consume(
 		Entities\Messages\IEntity $entity
@@ -98,8 +101,8 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'client',
+					'source' => 'fastybird-fb-mqtt-connector',
+					'type'   => 'consumer',
 				]
 			);
 
@@ -112,8 +115,8 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 			$this->logger->error(
 				sprintf('Property "%s" is not registered', $entity->getProperty()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'client',
+					'source' => 'fastybird-fb-mqtt-connector',
+					'type'   => 'consumer',
 				]
 			);
 
@@ -127,19 +130,47 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 			$toUpdate = $this->handlePropertyConfiguration($entity);
 
 			if ($toUpdate !== []) {
-				$this->propertiesManager->update($property, Utils\ArrayHash::from($toUpdate));
+				$property = $this->propertiesManager->update($property, Utils\ArrayHash::from($toUpdate));
 			}
 
 			// Commit all changes into database
 			$this->getOrmConnection()->commit();
 
-			if (
-				$entity->getValue() !== 'N/A'
-				&& $this->propertyStateRepository !== null
-				&& $this->propertiesStatesManager !== null
-			) {
+		} catch (Throwable $ex) {
+			// Revert all changes when error occur
+			if ($this->getOrmConnection()->isTransactionActive()) {
+				$this->getOrmConnection()->rollBack();
+			}
+
+			throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
+		}
+
+		if ($entity->getValue() !== 'N/A') {
+			try {
 				$propertyState = $this->propertyStateRepository->findOne($property);
 
+			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+				$this->logger->warning(
+					'States repository is not configured. State could not be fetched',
+					[
+						'source' => 'fastybird-fb-mqtt-connector',
+						'type'   => 'consumer',
+					]
+				);
+
+				return;
+			}
+
+			$actualValue = DevicesModuleUtilities\ValueHelper::flattenValue(
+				DevicesModuleUtilities\ValueHelper::normalizeValue(
+					$property->getDataType(),
+					$entity->getValue(),
+					$property->getFormat(),
+					$property->getInvalid()
+				)
+			);
+
+			try {
 				// In case synchronization failed...
 				if ($propertyState === null) {
 					// ...create state in storage
@@ -148,9 +179,10 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 						Utils\ArrayHash::from(array_merge(
 							$property->toArray(),
 							[
-								'value'    => $entity->getValue(),
-								'expected' => null,
-								'pending'  => false,
+								'actualValue'   => $actualValue,
+								'expectedValue' => null,
+								'pending'       => false,
+								'valid'         => true,
 							]
 						))
 					);
@@ -160,20 +192,22 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 						$property,
 						$propertyState,
 						Utils\ArrayHash::from([
-							'value'    => $entity->getValue(),
-							'expected' => null,
-							'pending'  => false,
+							'actualValue'   => $actualValue,
+							'expectedValue' => null,
+							'pending'       => false,
+							'valid'         => true,
 						])
 					);
 				}
+			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+				$this->logger->warning(
+					'States manager is not configured. State could not be saved',
+					[
+						'source' => 'fastybird-fb-mqtt-connector',
+						'type'   => 'consumer',
+					]
+				);
 			}
-		} catch (Throwable $ex) {
-			// Revert all changes when error occur
-			if ($this->getOrmConnection()->isTransactionActive()) {
-				$this->getOrmConnection()->rollBack();
-			}
-
-			throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
 		}
 	}
 

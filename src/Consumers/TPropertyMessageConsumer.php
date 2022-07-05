@@ -40,121 +40,43 @@ trait TPropertyMessageConsumer
 
 		foreach ($entity->getAttributes() as $attribute) {
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::NAME) {
-				$subResult = $this->setPropertyName(strval($attribute->getValue()));
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+				$toUpdate = array_merge($toUpdate, [
+					'name' => strval($attribute->getValue()),
+				]);
 			}
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::SETTABLE) {
-				$subResult = $this->setPropertySettable((bool) $attribute->getValue());
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+				$toUpdate = array_merge($toUpdate, [
+					'settable' => boolval($attribute->getValue()),
+				]);
 			}
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::QUERYABLE) {
-				$subResult = $this->setPropertyQueryable((bool) $entity->getValue());
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+				$toUpdate = array_merge($toUpdate, [
+					'queryable' => boolval($entity->getValue()),
+				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATATYPE) {
-				$subResult = $this->setPropertyDatatype($entity->getValue());
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE) {
+				$toUpdate = array_merge($toUpdate, [
+					'dataType' => strval($entity->getValue()),
+				]);
 			}
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::FORMAT) {
-				$subResult = $this->setPropertyFormat($entity->getValue());
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+				$toUpdate = array_merge($toUpdate, [
+					'format' => $entity->getValue(),
+				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::SETTABLE) {
-				$subResult = $this->setPropertyUnit($entity->getValue());
-
-				$toUpdate = array_merge($toUpdate, $subResult);
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::UNIT) {
+				$toUpdate = array_merge($toUpdate, [
+					'unit' => $entity->getValue(),
+				]);
 			}
 		}
 
 		return $toUpdate;
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertyName(
-		string $name
-	): array {
-		return [
-			'name' => $name,
-		];
-	}
-
-	/**
-	 * @param bool $settable
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertySettable(
-		bool $settable
-	): array {
-		return [
-			'settable' => $settable,
-		];
-	}
-
-	/**
-	 * @param bool $queryable
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertyQueryable(
-		bool $queryable
-	): array {
-		return [
-			'queryable' => $queryable,
-		];
-	}
-
-	/**
-	 * @param string|null $datatype
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertyDatatype(
-		?string $datatype
-	): array {
-		return [
-			'datatype' => $datatype,
-		];
-	}
-
-	/**
-	 * @param string|null $format
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertyFormat(
-		?string $format
-	): array {
-		return [
-			'format' => $format,
-		];
-	}
-
-	/**
-	 * @param string|null $unit
-	 *
-	 * @return mixed[]
-	 */
-	protected function setPropertyUnit(
-		?string $unit
-	): array {
-		return [
-			'unit' => $unit,
-		];
 	}
 
 }

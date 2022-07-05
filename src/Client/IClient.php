@@ -35,7 +35,7 @@ interface IClient
 	/**
 	 * @return Types\ProtocolVersionType
 	 */
-	public function getProtocol(): Types\ProtocolVersionType;
+	public function getVersion(): Types\ProtocolVersionType;
 
 	/**
 	 * @param MetadataEntities\Actions\IActionDeviceEntity $action

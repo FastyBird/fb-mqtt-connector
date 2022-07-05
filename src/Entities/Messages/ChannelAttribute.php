@@ -29,7 +29,7 @@ final class ChannelAttribute extends Attribute
 	public const ALLOWED_ATTRIBUTES = [
 		self::NAME,
 		self::PROPERTIES,
-		self::CONTROL,
+		self::CONTROLS,
 	];
 
 	/** @var string */

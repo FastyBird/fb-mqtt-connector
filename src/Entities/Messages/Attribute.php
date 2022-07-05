@@ -34,7 +34,7 @@ abstract class Attribute extends Entity
 	public const STATE = 'state';
 	public const CHANNELS = 'channels';
 	public const EXTENSIONS = 'extensions';
-	public const CONTROL = 'control';
+	public const CONTROLS = 'controls';
 
 	/** @var string */
 	private string $attribute;
@@ -114,7 +114,7 @@ abstract class Attribute extends Entity
 				$this->getAttribute() === self::PROPERTIES
 				|| $this->getAttribute() === self::CHANNELS
 				|| $this->getAttribute() === self::EXTENSIONS
-				|| $this->getAttribute() === self::CONTROL
+				|| $this->getAttribute() === self::CONTROLS
 			) {
 				$items = array_filter(
 					array_map('trim', explode(',', strtolower($value))),

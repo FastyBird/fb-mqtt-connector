@@ -23,14 +23,14 @@ return [
 			Entities\Messages\Attribute::PROPERTIES => ['prop1', 'prop2'],
 		],
 	],
-	'attr-' . Entities\Messages\Attribute::CONTROL          => [
-		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::CONTROL,
+	'attr-' . Entities\Messages\Attribute::CONTROLS          => [
+		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::CONTROLS,
 		'configure,reset',
 		[
 			'device'                    => 'device-name',
 			'channel'                   => 'channel-name',
 			'retained'                  => false,
-			Entities\Messages\Attribute::CONTROL => ['configure', 'reset'],
+			Entities\Messages\Attribute::CONTROLS => ['configure', 'reset'],
 		],
 	],
 ];

@@ -124,9 +124,9 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getProtocol(): Types\ProtocolVersionType
+	public function getVersion(): Types\ProtocolVersionType
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PROTOCOL);
+		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PROTOCOL_VERSION);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -137,20 +137,6 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 		}
 
 		return Types\ProtocolVersionType::get($property->getValue());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function toArray(): array
-	{
-		return array_merge(parent::toArray(), [
-			'server'       => $this->getServer(),
-			'port'         => $this->getPort(),
-			'secured_port' => $this->getSecuredPort(),
-			'username'     => $this->getUsername(),
-			'protocol'     => $this->getProtocol()->getValue(),
-		]);
 	}
 
 	/**

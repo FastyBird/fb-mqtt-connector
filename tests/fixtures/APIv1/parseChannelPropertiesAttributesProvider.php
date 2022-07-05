@@ -14,17 +14,6 @@ return [
 			Entities\Messages\PropertyAttribute::NAME => 'payload',
 		],
 	],
-	'attr-' . Entities\Messages\PropertyAttribute::TYPE            => [
-		'/fb/v1/device-name/$channel/channel-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::TYPE,
-		'typename',
-		[
-			'device'                                  => 'device-name',
-			'channel'                                 => 'channel-name',
-			'retained'                                => false,
-			'property'                                => 'some-property',
-			Entities\Messages\PropertyAttribute::TYPE => 'typename',
-		],
-	],
 	'attr-' . Entities\Messages\PropertyAttribute::SETTABLE        => [
 		'/fb/v1/device-name/$channel/channel-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::SETTABLE,
 		'true',

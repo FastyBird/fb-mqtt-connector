@@ -36,19 +36,17 @@ final class PropertyAttribute
 	use Nette\SmartObject;
 
 	public const NAME = 'name';
-	public const TYPE = 'type';
 	public const SETTABLE = 'settable';
 	public const QUERYABLE = 'queryable';
-	public const DATATYPE = 'data-type';
+	public const DATA_TYPE = 'data-type';
 	public const FORMAT = 'format';
 	public const UNIT = 'unit';
 
 	public const ALLOWED_ATTRIBUTES = [
 		self::NAME,
-		self::TYPE,
 		self::SETTABLE,
 		self::QUERYABLE,
-		self::DATATYPE,
+		self::DATA_TYPE,
 		self::FORMAT,
 		self::UNIT,
 	];
@@ -131,7 +129,7 @@ final class PropertyAttribute
 		} elseif ($this->getAttribute() === self::NAME) {
 			$this->value = Helpers\PayloadHelper::cleanName($value);
 
-		} elseif ($this->getAttribute() === self::DATATYPE) {
+		} elseif ($this->getAttribute() === self::DATA_TYPE) {
 			if (!MetadataTypes\DataTypeType::isValidValue($value)) {
 				throw new Exceptions\ParseMessageException('Provided payload is not valid');
 			}

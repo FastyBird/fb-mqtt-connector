@@ -19,7 +19,6 @@ use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
 use FastyBird\FbMqttConnector\Client;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Types as MetadataTypes;
-use Psr\Log;
 use Ramsey\Uuid;
 
 /**
@@ -33,28 +32,19 @@ use Ramsey\Uuid;
 final class Connector implements DevicesModuleConnectors\IConnector
 {
 
-	/** @var bool */
-	private bool $stopped = true;
-
 	/** @var Client\IClient */
 	private Client\IClient $client;
 
 	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity */
 	private MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector;
 
-	/** @var Log\LoggerInterface */
-	private Log\LoggerInterface $logger;
-
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
-		Client\IClient $client,
-		?Log\LoggerInterface $logger = null
+		Client\IClient $client
 	) {
 		$this->connector = $connector;
 
 		$this->client = $client;
-
-		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
@@ -90,26 +80,31 @@ final class Connector implements DevicesModuleConnectors\IConnector
 	}
 
 	/**
-	 * @param MetadataEntities\Actions\IActionDeviceEntity|MetadataEntities\Actions\IActionChannelEntity $action
+	 * @param MetadataEntities\Actions\IActionDeviceEntity $action
 	 *
 	 * @return void
 	 */
-	public function handleControlAction($action): void
+	public function handleDeviceControlAction(MetadataEntities\Actions\IActionDeviceEntity $action): void
 	{
-		if ($action instanceof MetadataEntities\Actions\IActionDeviceEntity) {
-			if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
-				return;
-			}
-
-			$this->client->writeDeviceControl($action);
-
-		} elseif ($action instanceof MetadataEntities\Actions\IActionChannelEntity) {
-			if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
-				return;
-			}
-
-			$this->client->writeChannelControl($action);
+		if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
+			return;
 		}
+
+		$this->client->writeDeviceControl($action);
+	}
+
+	/**
+	 * @param MetadataEntities\Actions\IActionChannelEntity $action
+	 *
+	 * @return void
+	 */
+	public function handleChannelControlAction(MetadataEntities\Actions\IActionChannelEntity $action): void
+	{
+		if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
+			return;
+		}
+
+		$this->client->writeChannelControl($action);
 	}
 
 }

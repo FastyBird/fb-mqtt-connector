@@ -53,7 +53,7 @@ final class ApiV1ParserTest extends BaseTestCase
 
 		$entity = $apiV1Parser->parse($topic, $payload);
 
-		Assert::true($entity instanceof Entities\Messages\Hardware);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -74,7 +74,7 @@ final class ApiV1ParserTest extends BaseTestCase
 
 		$entity = $apiV1Parser->parse($topic, $payload);
 
-		Assert::true($entity instanceof Entities\Messages\Firmware);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
