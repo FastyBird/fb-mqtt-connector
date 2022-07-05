@@ -87,6 +87,7 @@ final class FbMqttV1Client extends Client
 	private DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository;
 
 	public function __construct(
+		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		API\V1Validator $apiValidator,
 		API\V1Parser $apiParser,
 		API\V1Builder $apiBuilder,
@@ -103,7 +104,7 @@ final class FbMqttV1Client extends Client
 		?Mqtt\FlowFactory $flowFactory = null,
 		?Mqtt\StreamParser $parser = null
 	) {
-		parent::__construct($connectorPropertiesRepository, $loop, $identifierGenerator, $flowFactory, $parser);
+		parent::__construct($connector, $connectorPropertiesRepository, $loop, $identifierGenerator, $flowFactory, $parser);
 
 		$this->apiValidator = $apiValidator;
 		$this->apiParser = $apiParser;
@@ -244,9 +245,9 @@ final class FbMqttV1Client extends Client
 	/**
 	 * {@inheritDoc}
 	 */
-	protected function handleCommunication(MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector): void
+	protected function handleCommunication(): void
 	{
-		foreach ($this->devicesRepository->findAllByConnector($connector->getId()) as $device) {
+		foreach ($this->devicesRepository->findAllByConnector($this->connector->getId()) as $device) {
 			if (!in_array($device->getId()->toString(), $this->processedDevices, true)) {
 				$this->processedDevices[] = $device->getId()->toString();
 

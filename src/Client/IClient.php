@@ -59,15 +59,11 @@ interface IClient
 	/**
 	 * Connects to a broker
 	 *
-	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	 * @param int $timeout
 	 *
 	 * @return Promise\ExtendedPromiseInterface
 	 */
-	public function connect(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
-		int $timeout = 5
-	): Promise\ExtendedPromiseInterface;
+	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface;
 
 	/**
 	 * Disconnects from a broker

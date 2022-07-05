@@ -22,7 +22,7 @@ use FastyBird\FbMqttConnector\Client;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
-use Psr\Log;
+use ReflectionClass;
 
 /**
  * Connector service factory
@@ -35,29 +35,22 @@ use Psr\Log;
 final class ConnectorFactory implements DevicesModuleConnectors\IConnectorFactory
 {
 
-	/** @var Client\IClient[] */
-	private array $clients;
+	/** @var Client\ClientFactory[] */
+	private array $clientsFactories;
 
 	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
 	private DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
 
-	/** @var Log\LoggerInterface */
-	private Log\LoggerInterface $logger;
-
 	/**
-	 * @param Client\IClient[] $clients
+	 * @param Client\ClientFactory[] $clientsFactories
 	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
-	 * @param Log\LoggerInterface|null $logger
 	 */
 	public function __construct(
-		array $clients,
-		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
-		?Log\LoggerInterface $logger = null
+		array $clientsFactories,
+		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
 	) {
-		$this->clients = $clients;
+		$this->clientsFactories = $clientsFactories;
 		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
-
-		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
@@ -83,19 +76,22 @@ final class ConnectorFactory implements DevicesModuleConnectors\IConnectorFactor
 
 		if (
 			!$versionProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			|| Types\ProtocolVersionType::isValidValue($versionProperty->getValue())
+			|| !Types\ProtocolVersionType::isValidValue($versionProperty->getValue())
 		) {
 			throw new DevicesModuleExceptions\TerminateException('Connector protocol version is not configured');
 		}
 
-		$version = Types\ProtocolVersionType::get($versionProperty->getValue());
+		foreach ($this->clientsFactories as $clientFactory) {
+			$rc = new ReflectionClass($clientFactory);
 
-		foreach ($this->clients as $client) {
-			if ($client->getVersion()->equals($version)) {
-				return new Connector(
-					$connector,
-					$client
-				);
+			$constants = $rc->getConstants();
+
+			if (
+				array_key_exists(Client\ClientFactory::VERSION_CONSTANT_NAME, $constants)
+				&& $constants[Client\ClientFactory::VERSION_CONSTANT_NAME] === $versionProperty->getValue()
+				&& method_exists($clientFactory, 'create')
+			) {
+				return new Connector($clientFactory->create($connector));
 			}
 		}
 

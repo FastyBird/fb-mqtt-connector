@@ -79,8 +79,8 @@ abstract class Client implements IClient
 	/** @var Flow|null */
 	protected ?Flow $writtenFlow;
 
-	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity|null */
-	protected ?MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector = null;
+	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity */
+	protected MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector;
 
 	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
 	protected DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
@@ -107,12 +107,14 @@ abstract class Client implements IClient
 	protected Log\LoggerInterface $logger;
 
 	public function __construct(
+		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
 		EventLoop\LoopInterface $eventLoop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
 		?Mqtt\StreamParser $parser = null
 	) {
+		$this->connector = $connector;
 		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
 		$this->eventLoop = $eventLoop;
 
@@ -159,12 +161,8 @@ abstract class Client implements IClient
 	/**
 	 * {@inheritDoc}
 	 */
-	public function connect(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
-		int $timeout = 5
-	): Promise\ExtendedPromiseInterface {
-		$this->connector = $connector;
-
+	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface
+	{
 		$deferred = new Promise\Deferred();
 
 		if ($this->isConnected || $this->isConnecting) {
@@ -178,7 +176,7 @@ abstract class Client implements IClient
 		$this->isConnected = false;
 
 		$usernameProperty = $this->connectorPropertiesRepository->findByIdentifier(
-			$connector->getId(),
+			$this->connector->getId(),
 			Types\ConnectorPropertyType::NAME_USERNAME
 		);
 
@@ -192,7 +190,7 @@ abstract class Client implements IClient
 		}
 
 		$passwordProperty = $this->connectorPropertiesRepository->findByIdentifier(
-			$connector->getId(),
+			$this->connector->getId(),
 			Types\ConnectorPropertyType::NAME_PASSWORD
 		);
 
@@ -206,7 +204,7 @@ abstract class Client implements IClient
 		}
 
 		$serverProperty = $this->connectorPropertiesRepository->findByIdentifier(
-			$connector->getId(),
+			$this->connector->getId(),
 			Types\ConnectorPropertyType::NAME_SERVER
 		);
 
@@ -220,7 +218,7 @@ abstract class Client implements IClient
 		}
 
 		$portProperty = $this->connectorPropertiesRepository->findByIdentifier(
-			$connector->getId(),
+			$this->connector->getId(),
 			Types\ConnectorPropertyType::NAME_PORT
 		);
 
@@ -411,13 +409,9 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
-	 *
 	 * @return void
 	 */
-	abstract protected function handleCommunication(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
-	): void;
+	abstract protected function handleCommunication(): void;
 
 	/**
 	 * @param Mqtt\Connection $connection
@@ -481,9 +475,7 @@ abstract class Client implements IClient
 		);
 
 		$this->eventLoop->addPeriodicTimer(0.01, function (): void {
-			if ($this->connector !== null) {
-				$this->handleCommunication($this->connector);
-			}
+			$this->handleCommunication();
 		});
 	}
 

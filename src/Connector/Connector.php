@@ -19,7 +19,6 @@ use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
 use FastyBird\FbMqttConnector\Client;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Types as MetadataTypes;
-use Ramsey\Uuid;
 
 /**
  * Service constants
@@ -35,24 +34,10 @@ final class Connector implements DevicesModuleConnectors\IConnector
 	/** @var Client\IClient */
 	private Client\IClient $client;
 
-	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity */
-	private MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector;
-
 	public function __construct(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		Client\IClient $client
 	) {
-		$this->connector = $connector;
-
 		$this->client = $client;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getId(): Uuid\UuidInterface
-	{
-		return $this->connector->getId();
 	}
 
 	/**
@@ -60,7 +45,7 @@ final class Connector implements DevicesModuleConnectors\IConnector
 	 */
 	public function execute(): void
 	{
-		$this->client->connect($this->connector);
+		$this->client->connect();
 	}
 
 	/**

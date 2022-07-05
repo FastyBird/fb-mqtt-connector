@@ -88,8 +88,10 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 			->setFactory(Connector\ConnectorFactory::class);
 
 		// MQTT v1 API client
-		$builder->addDefinition($this->prefix('client.apiv1'), new DI\Definitions\ServiceDefinition())
-			->setFactory(Client\FbMqttV1Client::class);
+		$builder->addFactoryDefinition($this->prefix('client.apiv1'))
+			->setImplement(Client\FbMqttV1ClientFactory::class)
+			->getResultDefinition()
+			->setType(Client\FbMqttV1Client::class);
 
 		// MQTT API
 		$builder->addDefinition($this->prefix('api.v1parser'), new DI\Definitions\ServiceDefinition())
