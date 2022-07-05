@@ -16,6 +16,7 @@
 namespace FastyBird\FbMqttConnector\API;
 
 use FastyBird\FbMqttConnector;
+use FastyBird\Metadata\Entities as MetadataEntities;
 use Nette;
 
 /**
@@ -99,69 +100,60 @@ final class V1Builder
 		. 'set';
 
 	/**
-	 * @param string $device
-	 * @param string $property
+	 * @param MetadataEntities\Modules\DevicesModule\IDeviceEntity $device
+	 * @param MetadataEntities\Modules\DevicesModule\IDeviceDynamicPropertyEntity|MetadataEntities\Modules\DevicesModule\IDeviceMappedPropertyEntity $property
 	 *
 	 * @return string
 	 */
 	public function buildDevicePropertyTopic(
-		string $device,
-		string $property
+		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
+		$property
 	): string {
 		$topic = self::DEVICE_PROPERTY_TOPIC;
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		return str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);
+
+		return str_replace(self::PROPERTY_REPLACE_STRING, $property->getIdentifier(), $topic);
 	}
 
-	/**
-	 * @param string $device
-	 * @param string $command
-	 *
-	 * @return string
-	 */
 	public function buildDeviceCommandTopic(
-		string $device,
-		string $command
+		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
+		MetadataEntities\Modules\DevicesModule\IDeviceControlEntity $command
 	): string {
 		$topic = self::DEVICE_CONTROL_SET_TOPIC;
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		return str_replace(self::CONTROL_REPLACE_STRING, $command, $topic);
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);
+
+		return str_replace(self::CONTROL_REPLACE_STRING, $command->getName(), $topic);
 	}
 
 	/**
-	 * @param string $device
-	 * @param string $channel
-	 * @param string $property
+	 * @param MetadataEntities\Modules\DevicesModule\IDeviceEntity $device
+	 * @param MetadataEntities\Modules\DevicesModule\IChannelEntity $channel
+	 * @param MetadataEntities\Modules\DevicesModule\IChannelDynamicPropertyEntity|MetadataEntities\Modules\DevicesModule\IChannelMappedPropertyEntity $property
 	 *
 	 * @return string
 	 */
 	public function buildChannelPropertyTopic(
-		string $device,
-		string $channel,
-		string $property
+		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
+		MetadataEntities\Modules\DevicesModule\IChannelEntity $channel,
+		$property
 	): string {
 		$topic = self::CHANNEL_PROPERTY_TOPIC;
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
-		return str_replace(self::PROPERTY_REPLACE_STRING, $property, $topic);
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);
+		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel->getIdentifier(), $topic);
+
+		return str_replace(self::PROPERTY_REPLACE_STRING, $property->getIdentifier(), $topic);
 	}
 
-	/**
-	 * @param string $device
-	 * @param string $channel
-	 * @param string $command
-	 *
-	 * @return string
-	 */
 	public function buildChannelCommandTopic(
-		string $device,
-		string $channel,
-		string $command
+		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
+		MetadataEntities\Modules\DevicesModule\IChannelEntity $channel,
+		MetadataEntities\Modules\DevicesModule\IChannelControlEntity $command
 	): string {
 		$topic = self::CHANNEL_CONTROL_SET_TOPIC;
-		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device, $topic);
-		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel, $topic);
-		return str_replace(self::CONTROL_REPLACE_STRING, $command, $topic);
+		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);
+		$topic = str_replace(self::CHANNEL_REPLACE_STRING, $channel->getIdentifier(), $topic);
+
+		return str_replace(self::CONTROL_REPLACE_STRING, $command->getName(), $topic);
 	}
 
 }

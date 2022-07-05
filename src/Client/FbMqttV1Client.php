@@ -168,10 +168,7 @@ final class FbMqttV1Client extends Client
 		}
 
 		$this->publish(
-			$this->apiBuilder->buildDeviceCommandTopic(
-				$device->getIdentifier(),
-				$control->getName(),
-			),
+			$this->apiBuilder->buildDeviceCommandTopic($device, $control),
 			$action->getExpectedValue() !== null ? strval($action->getExpectedValue()) : null
 		);
 	}
@@ -239,11 +236,7 @@ final class FbMqttV1Client extends Client
 		}
 
 		$this->publish(
-			$this->apiBuilder->buildChannelCommandTopic(
-				$device->getIdentifier(),
-				$channel->getIdentifier(),
-				$control->getName(),
-			),
+			$this->apiBuilder->buildChannelCommandTopic($device, $channel, $control),
 			$action->getExpectedValue() !== null ? strval($action->getExpectedValue()) : null
 		);
 	}
@@ -485,10 +478,7 @@ final class FbMqttV1Client extends Client
 				&& $property->getExpectedValue() !== null
 			) {
 				$this->publish(
-					$this->apiBuilder->buildDevicePropertyTopic(
-						$device->getIdentifier(),
-						$property->getIdentifier(),
-					),
+					$this->apiBuilder->buildDevicePropertyTopic($device, $property),
 					strval($property->getExpectedValue())
 				);
 
@@ -516,11 +506,7 @@ final class FbMqttV1Client extends Client
 					&& $property->getExpectedValue() !== null
 				) {
 					$this->publish(
-						$this->apiBuilder->buildChannelPropertyTopic(
-							$device->getIdentifier(),
-							$channel->getIdentifier(),
-							$property->getIdentifier(),
-						),
+						$this->apiBuilder->buildChannelPropertyTopic($device, $channel, $property),
 						strval($property->getExpectedValue())
 					);
 
