@@ -84,7 +84,13 @@ final class DeviceHardwareMessageConsumer implements Consumers\IConsumer
 		$device = $this->deviceRepository->findOneBy($findDeviceQuery);
 
 		if ($device === null) {
-			$this->logger->error(sprintf('[FB:NODE:MQTT] Device "%s" is not registered', $entity->getDevice()));
+			$this->logger->error(
+				sprintf('Device "%s" is not registered', $entity->getDevice()),
+				[
+					'source'    => 'fastybird-fb-mqtt-connector',
+					'type'      => 'client',
+				]
+			);
 
 			return;
 		}

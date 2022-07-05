@@ -138,7 +138,7 @@ final class FbMqttV1Client extends Client
 				'Controlled device control entity was not found in registry',
 				[
 					'source'  => 'fastybird-fb-mqtt-connector',
-					'type'    => 'connector',
+					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
 						'control' => $action->getControl()->toString(),
@@ -156,7 +156,7 @@ final class FbMqttV1Client extends Client
 				'Controlled device entity was not found in registry',
 				[
 					'source'  => 'fastybird-fb-mqtt-connector',
-					'type'    => 'connector',
+					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
 						'control' => $action->getControl()->toString(),

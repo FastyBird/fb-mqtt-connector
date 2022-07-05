@@ -100,7 +100,13 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 		$device = $this->deviceRepository->findOneBy($findDeviceQuery);
 
 		if ($device === null) {
-			$this->logger->error(sprintf('[FB:NODE:MQTT] Device "%s" is not registered', $entity->getDevice()));
+			$this->logger->error(
+				sprintf('Device "%s" is not registered', $entity->getDevice()),
+				[
+					'source'    => 'fastybird-fb-mqtt-connector',
+					'type'      => 'client',
+				]
+			);
 
 			return;
 		}
@@ -112,7 +118,13 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 		$channel = $this->channelRepository->findOneBy($findChannelQuery);
 
 		if ($channel === null) {
-			$this->logger->error(sprintf('[FB:NODE:MQTT] Device channel "%s" is not registered', $entity->getChannel()));
+			$this->logger->error(
+				sprintf('Device channel "%s" is not registered', $entity->getChannel()),
+				[
+					'source'    => 'fastybird-fb-mqtt-connector',
+					'type'      => 'client',
+				]
+			);
 
 			return;
 		}
@@ -120,7 +132,13 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 		$property = $channel->findProperty($entity->getProperty());
 
 		if ($property === null) {
-			$this->logger->error(sprintf('[FB:NODE:MQTT] Property "%s" is not registered', $entity->getProperty()));
+			$this->logger->error(
+				sprintf('Property "%s" is not registered', $entity->getProperty()),
+				[
+					'source'    => 'fastybird-fb-mqtt-connector',
+					'type'      => 'client',
+				]
+			);
 
 			return;
 		}
