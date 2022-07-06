@@ -37,13 +37,13 @@
   "minimum-stability" : "dev",
 
   "require" : {
-    "php": ">=7.4.0|>=8.0.0",
+    "php" : ">=8.0.0|>=8.1.0",
     "binsoul/net-mqtt": "^0.8",
     "cweagans/composer-patches": "^1.7",
-    "fastybird/devices-module": "^0.68",
-    "fastybird/json-api": "^0.10",
-    "fastybird/metadata": "^0.66",
-    "fastybird/socket-server-factory": "^0.4",
+    "fastybird/devices-module": "^0.69",
+    "fastybird/json-api": "^0.11",
+    "fastybird/metadata" : "^0.67",
+    "fastybird/socket-server-factory": "^0.5",
     "nette/bootstrap": "^3.1",
     "nette/di": "^3.0",
     "psr/log": "^1.1",
