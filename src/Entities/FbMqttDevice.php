@@ -46,7 +46,7 @@ class FbMqttDevice extends DevicesModuleEntities\Devices\Device implements IFbMq
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getSource()
+	public function getSource(): MetadataTypes\ModuleSourceType|MetadataTypes\ConnectorSourceType|MetadataTypes\PluginSourceType
 	{
 		return MetadataTypes\ConnectorSourceType::get(MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT);
 	}
