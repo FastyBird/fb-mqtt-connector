@@ -77,7 +77,7 @@ abstract class Client implements IClient
 	protected array $sendingFlows = [];
 
 	/** @var Flow|null */
-	protected ?Flow $writtenFlow;
+	protected ?Flow $writtenFlow = null;
 
 	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity */
 	protected MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector;

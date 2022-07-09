@@ -216,7 +216,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 							'name'       => $propertyName,
 							'settable'   => false,
 							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_STRING,
+							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_STRING),
 						]));
 
 					} elseif (in_array($propertyName, [
@@ -233,7 +233,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 							'name'       => $propertyName,
 							'settable'   => false,
 							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_UINT,
+							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_UINT),
 						]));
 
 					} else {
@@ -243,7 +243,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 							'identifier' => $propertyName,
 							'settable'   => false,
 							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_UNKNOWN,
+							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_UNKNOWN),
 						]));
 					}
 				}
@@ -372,7 +372,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 		DevicesModuleEntities\Devices\IDevice $device,
 		MetadataTypes\ConnectionStateType $state
 	): void {
-		$stateProperty = $device->getProperty(MetadataTypes\DevicePropertyNameType::NAME_STATE);
+		$stateProperty = $device->findProperty(MetadataTypes\DevicePropertyNameType::NAME_STATE);
 
 		if ($stateProperty === null) {
 			$stateProperty = $this->devicePropertiesManager->create(Utils\ArrayHash::from([
@@ -381,7 +381,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 				'identifier' => MetadataTypes\DevicePropertyNameType::NAME_STATE,
 				'settable'   => false,
 				'queryable'  => false,
-				'dataType'   => MetadataTypes\DataTypeType::DATA_TYPE_ENUM,
+				'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_ENUM),
 				'unit'       => null,
 				'invalid'    => null,
 				'format'     => [

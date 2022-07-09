@@ -38,7 +38,7 @@ final class V1Validator
 	public const API_VERSION_REGEXP = '/^\/fb\/v1\/.*$/';
 
 	// TOPIC: /fb/v1/<device>/$channel/<channel>/*
-	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
+	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9_]+)\/.*$/';
 
 	// TOPIC: /fb/v1/<device>/<$state|$name|$properties|$controls|$channels|$extensions>
 	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|controls|channels|extensions)$/';
@@ -53,10 +53,10 @@ final class V1Validator
 	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
 	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$controls>
-	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|controls)$/';
+	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9_]+)\/\$(name|properties|controls)$/';
 
 	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
-	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
+	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9_]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
 	/**
 	 * @param string $topic

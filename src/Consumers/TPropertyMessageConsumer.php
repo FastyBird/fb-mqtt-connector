@@ -16,6 +16,7 @@
 namespace FastyBird\FbMqttConnector\Consumers;
 
 use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Metadata\Types as MetadataTypes;
 
 /**
  * Property message consumer
@@ -57,9 +58,12 @@ trait TPropertyMessageConsumer
 				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE) {
+			if (
+				$attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE
+				&& MetadataTypes\DataTypeType::isValidValue(strval($entity->getValue()))
+			) {
 				$toUpdate = array_merge($toUpdate, [
-					'dataType' => strval($entity->getValue()),
+					'dataType' => MetadataTypes\DataTypeType::get(strval($entity->getValue())),
 				]);
 			}
 
