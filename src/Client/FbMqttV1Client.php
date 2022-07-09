@@ -130,7 +130,7 @@ final class FbMqttV1Client extends Client
 	/**
 	 * {@inheritDoc}
 	 */
-	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceEntity $action): void
+	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceControlEntity $action): void
 	{
 		$control = $this->deviceControlsRepository->findById($action->getControl());
 
@@ -177,7 +177,7 @@ final class FbMqttV1Client extends Client
 	/**
 	 * {@inheritDoc}
 	 */
-	public function writeChannelControl(MetadataEntities\Actions\IActionChannelEntity $action): void
+	public function writeChannelControl(MetadataEntities\Actions\IActionChannelControlEntity $action): void
 	{
 		$control = $this->channelControlsRepository->findById($action->getControl());
 

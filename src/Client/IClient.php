@@ -38,18 +38,18 @@ interface IClient
 	public function getVersion(): Types\ProtocolVersionType;
 
 	/**
-	 * @param MetadataEntities\Actions\IActionDeviceEntity $action
+	 * @param MetadataEntities\Actions\IActionDeviceControlEntity $action
 	 *
 	 * @return void
 	 */
-	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceEntity $action): void;
+	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceControlEntity $action): void;
 
 	/**
-	 * @param MetadataEntities\Actions\IActionChannelEntity $action
+	 * @param MetadataEntities\Actions\IActionChannelControlEntity $action
 	 *
 	 * @return void
 	 */
-	public function writeChannelControl(MetadataEntities\Actions\IActionChannelEntity $action): void;
+	public function writeChannelControl(MetadataEntities\Actions\IActionChannelControlEntity $action): void;
 
 	/**
 	 * @return bool

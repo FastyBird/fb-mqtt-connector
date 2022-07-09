@@ -65,11 +65,11 @@ final class Connector implements DevicesModuleConnectors\IConnector
 	}
 
 	/**
-	 * @param MetadataEntities\Actions\IActionDeviceEntity $action
+	 * @param MetadataEntities\Actions\IActionDeviceControlEntity $action
 	 *
 	 * @return void
 	 */
-	public function handleDeviceControlAction(MetadataEntities\Actions\IActionDeviceEntity $action): void
+	public function handleDeviceControlAction(MetadataEntities\Actions\IActionDeviceControlEntity $action): void
 	{
 		if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
 			return;
@@ -79,11 +79,11 @@ final class Connector implements DevicesModuleConnectors\IConnector
 	}
 
 	/**
-	 * @param MetadataEntities\Actions\IActionChannelEntity $action
+	 * @param MetadataEntities\Actions\IActionChannelControlEntity $action
 	 *
 	 * @return void
 	 */
-	public function handleChannelControlAction(MetadataEntities\Actions\IActionChannelEntity $action): void
+	public function handleChannelControlAction(MetadataEntities\Actions\IActionChannelControlEntity $action): void
 	{
 		if (!$action->getAction()->equalsValue(MetadataTypes\ControlActionType::ACTION_SET)) {
 			return;
