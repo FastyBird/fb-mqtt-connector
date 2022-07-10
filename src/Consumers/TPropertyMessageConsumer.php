@@ -54,28 +54,28 @@ trait TPropertyMessageConsumer
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::QUERYABLE) {
 				$toUpdate = array_merge($toUpdate, [
-					'queryable' => boolval($entity->getValue()),
+					'queryable' => boolval($attribute->getValue()),
 				]);
 			}
 
 			if (
 				$attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE
-				&& MetadataTypes\DataTypeType::isValidValue(strval($entity->getValue()))
+				&& MetadataTypes\DataTypeType::isValidValue(strval($attribute->getValue()))
 			) {
 				$toUpdate = array_merge($toUpdate, [
-					'dataType' => MetadataTypes\DataTypeType::get(strval($entity->getValue())),
+					'dataType' => MetadataTypes\DataTypeType::get(strval($attribute->getValue())),
 				]);
 			}
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::FORMAT) {
 				$toUpdate = array_merge($toUpdate, [
-					'format' => $entity->getValue(),
+					'format' => $attribute->getValue(),
 				]);
 			}
 
 			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::UNIT) {
 				$toUpdate = array_merge($toUpdate, [
-					'unit' => $entity->getValue(),
+					'unit' => $attribute->getValue(),
 				]);
 			}
 		}

@@ -18,6 +18,7 @@ namespace FastyBird\FbMqttConnector\Consumers;
 use Doctrine\DBAL;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence;
+use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
@@ -123,90 +124,114 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 			return;
 		}
 
-		try {
-			// Start transaction connection to the database
-			$this->getOrmConnection()->beginTransaction();
+		if (count($entity->getAttributes())) {
+			try {
+				// Start transaction connection to the database
+				$this->getOrmConnection()->beginTransaction();
 
-			$toUpdate = $this->handlePropertyConfiguration($entity);
+				$toUpdate = $this->handlePropertyConfiguration($entity);
 
-			if ($toUpdate !== []) {
-				$property = $this->propertiesManager->update($property, Utils\ArrayHash::from($toUpdate));
+				if ($toUpdate !== []) {
+					$property = $this->propertiesManager->update($property, Utils\ArrayHash::from($toUpdate));
+				}
+
+				// Commit all changes into database
+				$this->getOrmConnection()->commit();
+
+			} catch (Throwable $ex) {
+				// Revert all changes when error occur
+				if ($this->getOrmConnection()->isTransactionActive()) {
+					$this->getOrmConnection()->rollBack();
+				}
+
+				throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
 			}
-
-			// Commit all changes into database
-			$this->getOrmConnection()->commit();
-
-		} catch (Throwable $ex) {
-			// Revert all changes when error occur
-			if ($this->getOrmConnection()->isTransactionActive()) {
-				$this->getOrmConnection()->rollBack();
-			}
-
-			throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
 		}
 
 		if ($entity->getValue() !== 'N/A') {
-			try {
-				$propertyState = $this->propertyStateRepository->findOne($property);
+			if ($property instanceof DevicesModuleEntities\Devices\Properties\IStaticProperty) {
+				try {
+					// Start transaction connection to the database
+					$this->getOrmConnection()->beginTransaction();
 
-			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
-				$this->logger->warning(
-					'States repository is not configured. State could not be fetched',
-					[
-						'source' => 'fastybird-fb-mqtt-connector',
-						'type'   => 'consumer',
-					]
+					$this->propertiesManager->update($property, Utils\ArrayHash::from([
+						'value' => $entity->getValue(),
+					]));
+
+					// Commit all changes into database
+					$this->getOrmConnection()->commit();
+
+				} catch (Throwable $ex) {
+					// Revert all changes when error occur
+					if ($this->getOrmConnection()->isTransactionActive()) {
+						$this->getOrmConnection()->rollBack();
+					}
+
+					throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
+				}
+			} elseif ($property instanceof DevicesModuleEntities\Devices\Properties\IDynamicProperty) {
+				try {
+					$propertyState = $this->propertyStateRepository->findOne($property);
+
+				} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+					$this->logger->warning(
+						'States repository is not configured. State could not be fetched',
+						[
+							'source' => 'fastybird-fb-mqtt-connector',
+							'type'   => 'consumer',
+						]
+					);
+
+					return;
+				}
+
+				$actualValue = DevicesModuleUtilities\ValueHelper::flattenValue(
+					DevicesModuleUtilities\ValueHelper::normalizeValue(
+						$property->getDataType(),
+						$entity->getValue(),
+						$property->getFormat(),
+						$property->getInvalid()
+					)
 				);
 
-				return;
-			}
+				try {
+					// In case synchronization failed...
+					if ($propertyState === null) {
+						// ...create state in storage
+						$this->propertiesStatesManager->create(
+							$property,
+							Utils\ArrayHash::from(array_merge(
+								$property->toArray(),
+								[
+									'actualValue'   => $actualValue,
+									'expectedValue' => null,
+									'pending'       => false,
+									'valid'         => true,
+								]
+							))
+						);
 
-			$actualValue = DevicesModuleUtilities\ValueHelper::flattenValue(
-				DevicesModuleUtilities\ValueHelper::normalizeValue(
-					$property->getDataType(),
-					$entity->getValue(),
-					$property->getFormat(),
-					$property->getInvalid()
-				)
-			);
-
-			try {
-				// In case synchronization failed...
-				if ($propertyState === null) {
-					// ...create state in storage
-					$this->propertiesStatesManager->create(
-						$property,
-						Utils\ArrayHash::from(array_merge(
-							$property->toArray(),
-							[
+					} else {
+						$this->propertiesStatesManager->update(
+							$property,
+							$propertyState,
+							Utils\ArrayHash::from([
 								'actualValue'   => $actualValue,
 								'expectedValue' => null,
 								'pending'       => false,
 								'valid'         => true,
-							]
-						))
-					);
-
-				} else {
-					$this->propertiesStatesManager->update(
-						$property,
-						$propertyState,
-						Utils\ArrayHash::from([
-							'actualValue'   => $actualValue,
-							'expectedValue' => null,
-							'pending'       => false,
-							'valid'         => true,
-						])
+							])
+						);
+					}
+				} catch (DevicesModuleExceptions\NotImplementedException $ex) {
+					$this->logger->warning(
+						'States manager is not configured. State could not be saved',
+						[
+							'source' => 'fastybird-fb-mqtt-connector',
+							'type'   => 'consumer',
+						]
 					);
 				}
-			} catch (DevicesModuleExceptions\NotImplementedException $ex) {
-				$this->logger->warning(
-					'States manager is not configured. State could not be saved',
-					[
-						'source' => 'fastybird-fb-mqtt-connector',
-						'type'   => 'consumer',
-					]
-				);
 			}
 		}
 	}

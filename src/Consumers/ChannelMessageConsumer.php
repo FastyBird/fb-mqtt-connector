@@ -177,7 +177,6 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 		Utils\ArrayHash $properties
 	): void {
 		foreach ($properties as $propertyName) {
-			var_dump($propertyName);
 			if (!$channel->hasProperty($propertyName)) {
 				$this->channelPropertiesManager->create(Utils\ArrayHash::from([
 					'entity'     => DevicesModuleEntities\Channels\Properties\DynamicProperty::class,

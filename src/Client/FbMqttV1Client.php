@@ -419,7 +419,6 @@ final class FbMqttV1Client extends Client
 		) {
 			// Check if message is sent from broker
 			if (!$this->apiValidator->validate($message->getTopic())) {
-				var_dump($message->getTopic());
 				return;
 			}
 
@@ -431,7 +430,6 @@ final class FbMqttV1Client extends Client
 				);
 
 			} catch (Exceptions\ParseMessageException $ex) {
-				var_dump($ex->getMessage());
 				$this->logger->debug(
 					'Received message could not be successfully parsed to entity.',
 					[

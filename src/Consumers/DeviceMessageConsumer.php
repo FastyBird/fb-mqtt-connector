@@ -399,6 +399,10 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 			]));
 		}
 
+		if (!$stateProperty instanceof DevicesModuleEntities\Devices\Properties\IDynamicProperty) {
+			return;
+		}
+
 		try {
 			$statePropertyState = $this->propertyStateRepository->findOne($stateProperty);
 
