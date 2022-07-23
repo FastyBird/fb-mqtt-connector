@@ -30,7 +30,7 @@ use Nette\Utils;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class PropertyAttribute
+final class PropertyAttributeEntity
 {
 
 	use Nette\SmartObject;
@@ -60,8 +60,12 @@ final class PropertyAttribute
 	private string $attribute;
 
 	/** @var string|string[]|float[]|null[]|bool|MetadataTypes\DataTypeType|null */
-	private $value = null;
+	private MetadataTypes\DataTypeType|string|array|bool|null $value = null;
 
+	/**
+	 * @param string $attribute
+	 * @param string $value
+	 */
 	public function __construct(
 		string $attribute,
 		string $value

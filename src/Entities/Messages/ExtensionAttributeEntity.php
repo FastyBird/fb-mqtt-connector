@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * ExtensionAttribute.php
+ * ExtensionAttributeEntity.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Entities\Messages;
 
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Types;
+use Ramsey\Uuid;
 
 /**
  * Device extension attribute
@@ -26,7 +27,7 @@ use FastyBird\FbMqttConnector\Types;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class ExtensionAttribute extends Entity
+final class ExtensionAttributeEntity extends Entity
 {
 
 	public const MAC_ADDRESS = 'mac-address';
@@ -52,7 +53,15 @@ final class ExtensionAttribute extends Entity
 	/** @var string */
 	private string $value;
 
+	/**
+	 * @param Uuid\UuidInterface $connector
+	 * @param string $device
+	 * @param Types\ExtensionTypeType $extension
+	 * @param string $parameter
+	 * @param string $value
+	 */
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
 		Types\ExtensionTypeType $extension,
 		string $parameter,
@@ -62,7 +71,7 @@ final class ExtensionAttribute extends Entity
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided extension attribute "%s" is not in allowed range', $parameter));
 		}
 
-		parent::__construct($device);
+		parent::__construct($connector, $device);
 
 		$this->extension = $extension;
 		$this->parameter = $parameter;

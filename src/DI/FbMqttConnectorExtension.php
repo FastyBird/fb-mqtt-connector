@@ -16,10 +16,12 @@
 namespace FastyBird\FbMqttConnector\DI;
 
 use Doctrine\Persistence;
+use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Client;
+use FastyBird\FbMqttConnector\Clients;
 use FastyBird\FbMqttConnector\Connector;
 use FastyBird\FbMqttConnector\Consumers;
+use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Hydrators;
 use FastyBird\FbMqttConnector\Schemas;
 use Nette;
@@ -83,15 +85,21 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 				->setFactory('React\EventLoop\Factory::create');
 		}
 
+		// Service factory
+		$builder->addDefinition($this->prefix('service.factory'), new DI\Definitions\ServiceDefinition())
+			->setType(FbMqttConnector\ConnectorFactory::class);
+
 		// Connector
-		$builder->addDefinition($this->prefix('connector.factory'), new DI\Definitions\ServiceDefinition())
-			->setFactory(Connector\ConnectorFactory::class);
+		$builder->addFactoryDefinition($this->prefix('connector'))
+			->setImplement(Connector\ConnectorFactory::class)
+			->getResultDefinition()
+			->setType(Connector\Connector::class);
 
 		// MQTT v1 API client
 		$builder->addFactoryDefinition($this->prefix('client.apiv1'))
-			->setImplement(Client\FbMqttV1ClientFactory::class)
+			->setImplement(Clients\FbMqttV1ClientFactory::class)
 			->getResultDefinition()
-			->setType(Client\FbMqttV1Client::class);
+			->setType(Clients\FbMqttV1Client::class);
 
 		// MQTT API
 		$builder->addDefinition($this->prefix('api.v1parser'), new DI\Definitions\ServiceDefinition())
@@ -135,6 +143,10 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 
 		$builder->addDefinition($this->prefix('hydrators.device.fbMqtt'), new DI\Definitions\ServiceDefinition())
 			->setType(Hydrators\FbMqttDeviceHydrator::class);
+
+		// Helpers
+		$builder->addDefinition($this->prefix('helpers.database'), new DI\Definitions\ServiceDefinition())
+			->setType(Helpers\DatabaseHelper::class);
 	}
 
 	/**
@@ -145,27 +157,6 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		parent::beforeCompile();
 
 		$builder = $this->getContainerBuilder();
-
-		// Register data consumers
-
-		/** @var string $consumerServiceName */
-		$consumerServiceName = $builder->getByType(Consumers\Consumer::class, true);
-
-		/** @var DI\Definitions\ServiceDefinition $consumerService */
-		$consumerService = $builder->getDefinition($consumerServiceName);
-
-		$consumersServices = $builder->findByType(Consumers\IConsumer::class);
-
-		foreach ($consumersServices as $service) {
-			if ($service->getType() !== Consumers\Consumer::class) {
-				$service->setAutowired(false);
-
-				$consumerService->addSetup('?->addConsumer(?)', [
-					'@self',
-					$service,
-				]);
-			}
-		}
 
 		/**
 		 * Doctrine entities

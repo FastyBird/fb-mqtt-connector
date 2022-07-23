@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * ChannelAttribute.php
+ * ChannelAttributeEntity.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -15,6 +15,8 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use Ramsey\Uuid;
+
 /**
  * Channel attribute
  *
@@ -23,7 +25,7 @@ namespace FastyBird\FbMqttConnector\Entities\Messages;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class ChannelAttribute extends Attribute
+final class ChannelAttributeEntity extends AttributeEntity
 {
 
 	public const ALLOWED_ATTRIBUTES = [
@@ -36,18 +38,20 @@ final class ChannelAttribute extends Attribute
 	private string $channel;
 
 	/**
+	 * @param Uuid\UuidInterface $connector
 	 * @param string $device
 	 * @param string $channel
 	 * @param string $attribute
 	 * @param string $value
 	 */
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
 		string $channel,
 		string $attribute,
 		string $value
 	) {
-		parent::__construct($device, $attribute, $value);
+		parent::__construct($connector, $device, $attribute, $value);
 
 		$this->channel = $channel;
 	}

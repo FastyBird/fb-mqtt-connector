@@ -7,15 +7,17 @@
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
- * @since          0.1.0
+ * @subpackage     Clients
+ * @since          0.25.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Client;
+namespace FastyBird\FbMqttConnector\Clients;
 
 use BinSoul\Net\Mqtt;
+use DateTimeInterface;
+use FastyBird\DateTimeFactory;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\API;
@@ -23,7 +25,10 @@ use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Types;
+use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
+use FastyBird\Metadata\Types as MetadataTypes;
+use Nette\Utils;
 use React\EventLoop;
 use Throwable;
 
@@ -31,7 +36,7 @@ use Throwable;
  * FastyBird MQTT v1 client
  *
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
@@ -56,6 +61,9 @@ final class FbMqttV1Client extends Client
 	/** @var string[] */
 	private array $processedDevices = [];
 
+	/** @var Array<string, DateTimeInterface> */
+	private array $processedProperties = [];
+
 	/** @var API\V1Validator */
 	private API\V1Validator $apiValidator;
 
@@ -64,9 +72,6 @@ final class FbMqttV1Client extends Client
 
 	/** @var API\V1Builder */
 	private API\V1Builder $apiBuilder;
-
-	/** @var Consumers\IConsumer */
-	private Consumers\IConsumer $consumer;
 
 	/** @var DevicesModuleModels\DataStorage\IDevicesRepository */
 	private DevicesModuleModels\DataStorage\IDevicesRepository $devicesRepository;
@@ -86,12 +91,54 @@ final class FbMqttV1Client extends Client
 	/** @var DevicesModuleModels\DataStorage\IChannelControlsRepository */
 	private DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository;
 
+	/** @var DevicesModuleModels\States\DevicePropertiesRepository */
+	private DevicesModuleModels\States\DevicePropertiesRepository $devicePropertiesStatesRepository;
+
+	/** @var DevicesModuleModels\States\DevicePropertiesManager */
+	private DevicesModuleModels\States\DevicePropertiesManager $devicePropertiesStatesManager;
+
+	/** @var DevicesModuleModels\States\ChannelPropertiesRepository */
+	private DevicesModuleModels\States\ChannelPropertiesRepository $channelPropertiesStatesRepository;
+
+	/** @var DevicesModuleModels\States\ChannelPropertiesManager */
+	private DevicesModuleModels\States\ChannelPropertiesManager $channelPropertiesStatesManager;
+
+	/** @var DevicesModuleModels\States\DeviceConnectionStateManager */
+	private DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager;
+
+	/** @var DateTimeFactory\DateTimeFactory */
+	private DateTimeFactory\DateTimeFactory $dateTimeFactory;
+
+	/**
+	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
+	 * @param API\V1Validator $apiValidator
+	 * @param API\V1Parser $apiParser
+	 * @param API\V1Builder $apiBuilder
+	 * @param Consumers\Consumer $consumer
+	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
+	 * @param DevicesModuleModels\DataStorage\IDevicesRepository $devicesRepository
+	 * @param DevicesModuleModels\DataStorage\IDevicePropertiesRepository $devicePropertiesRepository
+	 * @param DevicesModuleModels\DataStorage\IDeviceControlsRepository $deviceControlsRepository
+	 * @param DevicesModuleModels\DataStorage\IChannelsRepository $channelsRepository
+	 * @param DevicesModuleModels\DataStorage\IChannelPropertiesRepository $channelPropertiesRepository
+	 * @param DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository
+	 * @param DevicesModuleModels\States\DevicePropertiesRepository $devicePropertiesStatesRepository
+	 * @param DevicesModuleModels\States\DevicePropertiesManager $devicePropertiesStatesManager
+	 * @param DevicesModuleModels\States\ChannelPropertiesRepository $channelPropertiesStatesRepository
+	 * @param DevicesModuleModels\States\ChannelPropertiesManager $channelPropertiesStatesManager
+	 * @param DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager
+	 * @param DateTimeFactory\DateTimeFactory $dateTimeFactory
+	 * @param EventLoop\LoopInterface $loop
+	 * @param Mqtt\ClientIdentifierGenerator|null $identifierGenerator
+	 * @param Mqtt\FlowFactory|null $flowFactory
+	 * @param Mqtt\StreamParser|null $parser
+	 */
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		API\V1Validator $apiValidator,
 		API\V1Parser $apiParser,
 		API\V1Builder $apiBuilder,
-		Consumers\IConsumer $consumer,
+		Consumers\Consumer $consumer,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
 		DevicesModuleModels\DataStorage\IDevicesRepository $devicesRepository,
 		DevicesModuleModels\DataStorage\IDevicePropertiesRepository $devicePropertiesRepository,
@@ -99,17 +146,30 @@ final class FbMqttV1Client extends Client
 		DevicesModuleModels\DataStorage\IChannelsRepository $channelsRepository,
 		DevicesModuleModels\DataStorage\IChannelPropertiesRepository $channelPropertiesRepository,
 		DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository,
+		DevicesModuleModels\States\DevicePropertiesRepository $devicePropertiesStatesRepository,
+		DevicesModuleModels\States\DevicePropertiesManager $devicePropertiesStatesManager,
+		DevicesModuleModels\States\ChannelPropertiesRepository $channelPropertiesStatesRepository,
+		DevicesModuleModels\States\ChannelPropertiesManager $channelPropertiesStatesManager,
+		DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager,
+		DateTimeFactory\DateTimeFactory $dateTimeFactory,
 		EventLoop\LoopInterface $loop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
 		?Mqtt\StreamParser $parser = null
 	) {
-		parent::__construct($connector, $connectorPropertiesRepository, $loop, $identifierGenerator, $flowFactory, $parser);
+		parent::__construct(
+			$connector,
+			$connectorPropertiesRepository,
+			$consumer,
+			$loop,
+			$identifierGenerator,
+			$flowFactory,
+			$parser
+		);
 
 		$this->apiValidator = $apiValidator;
 		$this->apiParser = $apiParser;
 		$this->apiBuilder = $apiBuilder;
-		$this->consumer = $consumer;
 
 		$this->devicesRepository = $devicesRepository;
 		$this->devicePropertiesRepository = $devicePropertiesRepository;
@@ -117,6 +177,14 @@ final class FbMqttV1Client extends Client
 		$this->channelsRepository = $channelsRepository;
 		$this->channelPropertiesRepository = $channelPropertiesRepository;
 		$this->channelControlsRepository = $channelControlsRepository;
+
+		$this->devicePropertiesStatesRepository = $devicePropertiesStatesRepository;
+		$this->devicePropertiesStatesManager = $devicePropertiesStatesManager;
+		$this->channelPropertiesStatesRepository = $channelPropertiesStatesRepository;
+		$this->channelPropertiesStatesManager = $channelPropertiesStatesManager;
+		$this->deviceConnectionStateManager = $deviceConnectionStateManager;
+
+		$this->dateTimeFactory = $dateTimeFactory;
 	}
 
 	/**
@@ -138,7 +206,7 @@ final class FbMqttV1Client extends Client
 			$this->logger->debug(
 				'Controlled device control entity was not found in registry',
 				[
-					'source'  => 'fastybird-fb-mqtt-connector',
+					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
@@ -156,7 +224,7 @@ final class FbMqttV1Client extends Client
 			$this->logger->debug(
 				'Controlled device entity was not found in registry',
 				[
-					'source'  => 'fastybird-fb-mqtt-connector',
+					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
@@ -185,7 +253,7 @@ final class FbMqttV1Client extends Client
 			$this->logger->debug(
 				'Controlled control entity was not found in registry',
 				[
-					'source'  => 'fastybird-fb-mqtt-connector',
+					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
@@ -204,7 +272,7 @@ final class FbMqttV1Client extends Client
 			$this->logger->debug(
 				'Controlled channel entity was not found in registry',
 				[
-					'source'  => 'fastybird-fb-mqtt-connector',
+					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
@@ -223,7 +291,7 @@ final class FbMqttV1Client extends Client
 			$this->logger->debug(
 				'Controlled device entity was not found in registry',
 				[
-					'source'  => 'fastybird-fb-mqtt-connector',
+					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'    => 'client',
 					'control' => [
 						'device'  => $action->getDevice()->toString(),
@@ -247,8 +315,17 @@ final class FbMqttV1Client extends Client
 	 */
 	protected function handleCommunication(): void
 	{
+		foreach ($this->processedProperties as $index => $processedProperty) {
+			if (((float) $this->dateTimeFactory->getNow()->format('Uv') - (float) $processedProperty->format('Uv')) >= 500) {
+				unset($this->processedProperties[$index]);
+			}
+		}
+
 		foreach ($this->devicesRepository->findAllByConnector($this->connector->getId()) as $device) {
-			if (!in_array($device->getId()->toString(), $this->processedDevices, true)) {
+			if (
+				!in_array($device->getId()->toString(), $this->processedDevices, true)
+				&& $this->deviceConnectionStateManager->getState($device)->equalsValue(MetadataTypes\ConnectionStateType::STATE_READY)
+			) {
 				$this->processedDevices[] = $device->getId()->toString();
 
 				if ($this->processDevice($device)) {
@@ -258,6 +335,23 @@ final class FbMqttV1Client extends Client
 		}
 
 		$this->processedDevices = [];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function onClose(Mqtt\Connection $connection): void
+	{
+		parent::onClose($connection);
+
+		foreach ($this->devicesRepository->findAllByConnector($this->connector->getId()) as $device) {
+			if ($this->deviceConnectionStateManager->getState($device)->equalsValue(MetadataTypes\ConnectionStateType::STATE_READY)) {
+				$this->deviceConnectionStateManager->setState(
+					$device,
+					MetadataTypes\ConnectionStateType::get(MetadataTypes\ConnectionStateType::STATE_DISCONNECTED)
+				);
+			}
+		}
 	}
 
 	/**
@@ -277,8 +371,8 @@ final class FbMqttV1Client extends Client
 					$this->logger->info(
 						sprintf('Subscribed to: %s', $subscription->getFilter()),
 						[
-							'source'    => 'fastybird-fb-mqtt-connector',
-							'type'      => 'client',
+							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+							'type'   => 'client',
 						]
 					);
 				},
@@ -286,7 +380,7 @@ final class FbMqttV1Client extends Client
 					$this->logger->error(
 						$ex->getMessage(),
 						[
-							'source'    => 'fastybird-fb-mqtt-connector',
+							'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'      => 'client',
 							'exception' => [
 								'message' => $ex->getMessage(),
@@ -309,8 +403,8 @@ final class FbMqttV1Client extends Client
 						$this->logger->info(
 							sprintf('Subscribed to: %s', $subscription->getFilter()),
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
-								'type'      => 'client',
+								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+								'type'   => 'client',
 							]
 						);
 					},
@@ -318,7 +412,7 @@ final class FbMqttV1Client extends Client
 						$this->logger->error(
 							$ex->getMessage(),
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
+								'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 								'type'      => 'client',
 								'exception' => [
 									'message' => $ex->getMessage(),
@@ -339,8 +433,8 @@ final class FbMqttV1Client extends Client
 		parent::onMessage($message);
 
 		// Check for broker system topic
-		if (strpos($message->getTopic(), '$SYS') !== false) {
-			[, $param1, $param2, $param3] = explode(FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER, $message->getTopic()) + [null, null, null, null];
+		if (str_contains($message->getTopic(), '$SYS')) {
+			[ , $param1, $param2, $param3] = explode(FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER, $message->getTopic()) + [null, null, null, null];
 
 			$payload = $message->getPayload();
 
@@ -352,24 +446,25 @@ final class FbMqttV1Client extends Client
 						$this->logger->notice(
 							$payload,
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
-								'type'      => 'client',
+								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+								'type'   => 'client',
 							]
 						);
 
 						// Nev device connected message
-						if (strpos($message->getPayload(), self::NEW_CLIENT_MESSAGE_PAYLOAD) !== false) {
-							[, , , , , $ipAddress, , $deviceId, , , $username] = explode(' ', $message->getPayload()) + [null, null, null, null, null, null, null, null, null, null, null];
+						if (str_contains($message->getPayload(), self::NEW_CLIENT_MESSAGE_PAYLOAD)) {
+							[ , , , , , $ipAddress, , $deviceId, , , $username] = explode(' ', $message->getPayload()) + [null, null, null, null, null, null, null, null, null, null, null];
 
 							// Check for correct data
 							if ($username !== null && $deviceId !== null && $ipAddress !== null) {
-								$entity = new Entities\Messages\DeviceProperty(
+								$entity = new Entities\Messages\DevicePropertyEntity(
+									$this->connector->getId(),
 									$deviceId,
 									'ip-address'
 								);
 								$entity->setValue($ipAddress);
 
-								$this->consumer->consume($entity);
+								$this->consumer->append($entity);
 							}
 						}
 
@@ -380,8 +475,8 @@ final class FbMqttV1Client extends Client
 						$this->logger->error(
 							$payload,
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
-								'type'      => 'client',
+								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+								'type'   => 'client',
 							]
 						);
 						break;
@@ -391,8 +486,8 @@ final class FbMqttV1Client extends Client
 						$this->logger->info(
 							$payload,
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
-								'type'      => 'client',
+								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+								'type'   => 'client',
 							]
 						);
 						break;
@@ -401,8 +496,8 @@ final class FbMqttV1Client extends Client
 						$this->logger->debug(
 							$param3 . ': ' . $payload,
 							[
-								'source'    => 'fastybird-fb-mqtt-connector',
-								'type'      => 'client',
+								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+								'type'   => 'client',
 							]
 						);
 						break;
@@ -424,6 +519,7 @@ final class FbMqttV1Client extends Client
 
 			try {
 				$entity = $this->apiParser->parse(
+					$this->connector->getId(),
 					$message->getTopic(),
 					$message->getPayload(),
 					$message->isRetained()
@@ -433,7 +529,7 @@ final class FbMqttV1Client extends Client
 				$this->logger->debug(
 					'Received message could not be successfully parsed to entity.',
 					[
-						'source'    => 'fastybird-fb-mqtt-connector',
+						'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'      => 'client',
 						'exception' => [
 							'message' => $ex->getMessage(),
@@ -445,7 +541,7 @@ final class FbMqttV1Client extends Client
 				return;
 			}
 
-			$this->consumer->consume($entity);
+			$this->consumer->append($entity);
 		}
 	}
 
@@ -470,6 +566,8 @@ final class FbMqttV1Client extends Client
 	 */
 	private function writeDeviceProperty(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
 	{
+		$now = $this->dateTimeFactory->getNow();
+
 		foreach ($this->devicePropertiesRepository->findAllByDevice($device->getId()) as $property) {
 			if (
 				(
@@ -477,13 +575,50 @@ final class FbMqttV1Client extends Client
 					|| $property instanceof MetadataEntities\Modules\DevicesModule\IDeviceMappedPropertyEntity
 				)
 				&& $property->getExpectedValue() !== null
+				&& $property->isPending()
 			) {
-				$this->publish(
-					$this->apiBuilder->buildDevicePropertyTopic($device, $property),
-					strval($property->getExpectedValue())
-				);
+				$pending = is_string($property->getPending()) ? Utils\DateTime::createFromFormat(DateTimeInterface::ATOM, $property->getPending()) : true;
+				$debounce = array_key_exists($property->getId()->toString(), $this->processedProperties) ? $this->processedProperties[$property->getId()->toString()] : false;
 
-				return true;
+				if (
+					$debounce !== false
+					&& (float) $now->format('Uv') - (float) $debounce->format('Uv') < 500
+				) {
+					continue;
+				}
+
+				unset($this->processedProperties[$property->getId()->toString()]);
+
+				if (
+					$pending === true
+					|| (
+						$pending !== false
+						&& (float) $now->format('Uv') - (float) $pending->format('Uv') > 2000
+					)
+				) {
+					$this->processedProperties[$property->getId()->toString()] = $now;
+
+					$this->publish(
+						$this->apiBuilder->buildDevicePropertyTopic($device, $property),
+						strval($property->getExpectedValue())
+					)->then(function () use ($property, $now): void {
+						$state = $this->devicePropertiesStatesRepository->findOne($property);
+
+						if ($state !== null) {
+							$this->devicePropertiesStatesManager->update(
+								$property,
+								$state,
+								Utils\ArrayHash::from([
+									'pending' => $now->format(DateTimeInterface::ATOM),
+								])
+							);
+						}
+					})->otherwise(function () use ($property): void {
+						unset($this->processedProperties[$property->getId()->toString()]);
+					});
+
+					return true;
+				}
 			}
 		}
 
@@ -497,6 +632,8 @@ final class FbMqttV1Client extends Client
 	 */
 	private function writeChannelsProperty(MetadataEntities\Modules\DevicesModule\IDeviceEntity $device): bool
 	{
+		$now = $this->dateTimeFactory->getNow();
+
 		foreach ($this->channelsRepository->findAllByDevice($device->getId()) as $channel) {
 			foreach ($this->channelPropertiesRepository->findAllByChannel($channel->getId()) as $property) {
 				if (
@@ -505,13 +642,50 @@ final class FbMqttV1Client extends Client
 						|| $property instanceof MetadataEntities\Modules\DevicesModule\IChannelMappedPropertyEntity
 					)
 					&& $property->getExpectedValue() !== null
+					&& $property->isPending()
 				) {
-					$this->publish(
-						$this->apiBuilder->buildChannelPropertyTopic($device, $channel, $property),
-						strval($property->getExpectedValue())
-					);
+					$pending = is_string($property->getPending()) ? Utils\DateTime::createFromFormat(DateTimeInterface::ATOM, $property->getPending()) : true;
+					$debounce = array_key_exists($property->getId()->toString(), $this->processedProperties) ? $this->processedProperties[$property->getId()->toString()] : false;
 
-					return true;
+					if (
+						$debounce !== false
+						&& (float) $now->format('Uv') - (float) $debounce->format('Uv') < 500
+					) {
+						continue;
+					}
+
+					unset($this->processedProperties[$property->getId()->toString()]);
+
+					if (
+						$pending === true
+						|| (
+							$pending !== false
+							&& (float) $now->format('Uv') - (float) $pending->format('Uv') > 2000
+						)
+					) {
+						$this->processedProperties[$property->getId()->toString()] = $now;
+
+						$this->publish(
+							$this->apiBuilder->buildChannelPropertyTopic($device, $channel, $property),
+							strval($property->getExpectedValue())
+						)->then(function () use ($property, $now): void {
+							$state = $this->channelPropertiesStatesRepository->findOne($property);
+
+							if ($state !== null) {
+								$this->channelPropertiesStatesManager->update(
+									$property,
+									$state,
+									Utils\ArrayHash::from([
+										'pending' => $now->format(DateTimeInterface::ATOM),
+									])
+								);
+							}
+						})->otherwise(function () use ($property): void {
+							unset($this->processedProperties[$property->getId()->toString()]);
+						});
+
+						return true;
+					}
 				}
 			}
 		}

@@ -1,26 +1,28 @@
 <?php declare(strict_types = 1);
 
 /**
- * FbMqttV1Client.php
+ * Client.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
- * @since          0.1.0
+ * @subpackage     Clients
+ * @since          0.25.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Client;
+namespace FastyBird\FbMqttConnector\Clients;
 
 use BinSoul\Net\Mqtt;
 use Closure;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
+use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Types;
+use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use Nette;
 use Psr\Log;
@@ -46,7 +48,7 @@ use Throwable;
  *  - onMessage - A message was received.
  *
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
@@ -85,6 +87,9 @@ abstract class Client implements IClient
 	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
 	protected DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
 
+	/** @var Consumers\Consumer */
+	protected Consumers\Consumer $consumer;
+
 	/** @var EventLoop\LoopInterface */
 	protected EventLoop\LoopInterface $eventLoop;
 
@@ -106,9 +111,19 @@ abstract class Client implements IClient
 	/** @var Log\LoggerInterface */
 	protected Log\LoggerInterface $logger;
 
+	/**
+	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
+	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
+	 * @param Consumers\Consumer $consumer
+	 * @param EventLoop\LoopInterface $eventLoop
+	 * @param Mqtt\ClientIdentifierGenerator|null $identifierGenerator
+	 * @param Mqtt\FlowFactory|null $flowFactory
+	 * @param Mqtt\StreamParser|null $parser
+	 */
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
+		Consumers\Consumer $consumer,
 		EventLoop\LoopInterface $eventLoop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
@@ -116,6 +131,7 @@ abstract class Client implements IClient
 	) {
 		$this->connector = $connector;
 		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
+		$this->consumer = $consumer;
 		$this->eventLoop = $eventLoop;
 
 		if ($parser === null) {
@@ -177,7 +193,7 @@ abstract class Client implements IClient
 
 		$usernameProperty = $this->connectorPropertiesRepository->findByIdentifier(
 			$this->connector->getId(),
-			Types\ConnectorPropertyType::NAME_USERNAME
+			Types\ConnectorPropertyIdentifierType::IDENTIFIER_USERNAME
 		);
 
 		if (
@@ -191,7 +207,7 @@ abstract class Client implements IClient
 
 		$passwordProperty = $this->connectorPropertiesRepository->findByIdentifier(
 			$this->connector->getId(),
-			Types\ConnectorPropertyType::NAME_PASSWORD
+			Types\ConnectorPropertyIdentifierType::IDENTIFIER_PASSWORD
 		);
 
 		if (
@@ -205,7 +221,7 @@ abstract class Client implements IClient
 
 		$serverProperty = $this->connectorPropertiesRepository->findByIdentifier(
 			$this->connector->getId(),
-			Types\ConnectorPropertyType::NAME_SERVER
+			Types\ConnectorPropertyIdentifierType::IDENTIFIER_SERVER
 		);
 
 		if (
@@ -219,7 +235,7 @@ abstract class Client implements IClient
 
 		$portProperty = $this->connectorPropertiesRepository->findByIdentifier(
 			$this->connector->getId(),
-			Types\ConnectorPropertyType::NAME_PORT
+			Types\ConnectorPropertyIdentifierType::IDENTIFIER_PORT
 		);
 
 		if (
@@ -264,9 +280,7 @@ abstract class Client implements IClient
 						$this->onError($reason);
 						$deferred->reject($reason);
 
-						if ($this->stream !== null) {
-							$this->stream->close();
-						}
+						$this->stream?->close();
 
 						$this->onClose($connection);
 					});
@@ -324,9 +338,7 @@ abstract class Client implements IClient
 				$this->timer[] = $this->eventLoop->addTimer(
 					$timeout,
 					function (): void {
-						if ($this->stream !== null) {
-							$this->stream->close();
-						}
+						$this->stream?->close();
 					}
 				);
 			})
@@ -424,8 +436,8 @@ abstract class Client implements IClient
 		$this->logger->info(
 			'Established connection to MQTT broker',
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source'      => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'        => 'client',
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
@@ -444,8 +456,8 @@ abstract class Client implements IClient
 		$this->logger->info(
 			'Connection to MQTT broker',
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source'      => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'        => 'client',
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
@@ -466,8 +478,8 @@ abstract class Client implements IClient
 		$this->logger->info(
 			sprintf('Connected to MQTT broker with client id %s', $connection->getClientID()),
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source'      => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'        => 'client',
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
@@ -476,6 +488,10 @@ abstract class Client implements IClient
 
 		$this->eventLoop->addPeriodicTimer(0.01, function (): void {
 			$this->handleCommunication();
+		});
+
+		$this->eventLoop->addPeriodicTimer(0.01, function (): void {
+			$this->consumer->consume();
 		});
 	}
 
@@ -490,8 +506,8 @@ abstract class Client implements IClient
 		$this->logger->info(
 			sprintf('Disconnected from MQTT broker with client id %s', $connection->getClientID()),
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source'      => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'        => 'client',
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
@@ -510,8 +526,8 @@ abstract class Client implements IClient
 		$this->logger->warning(
 			sprintf('There was an error  %s', $ex->getMessage()),
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'client',
 				'error'  => [
 					'message' => $ex->getMessage(),
 					'code'    => $ex->getCode(),
@@ -533,8 +549,8 @@ abstract class Client implements IClient
 		$this->logger->error(
 			sprintf('There was an error  %s', $ex->getMessage()),
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'client',
 				'error'  => [
 					'message' => $ex->getMessage(),
 					'code'    => $ex->getCode(),
@@ -560,8 +576,8 @@ abstract class Client implements IClient
 				$message->getPayload()
 			),
 			[
-				'source'    => 'fastybird-fb-mqtt-connector',
-				'type'      => 'client',
+				'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'    => 'client',
 				'message' => [
 					'topic'      => $message->getTopic(),
 					'payload'    => $message->getPayload(),

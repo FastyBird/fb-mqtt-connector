@@ -7,22 +7,22 @@
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  * @since          0.1.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Client;
+namespace FastyBird\FbMqttConnector\Clients;
 
 use BinSoul\Net\Mqtt;
 use React\Promise;
 
 /**
- * Decorates flows with data required for the {@see FbMqttV1Client} class.
+ * Decorates flows with data required for the {@see Client} class.
  *
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
@@ -42,7 +42,10 @@ class Flow implements Mqtt\Flow
 	private bool $isSilent;
 
 	/**
-	 * Constructs an instance of this class.
+	 * @param Mqtt\Flow $decorated
+	 * @param Promise\Deferred $deferred
+	 * @param Mqtt\Packet|null $packet
+	 * @param bool $isSilent
 	 */
 	public function __construct(
 		Mqtt\Flow $decorated,

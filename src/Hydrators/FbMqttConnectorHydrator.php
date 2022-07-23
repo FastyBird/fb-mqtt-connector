@@ -26,7 +26,7 @@ use FastyBird\FbMqttConnector\Entities;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  *
- * @phpstan-extends DevicesModuleHydrators\Connectors\ConnectorHydrator<Entities\IFbMqttConnector>
+ * @phpstan-extends DevicesModuleHydrators\Connectors\ConnectorHydrator<Entities\IFbMqttConnectorEntity>
  */
 final class FbMqttConnectorHydrator extends DevicesModuleHydrators\Connectors\ConnectorHydrator
 {
@@ -36,7 +36,7 @@ final class FbMqttConnectorHydrator extends DevicesModuleHydrators\Connectors\Co
 	 */
 	public function getEntityName(): string
 	{
-		return Entities\FbMqttConnector::class;
+		return Entities\FbMqttConnectorEntity::class;
 	}
 
 }

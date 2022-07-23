@@ -7,13 +7,13 @@
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  * @since          0.1.0
  *
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Client;
+namespace FastyBird\FbMqttConnector\Clients;
 
 use BinSoul\Net\Mqtt;
 use FastyBird\FbMqttConnector;
@@ -25,7 +25,7 @@ use React\Promise;
  * FastyBird MQTT client interface
  *
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Client
+ * @subpackage     Clients
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */

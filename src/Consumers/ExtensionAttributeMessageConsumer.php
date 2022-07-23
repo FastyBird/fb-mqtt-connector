@@ -16,19 +16,17 @@
 namespace FastyBird\FbMqttConnector\Consumers;
 
 use Doctrine\DBAL;
-use Doctrine\DBAL\Connection;
-use Doctrine\Persistence;
+use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Types\ExtensionTypeType;
-use FastyBird\Metadata\Types as MetadataTypes;
+use FastyBird\FbMqttConnector\Helpers;
+use FastyBird\FbMqttConnector\Types;
+use FastyBird\Metadata;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
-use Throwable;
 
 /**
  * Device extension MQTT message consumer
@@ -52,24 +50,31 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\Attributes\IAttributesManager */
 	private DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager;
 
-	/** @var Persistence\ManagerRegistry */
-	protected Persistence\ManagerRegistry $managerRegistry;
+	/** @var Helpers\DatabaseHelper */
+	private Helpers\DatabaseHelper $databaseHelper;
 
 	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
+	/**
+	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
+	 * @param DevicesModuleModels\Devices\Attributes\IAttributesRepository $attributesRepository
+	 * @param DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager
+	 * @param Helpers\DatabaseHelper $databaseHelper
+	 * @param Log\LoggerInterface|null $logger
+	 */
 	public function __construct(
 		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
 		DevicesModuleModels\Devices\Attributes\IAttributesRepository $attributesRepository,
 		DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager,
-		Persistence\ManagerRegistry $managerRegistry,
+		Helpers\DatabaseHelper $databaseHelper,
 		?Log\LoggerInterface $logger = null
 	) {
 		$this->deviceRepository = $deviceRepository;
 		$this->attributesRepository = $attributesRepository;
 		$this->attributesManager = $attributesManager;
 
-		$this->managerRegistry = $managerRegistry;
+		$this->databaseHelper = $databaseHelper;
 
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
@@ -81,77 +86,80 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 	 */
 	public function consume(
 		Entities\Messages\IEntity $entity
-	): void {
-		if (!$entity instanceof Entities\Messages\ExtensionAttribute) {
-			return;
+	): bool {
+		if (!$entity instanceof Entities\Messages\ExtensionAttributeEntity) {
+			return false;
 		}
 
-		$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
-		$findDeviceQuery->byIdentifier($entity->getDevice());
+		/** @var DevicesModuleEntities\Devices\IDevice|null $device */
+		$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
+			$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
+			$findDeviceQuery->byIdentifier($entity->getDevice());
 
-		$device = $this->deviceRepository->findOneBy($findDeviceQuery);
+			return $this->deviceRepository->findOneBy($findDeviceQuery);
+		});
 
 		if ($device === null) {
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'consumer',
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type'   => 'extension-attribute-message-consumer',
 				]
 			);
 
-			return;
+			return true;
 		}
 
 		$attributeIdentifier = null;
 
 		// HARDWARE INFO
 		if (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::MANUFACTURER
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::MANUFACTURER
 		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MANUFACTURER;
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MANUFACTURER;
 
-        } elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::MODEL
-		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MODEL;
-
-        } elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::VERSION
-		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_VERSION;
-
-        } elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::MAC_ADDRESS
-		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MAC_ADDRESS;
-
-        // FIRMWARE INFO
 		} elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::MANUFACTURER
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::MODEL
 		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_MANUFACTURER;
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MODEL;
 
-        } elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::NAME
+		} elseif (
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::VERSION
 		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_NAME;
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_VERSION;
 
-        } elseif (
-			$entity->getExtension()->equalsValue(ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
-			&& $entity->getParameter() === Entities\Messages\ExtensionAttribute::VERSION
+		} elseif (
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_HARDWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::MAC_ADDRESS
 		) {
-			$attributeIdentifier = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_VERSION;
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MAC_ADDRESS;
+
+		// FIRMWARE INFO
+		} elseif (
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::MANUFACTURER
+		) {
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_MANUFACTURER;
+
+		} elseif (
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::NAME
+		) {
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_NAME;
+
+		} elseif (
+			$entity->getExtension()->equalsValue(Types\ExtensionTypeType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE)
+			&& $entity->getParameter() === Entities\Messages\ExtensionAttributeEntity::VERSION
+		) {
+			$attributeIdentifier = Types\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_VERSION;
 		}
 
 		if ($attributeIdentifier === null) {
-			return;
+			return true;
 		}
 
 		$attribute = $device->findAttribute($attributeIdentifier);
@@ -160,49 +168,23 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 			$this->logger->error(
 				sprintf('Device attribute "%s" is not registered', $entity->getParameter()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'consumer',
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type'   => 'extension-attribute-message-consumer',
 				]
 			);
 
-			return;
+			return true;
 		}
 
-		try {
-			// Start transaction connection to the database
-			$this->getOrmConnection()->beginTransaction();
-
+		$this->databaseHelper->transaction(function () use ($entity, $attribute): void {
 			$toUpdate = [
 				'content' => $entity->getValue(),
 			];
 
 			$this->attributesManager->update($attribute, Utils\ArrayHash::from($toUpdate));
+		});
 
-			// Commit all changes into database
-			$this->getOrmConnection()->commit();
-
-		} catch (Throwable $ex) {
-			// Revert all changes when error occur
-			if ($this->getOrmConnection()->isTransactionActive()) {
-				$this->getOrmConnection()->rollBack();
-			}
-
-			throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
-		}
-	}
-
-	/**
-	 * @return Connection
-	 */
-	private function getOrmConnection(): Connection
-	{
-		$connection = $this->managerRegistry->getConnection();
-
-		if ($connection instanceof Connection) {
-			return $connection;
-		}
-
-		throw new Exceptions\RuntimeException('Entity manager could not be loaded');
+		return true;
 	}
 
 }

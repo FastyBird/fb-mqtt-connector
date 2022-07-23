@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * FbMqttDevice.php
+ * FbMqttDeviceEntity.php
  *
  * @license        More in LICENSE.md
  * @copyright      https://www.fastybird.com
@@ -22,7 +22,7 @@ use FastyBird\Metadata\Types as MetadataTypes;
 /**
  * @ORM\Entity
  */
-class FbMqttDevice extends DevicesModuleEntities\Devices\Device implements IFbMqttDevice
+class FbMqttDeviceEntity extends DevicesModuleEntities\Devices\Device implements IFbMqttDeviceEntity
 {
 
 	public const DEVICE_TYPE = 'fb-mqtt';

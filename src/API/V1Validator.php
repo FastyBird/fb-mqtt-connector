@@ -66,7 +66,10 @@ final class V1Validator
 	public function validate(string $topic): bool
 	{
 		// Check if message is sent from broker
-		if (strpos(trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER), FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
+		if (str_contains(
+			trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER),
+			FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set'
+		)) {
 			return false;
 		}
 

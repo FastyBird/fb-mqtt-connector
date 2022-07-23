@@ -27,7 +27,7 @@ use FastyBird\Metadata\Types as MetadataTypes;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  *
- * @phpstan-extends DevicesModuleSchemas\Devices\DeviceSchema<Entities\IFbMqttDevice>
+ * @phpstan-extends DevicesModuleSchemas\Devices\DeviceSchema<Entities\IFbMqttDeviceEntity>
  */
 final class FbMqttDeviceSchema extends DevicesModuleSchemas\Devices\DeviceSchema
 {
@@ -35,14 +35,14 @@ final class FbMqttDeviceSchema extends DevicesModuleSchemas\Devices\DeviceSchema
 	/**
 	 * Define entity schema type string
 	 */
-	public const SCHEMA_TYPE = MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT . '/device/' . Entities\FbMqttDevice::DEVICE_TYPE;
+	public const SCHEMA_TYPE = MetadataTypes\ConnectorSourceType::SOURCE_CONNECTOR_FB_MQTT . '/device/' . Entities\FbMqttDeviceEntity::DEVICE_TYPE;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function getEntityClass(): string
 	{
-		return Entities\FbMqttDevice::class;
+		return Entities\FbMqttDeviceEntity::class;
 	}
 
 	/**

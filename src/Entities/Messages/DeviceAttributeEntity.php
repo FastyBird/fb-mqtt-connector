@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * ChannelProperty.php
+ * DeviceAttributeEntity.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -16,45 +16,31 @@
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
 /**
- * Device or channel property
+ * Device attribute
  *
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Entities
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class ChannelProperty extends Property
+final class DeviceAttributeEntity extends AttributeEntity
 {
 
-	/** @var string */
-	private string $channel;
-
-	public function __construct(
-		string $device,
-		string $channel,
-		string $property
-	) {
-		parent::__construct($device, $property);
-
-		$this->channel = $channel;
-	}
+	public const ALLOWED_ATTRIBUTES = [
+		self::NAME,
+		self::STATE,
+		self::PROPERTIES,
+		self::CHANNELS,
+		self::EXTENSIONS,
+		self::CONTROLS,
+	];
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public function toArray(): array
+	protected function getAllowedAttributes(): array
 	{
-		return array_merge([
-			'channel' => $this->getChannel(),
-		], parent::toArray());
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getChannel(): string
-	{
-		return $this->channel;
+		return self::ALLOWED_ATTRIBUTES;
 	}
 
 }

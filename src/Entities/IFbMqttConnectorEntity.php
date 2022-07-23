@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * IFbMqttConnector.php
+ * IFbMqttConnectorEntity.php
  *
  * @license        More in LICENSE.md
  * @copyright      https://www.fastybird.com
@@ -26,7 +26,7 @@ use FastyBird\FbMqttConnector\Types;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-interface IFbMqttConnector extends DevicesModuleEntities\Connectors\IConnector
+interface IFbMqttConnectorEntity extends DevicesModuleEntities\Connectors\IConnector
 {
 
 	/**

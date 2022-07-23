@@ -30,36 +30,36 @@ trait TPropertyMessageConsumer
 {
 
 	/**
-	 * @param Entities\Messages\Property $entity
+	 * @param Entities\Messages\PropertyEntity $entity
 	 *
-	 * @return mixed[]
+	 * @return Array<string, string|string[]|float[]|null[]|bool|MetadataTypes\DataTypeType|null>
 	 */
 	protected function handlePropertyConfiguration(
-		Entities\Messages\Property $entity
+		Entities\Messages\PropertyEntity $entity
 	): array {
 		$toUpdate = [];
 
 		foreach ($entity->getAttributes() as $attribute) {
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::NAME) {
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::NAME) {
 				$toUpdate = array_merge($toUpdate, [
 					'name' => strval($attribute->getValue()),
 				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::SETTABLE) {
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::SETTABLE) {
 				$toUpdate = array_merge($toUpdate, [
 					'settable' => boolval($attribute->getValue()),
 				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::QUERYABLE) {
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::QUERYABLE) {
 				$toUpdate = array_merge($toUpdate, [
 					'queryable' => boolval($attribute->getValue()),
 				]);
 			}
 
 			if (
-				$attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE
+				$attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::DATA_TYPE
 				&& MetadataTypes\DataTypeType::isValidValue(strval($attribute->getValue()))
 			) {
 				$toUpdate = array_merge($toUpdate, [
@@ -67,13 +67,13 @@ trait TPropertyMessageConsumer
 				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::FORMAT) {
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::FORMAT) {
 				$toUpdate = array_merge($toUpdate, [
 					'format' => $attribute->getValue(),
 				]);
 			}
 
-			if ($attribute->getAttribute() === Entities\Messages\PropertyAttribute::UNIT) {
+			if ($attribute->getAttribute() === Entities\Messages\PropertyAttributeEntity::UNIT) {
 				$toUpdate = array_merge($toUpdate, [
 					'unit' => $attribute->getValue(),
 				]);

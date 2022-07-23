@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * ConnectorPropertyType.php
+ * ConnectorPropertyIdentifierType.php
  *
  * @license        More in LICENSE.md
  * @copyright      https://www.fastybird.com
@@ -26,18 +26,18 @@ use FastyBird\Metadata\Types as MetadataTypes;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-class ConnectorPropertyType extends Consistence\Enum\Enum
+class ConnectorPropertyIdentifierType extends Consistence\Enum\Enum
 {
 
 	/**
 	 * Define device states
 	 */
-	public const NAME_SERVER = MetadataTypes\ConnectorPropertyNameType::NAME_SERVER;
-	public const NAME_PORT = MetadataTypes\ConnectorPropertyNameType::NAME_PORT;
-	public const NAME_SECURED_PORT = MetadataTypes\ConnectorPropertyNameType::NAME_SECURED_PORT;
-	public const NAME_USERNAME = 'username';
-	public const NAME_PASSWORD = 'password';
-	public const NAME_PROTOCOL_VERSION = 'protocol';
+	public const IDENTIFIER_SERVER = MetadataTypes\ConnectorPropertyNameType::NAME_SERVER;
+	public const IDENTIFIER_PORT = MetadataTypes\ConnectorPropertyNameType::NAME_PORT;
+	public const IDENTIFIER_SECURED_PORT = MetadataTypes\ConnectorPropertyNameType::NAME_SECURED_PORT;
+	public const IDENTIFIER_USERNAME = 'username';
+	public const IDENTIFIER_PASSWORD = 'password';
+	public const IDENTIFIER_PROTOCOL_VERSION = 'protocol';
 
 	/**
 	 * @return string

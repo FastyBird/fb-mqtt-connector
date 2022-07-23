@@ -1,29 +1,31 @@
 <?php declare(strict_types = 1);
 
 /**
- * DeviceProperty.php
+ * ClientFactory.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Entities
- * @since          0.1.0
+ * @subpackage     Clients
+ * @since          0.25.0
  *
- * @date           05.03.20
+ * @date           05.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\FbMqttConnector\Clients;
 
 /**
- * Device property
+ * Base client factory
  *
  * @package        FastyBird:FbMqttConnector!
- * @subpackage     Entities
+ * @subpackage     Clients
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class DeviceProperty extends Property
+interface ClientFactory
 {
+
+	public const VERSION_CONSTANT_NAME = 'VERSION';
 
 }

@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * Attribute.php
+ * AttributeEntity.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Entities\Messages;
 
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Helpers;
+use Ramsey\Uuid;
 
 /**
  * Device, channel or property attribute
@@ -26,7 +27,7 @@ use FastyBird\FbMqttConnector\Helpers;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-abstract class Attribute extends Entity
+abstract class AttributeEntity extends Entity
 {
 
 	public const NAME = 'name';
@@ -40,14 +41,16 @@ abstract class Attribute extends Entity
 	private string $attribute;
 
 	/** @var string|string[] */
-	private $value;
+	private string|array $value;
 
 	/**
+	 * @param Uuid\UuidInterface $connector
 	 * @param string $device
 	 * @param string $attribute
 	 * @param string $value
 	 */
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
 		string $attribute,
 		string $value
@@ -56,7 +59,7 @@ abstract class Attribute extends Entity
 			throw new Exceptions\InvalidArgumentException(sprintf('Provided attribute "%s" is not in allowed range', $attribute));
 		}
 
-		parent::__construct($device);
+		parent::__construct($connector, $device);
 
 		$this->attribute = $attribute;
 
@@ -74,7 +77,7 @@ abstract class Attribute extends Entity
 	/**
 	 * @return string|string[]
 	 */
-	public function getValue()
+	public function getValue(): array|string
 	{
 		return $this->value;
 	}

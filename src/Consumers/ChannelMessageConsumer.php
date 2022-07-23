@@ -16,19 +16,17 @@
 namespace FastyBird\FbMqttConnector\Consumers;
 
 use Doctrine\DBAL;
-use Doctrine\DBAL\Connection;
-use Doctrine\Persistence;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\FbMqttConnector\Helpers;
+use FastyBird\Metadata;
 use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
-use Throwable;
 
 /**
  * Device channel attributes MQTT message consumer
@@ -46,9 +44,6 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\IDevicesRepository */
 	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
-	/** @var DevicesModuleModels\Channels\IChannelsRepository */
-	private DevicesModuleModels\Channels\IChannelsRepository $channelRepository;
-
 	/** @var DevicesModuleModels\Channels\IChannelsManager */
 	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
 
@@ -58,28 +53,34 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Channels\Controls\IControlsManager */
 	private DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager;
 
-	/** @var Persistence\ManagerRegistry */
-	protected Persistence\ManagerRegistry $managerRegistry;
+	/** @var Helpers\DatabaseHelper */
+	private Helpers\DatabaseHelper $databaseHelper;
 
 	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
+	/**
+	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
+	 * @param DevicesModuleModels\Channels\IChannelsManager $channelsManager
+	 * @param DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager
+	 * @param DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager
+	 * @param Helpers\DatabaseHelper $databaseHelper
+	 * @param Log\LoggerInterface|null $logger
+	 */
 	public function __construct(
 		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Channels\IChannelsRepository $channelRepository,
 		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
 		DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager,
 		DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager,
-		Persistence\ManagerRegistry $managerRegistry,
+		Helpers\DatabaseHelper $databaseHelper,
 		?Log\LoggerInterface $logger = null
 	) {
 		$this->deviceRepository = $deviceRepository;
-		$this->channelRepository = $channelRepository;
 		$this->channelsManager = $channelsManager;
 		$this->channelPropertiesManager = $channelPropertiesManager;
 		$this->channelControlManager = $channelControlManager;
 
-		$this->managerRegistry = $managerRegistry;
+		$this->databaseHelper = $databaseHelper;
 
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
@@ -91,79 +92,66 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 	 */
 	public function consume(
 		Entities\Messages\IEntity $entity
-	): void {
-		if (!$entity instanceof Entities\Messages\ChannelAttribute) {
-			return;
+	): bool {
+		if (!$entity instanceof Entities\Messages\ChannelAttributeEntity) {
+			return false;
 		}
 
-		$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
-		$findDeviceQuery->byIdentifier($entity->getDevice());
+		/** @var DevicesModuleEntities\Devices\IDevice|null $device */
+		$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
+			$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
+			$findDeviceQuery->byIdentifier($entity->getDevice());
 
-		$device = $this->deviceRepository->findOneBy($findDeviceQuery);
+			return $this->deviceRepository->findOneBy($findDeviceQuery);
+		});
 
 		if ($device === null) {
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'consumer',
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type'   => 'channel-message-consumer',
 				]
 			);
 
-			return;
+			return true;
 		}
 
-		$findChannelQuery = new DevicesModuleQueries\FindChannelsQuery();
-		$findChannelQuery->forDevice($device);
-		$findChannelQuery->byIdentifier($entity->getChannel());
-
-		$channel = $this->channelRepository->findOneBy($findChannelQuery);
+		$channel = $device->findChannel($entity->getChannel());
 
 		if ($channel === null) {
 			$this->logger->error(
 				sprintf('Device channel "%s" is not registered', $entity->getChannel()),
 				[
-					'source'    => 'fastybird-fb-mqtt-connector',
-					'type'      => 'consumer',
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type'   => 'channel-message-consumer',
 				]
 			);
 
-			return;
+			return true;
 		}
 
-		try {
-			// Start transaction connection to the database
-			$this->getOrmConnection()->beginTransaction();
-
+		$this->databaseHelper->transaction(function () use ($entity, $channel): void {
 			$toUpdate = [];
 
-			if ($entity->getAttribute() === Entities\Messages\Attribute::NAME) {
+			if ($entity->getAttribute() === Entities\Messages\AttributeEntity::NAME) {
 				$toUpdate['name'] = $entity->getValue();
 			}
 
-			if ($entity->getAttribute() === Entities\Messages\Attribute::PROPERTIES && is_array($entity->getValue())) {
+			if ($entity->getAttribute() === Entities\Messages\AttributeEntity::PROPERTIES && is_array($entity->getValue())) {
 				$this->setChannelProperties($channel, Utils\ArrayHash::from($entity->getValue()));
 			}
 
-			if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROLS && is_array($entity->getValue())) {
+			if ($entity->getAttribute() === Entities\Messages\AttributeEntity::CONTROLS && is_array($entity->getValue())) {
 				$this->setChannelControls($channel, Utils\ArrayHash::from($entity->getValue()));
 			}
 
 			if ($toUpdate !== []) {
 				$this->channelsManager->update($channel, Utils\ArrayHash::from($toUpdate));
 			}
+		});
 
-			// Commit all changes into database
-			$this->getOrmConnection()->commit();
-
-		} catch (Throwable $ex) {
-			// Revert all changes when error occur
-			if ($this->getOrmConnection()->isTransactionActive()) {
-				$this->getOrmConnection()->rollBack();
-			}
-
-			throw new Exceptions\InvalidStateException('An error occurred: ' . $ex->getMessage(), $ex->getCode(), $ex);
-		}
+		return true;
 	}
 
 	/**
@@ -177,7 +165,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 		Utils\ArrayHash $properties
 	): void {
 		foreach ($properties as $propertyName) {
-			if (!$channel->hasProperty($propertyName)) {
+			if ($channel->findProperty($propertyName) === null) {
 				$this->channelPropertiesManager->create(Utils\ArrayHash::from([
 					'entity'     => DevicesModuleEntities\Channels\Properties\DynamicProperty::class,
 					'channel'    => $channel,
@@ -208,7 +196,7 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 		Utils\ArrayHash $controls
 	): void {
 		foreach ($controls as $controlName) {
-			if (!$channel->hasControl($controlName)) {
+			if ($channel->findControl($controlName) === null) {
 				$this->channelControlManager->create(Utils\ArrayHash::from([
 					'channel' => $channel,
 					'name'    => $controlName,
@@ -222,20 +210,6 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				$this->channelControlManager->delete($control);
 			}
 		}
-	}
-
-	/**
-	 * @return Connection
-	 */
-	private function getOrmConnection(): Connection
-	{
-		$connection = $this->managerRegistry->getConnection();
-
-		if ($connection instanceof Connection) {
-			return $connection;
-		}
-
-		throw new Exceptions\RuntimeException('Entity manager could not be loaded');
 	}
 
 }

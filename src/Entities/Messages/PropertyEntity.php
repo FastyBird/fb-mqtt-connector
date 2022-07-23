@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * Property.php
+ * PropertyEntity.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -15,6 +15,8 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use FastyBird\FbMqttConnector;
+use Ramsey\Uuid;
 use SplObjectStorage;
 
 /**
@@ -25,23 +27,29 @@ use SplObjectStorage;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-abstract class Property extends Entity
+abstract class PropertyEntity extends Entity
 {
 
 	/** @var string */
 	private string $property;
 
 	/** @var string|null */
-	private ?string $value = null;
+	private ?string $value = FbMqttConnector\Constants::VALUE_NOT_SET;
 
-	/** @var SplObjectStorage<PropertyAttribute, null> */
+	/** @var SplObjectStorage<PropertyAttributeEntity, null> */
 	private SplObjectStorage $attributes;
 
+	/**
+	 * @param Uuid\UuidInterface $connector
+	 * @param string $device
+	 * @param string $property
+	 */
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
 		string $property
 	) {
-		parent::__construct($device);
+		parent::__construct($connector, $device);
 
 		$this->property = $property;
 
@@ -49,11 +57,11 @@ abstract class Property extends Entity
 	}
 
 	/**
-	 * @param PropertyAttribute $attribute
+	 * @param PropertyAttributeEntity $attribute
 	 *
 	 * @return void
 	 */
-	public function addAttribute(PropertyAttribute $attribute): void
+	public function addAttribute(PropertyAttributeEntity $attribute): void
 	{
 		if (!$this->attributes->contains($attribute)) {
 			$this->attributes->attach($attribute);
@@ -69,13 +77,13 @@ abstract class Property extends Entity
 	}
 
 	/**
-	 * @return PropertyAttribute[]
+	 * @return PropertyAttributeEntity[]
 	 */
 	public function getAttributes(): array
 	{
 		$data = [];
 
-		/** @var PropertyAttribute $item */
+		/** @var PropertyAttributeEntity $item */
 		foreach ($this->attributes as $item) {
 			$data[] = $item;
 		}
@@ -114,7 +122,7 @@ abstract class Property extends Entity
 			$return[$attribute->getAttribute()] = $attribute->getValue();
 		}
 
-		if ($this->getValue() !== null) {
+		if ($this->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
 			$return['value'] = $this->getValue();
 		}
 

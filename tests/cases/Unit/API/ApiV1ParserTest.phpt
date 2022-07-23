@@ -4,6 +4,7 @@ namespace Tests\Cases;
 
 use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Entities;
+use Ramsey\Uuid;
 use Tester\Assert;
 
 require_once __DIR__ . '/../../../bootstrap.php';
@@ -30,9 +31,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\DeviceAttribute);
+		Assert::true($entity instanceof Entities\Messages\DeviceAttributeEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -51,9 +56,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttributeEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -72,9 +81,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttributeEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -93,9 +106,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\DeviceProperty);
+		Assert::true($entity instanceof Entities\Messages\DevicePropertyEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -114,9 +131,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\DeviceProperty);
+		Assert::true($entity instanceof Entities\Messages\DevicePropertyEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -136,7 +157,11 @@ final class ApiV1ParserTest extends BaseTestCase
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
 		Assert::exception(function () use ($apiV1Parser, $topic): void {
-			$apiV1Parser->parse($topic, 'bar');
+			$apiV1Parser->parse(
+				Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+				$topic,
+				'bar'
+			);
 		}, $exception, $message);
 	}
 
@@ -156,7 +181,11 @@ final class ApiV1ParserTest extends BaseTestCase
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
 		Assert::exception(function () use ($apiV1Parser, $topic): void {
-			$apiV1Parser->parse($topic, 'bar');
+			$apiV1Parser->parse(
+				Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+				$topic,
+				'bar'
+			);
 		}, $exception, $message);
 	}
 
@@ -176,7 +205,11 @@ final class ApiV1ParserTest extends BaseTestCase
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
 		Assert::exception(function () use ($apiV1Parser, $topic): void {
-			$apiV1Parser->parse($topic, 'bar');
+			$apiV1Parser->parse(
+				Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+				$topic,
+				'bar'
+			);
 		}, $exception, $message);
 	}
 
@@ -195,9 +228,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelAttribute);
+		Assert::true($entity instanceof Entities\Messages\ChannelAttributeEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -216,9 +253,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelProperty);
+		Assert::true($entity instanceof Entities\Messages\ChannelPropertyEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -237,9 +278,13 @@ final class ApiV1ParserTest extends BaseTestCase
 		/** @var API\V1Parser $apiV1Parser */
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
-		$entity = $apiV1Parser->parse($topic, $payload);
+		$entity = $apiV1Parser->parse(
+			Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+			$topic,
+			$payload
+		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelProperty);
+		Assert::true($entity instanceof Entities\Messages\ChannelPropertyEntity);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -259,7 +304,11 @@ final class ApiV1ParserTest extends BaseTestCase
 		$apiV1Parser = $this->container->getByType(API\V1Parser::class);
 
 		Assert::exception(function () use ($apiV1Parser, $topic): void {
-			$apiV1Parser->parse($topic, 'bar');
+			$apiV1Parser->parse(
+				Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e'),
+				$topic,
+				'bar'
+			);
 		}, $exception, $message);
 	}
 

@@ -15,6 +15,8 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use Ramsey\Uuid;
+
 /**
  * Base data entity interface
  *
@@ -25,6 +27,11 @@ namespace FastyBird\FbMqttConnector\Entities\Messages;
  */
 interface IEntity
 {
+
+	/**
+	 * @return Uuid\UuidInterface
+	 */
+	public function getConnector(): Uuid\UuidInterface;
 
 	/**
 	 * @return string

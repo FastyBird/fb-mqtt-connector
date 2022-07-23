@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * Constants.php
+ * ConnectorFactory.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -10,19 +10,13 @@
  * @subpackage     Connector
  * @since          0.25.0
  *
- * @date           04.07.22
+ * @date           05.07.22
  */
 
 namespace FastyBird\FbMqttConnector\Connector;
 
-use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
-use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
-use FastyBird\DevicesModule\Models as DevicesModuleModels;
-use FastyBird\FbMqttConnector\Client;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Types;
+use FastyBird\FbMqttConnector\Clients;
 use FastyBird\Metadata\Entities as MetadataEntities;
-use ReflectionClass;
 
 /**
  * Connector service factory
@@ -32,70 +26,18 @@ use ReflectionClass;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class ConnectorFactory implements DevicesModuleConnectors\IConnectorFactory
+interface ConnectorFactory
 {
 
-	/** @var Client\ClientFactory[] */
-	private array $clientsFactories;
-
-	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
-	private DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
-
 	/**
-	 * @param Client\ClientFactory[] $clientsFactories
-	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
-	 */
-	public function __construct(
-		array $clientsFactories,
-		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
-	) {
-		$this->clientsFactories = $clientsFactories;
-		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function getType(): string
-	{
-		return Entities\FbMqttConnector::CONNECTOR_TYPE;
-	}
-
-	/**
-	 * {@inheritDoc}
+	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
+	 * @param Clients\IClient $client
 	 *
-	 * @throws DevicesModuleExceptions\TerminateException
+	 * @return Connector
 	 */
 	public function create(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
-	): DevicesModuleConnectors\IConnector {
-		$versionProperty = $this->connectorPropertiesRepository->findByIdentifier(
-			$connector->getId(),
-			Types\ConnectorPropertyType::NAME_PROTOCOL_VERSION
-		);
-
-		if (
-			!$versionProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			|| !Types\ProtocolVersionType::isValidValue($versionProperty->getValue())
-		) {
-			throw new DevicesModuleExceptions\TerminateException('Connector protocol version is not configured');
-		}
-
-		foreach ($this->clientsFactories as $clientFactory) {
-			$rc = new ReflectionClass($clientFactory);
-
-			$constants = $rc->getConstants();
-
-			if (
-				array_key_exists(Client\ClientFactory::VERSION_CONSTANT_NAME, $constants)
-				&& $constants[Client\ClientFactory::VERSION_CONSTANT_NAME] === $versionProperty->getValue()
-				&& method_exists($clientFactory, 'create')
-			) {
-				return new Connector($clientFactory->create($connector));
-			}
-		}
-
-		throw new DevicesModuleExceptions\TerminateException('Connector client is not configured');
-	}
+		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
+		Clients\IClient $client
+	): Connector;
 
 }

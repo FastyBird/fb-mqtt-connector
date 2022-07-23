@@ -31,8 +31,8 @@ interface IConsumer
 	/**
 	 * @param Entities\Messages\IEntity $entity
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public function consume(Entities\Messages\IEntity $entity): void;
+	public function consume(Entities\Messages\IEntity $entity): bool;
 
 }

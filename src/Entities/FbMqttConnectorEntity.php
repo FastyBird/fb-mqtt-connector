@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * FbMqttConnector.php
+ * FbMqttConnectorEntity.php
  *
  * @license        More in LICENSE.md
  * @copyright      https://www.fastybird.com
@@ -24,7 +24,7 @@ use FastyBird\Metadata\Types as MetadataTypes;
 /**
  * @ORM\Entity
  */
-class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector implements IFbMqttConnector
+class FbMqttConnectorEntity extends DevicesModuleEntities\Connectors\Connector implements IFbMqttConnectorEntity
 {
 
 	public const CONNECTOR_TYPE = 'fb-mqtt';
@@ -42,7 +42,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getServer(): string
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SERVER);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_SERVER);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -59,7 +59,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getPort(): int
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PORT);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PORT);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -76,7 +76,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getSecuredPort(): int
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_SECURED_PORT);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_SECURED_PORT);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -93,7 +93,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getUsername(): ?string
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_USERNAME);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_USERNAME);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -110,7 +110,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getPassword(): ?string
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PASSWORD);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PASSWORD);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty
@@ -127,7 +127,7 @@ class FbMqttConnector extends DevicesModuleEntities\Connectors\Connector impleme
 	 */
 	public function getVersion(): Types\ProtocolVersionType
 	{
-		$property = $this->findProperty(Types\ConnectorPropertyType::NAME_PROTOCOL_VERSION);
+		$property = $this->findProperty(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PROTOCOL_VERSION);
 
 		if (
 			!$property instanceof DevicesModuleEntities\Connectors\Properties\IStaticProperty

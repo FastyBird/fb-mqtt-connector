@@ -7,8 +7,8 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 	exit(1);
 }
 
-define('FB_TEMP_DIR', __DIR__ . '/tmp');
-define('FB_RESOURCES_DIR', __DIR__ . '/../resources');
+const FB_TEMP_DIR = __DIR__ . '/tmp';
+const FB_RESOURCES_DIR = __DIR__ . '/../resources';
 
 Tester\Environment::bypassFinals();
 
