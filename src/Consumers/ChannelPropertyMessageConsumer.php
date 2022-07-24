@@ -138,6 +138,9 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-message-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -153,8 +156,14 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				$this->logger->error(
 					sprintf('Devices channel "%s" is not registered', $entity->getChannel()),
 					[
-						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-message-consumer',
+						'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+						'type'    => 'device-message-consumer',
+						'device'  => [
+							'identifier' => $entity->getDevice(),
+						],
+						'channel' => [
+							'identifier' => $entity->getChannel(),
+						],
 					]
 				);
 
@@ -192,8 +201,17 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 					$this->logger->warning(
 						'States repository is not configured. State could not be fetched',
 						[
-							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'   => 'channel-property-message-consumer',
+							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+							'type'     => 'channel-property-message-consumer',
+							'device'   => [
+								'identifier' => $entity->getDevice(),
+							],
+							'channel'  => [
+								'identifier' => $entity->getChannel(),
+							],
+							'property' => [
+								'id' => $property->getId()->toString(),
+							],
 						]
 					);
 
@@ -240,8 +258,17 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 					$this->logger->warning(
 						'States manager is not configured. State could not be saved',
 						[
-							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'   => 'channel-property-message-consumer',
+							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+							'type'     => 'channel-property-message-consumer',
+							'device'   => [
+								'identifier' => $entity->getDevice(),
+							],
+							'channel'  => [
+								'identifier' => $entity->getChannel(),
+							],
+							'property' => [
+								'id' => $property->getId()->toString(),
+							],
 						]
 					);
 				}
@@ -261,6 +288,9 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'channel-property-message-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -273,8 +303,14 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				$this->logger->error(
 					sprintf('Device channel "%s" is not registered', $entity->getChannel()),
 					[
-						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'channel-property-message-consumer',
+						'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+						'type'    => 'channel-property-message-consumer',
+						'device'  => [
+							'identifier' => $entity->getDevice(),
+						],
+						'channel' => [
+							'identifier' => $entity->getChannel(),
+						],
 					]
 				);
 
@@ -287,8 +323,17 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				$this->logger->error(
 					sprintf('Property "%s" is not registered', $entity->getProperty()),
 					[
-						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'channel-property-message-consumer',
+						'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+						'type'     => 'channel-property-message-consumer',
+						'device'   => [
+							'identifier' => $entity->getDevice(),
+						],
+						'channel'  => [
+							'identifier' => $entity->getChannel(),
+						],
+						'property' => [
+							'identifier' => $entity->getProperty(),
+						],
 					]
 				);
 
@@ -303,6 +348,18 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				});
 			}
 		}
+
+		$this->logger->debug(
+			'Consumed channel property message',
+			[
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'channel-property-message-consumer',
+				'device' => [
+					'id' => $device->getId()->toString(),
+				],
+				'data'   => $entity->toArray(),
+			]
+		);
 
 		return true;
 	}

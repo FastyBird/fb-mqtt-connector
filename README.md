@@ -11,7 +11,7 @@
 
 ## What is FastyBird IoT MQTT connector?
 
-FB MQTT connector is a [FastyBird](https://www.fastybird.com) [IoT](https://en.wikipedia.org/wiki/Internet_of_things)
+FastyBird IoT MQTT connector is a [FastyBird](https://www.fastybird.com) [IoT](https://en.wikipedia.org/wiki/Internet_of_things)
 extension which is integrating [MQTT](https://mqtt.org) protocol
 via [FastyBird MQTT Convention](https://github.com/FastyBird/mqtt-convention) for connected devices
 
@@ -30,7 +30,7 @@ in [PHP](https://www.php.net) with [Nette framework](https://nette.org).
 
 ## Requirements
 
-[FastyBird](https://www.fastybird.com) FB MQTT connector is tested against PHP 8.1
+[FastyBird](https://www.fastybird.com) IoT MQTT connector is tested against PHP 8.1
 and [ReactPHP Socket](https://github.com/reactphp/socket) 1.11 async, streaming plaintext TCP/IP and secure TLS socket server and client connections
 and [Nette framework](https://nette.org/en/) 3.0 PHP framework for real programmers
 
@@ -52,7 +52,7 @@ marketplace section
 
 ## Documentation
 
-Learn how to consume & publish messages
+Learn how to connect and handle devices connected via MQTT protocol with FastyBird IoT Convention
 in [documentation](https://github.com/FastyBird/fb-mqtt-connector/blob/master/.docs/en/index.md).
 
 ## Feedback

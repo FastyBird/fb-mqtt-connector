@@ -133,6 +133,9 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-message-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -160,6 +163,9 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-message-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -194,6 +200,18 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 				}
 			});
 		}
+
+		$this->logger->debug(
+			'Consumed device message',
+			[
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'device-message-consumer',
+				'device' => [
+					'id' => $device->getId()->toString(),
+				],
+				'data'   => $entity->toArray(),
+			]
+		);
 
 		return true;
 	}

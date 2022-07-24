@@ -132,6 +132,9 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-message-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -171,6 +174,12 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 						[
 							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'   => 'device-property-consumer',
+							'device'   => [
+								'identifier' => $entity->getDevice(),
+							],
+							'property' => [
+								'id' => $property->getId()->toString(),
+							],
 						]
 					);
 
@@ -219,6 +228,12 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 						[
 							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'   => 'device-property-consumer',
+							'device'   => [
+								'identifier' => $entity->getDevice(),
+							],
+							'property' => [
+								'id' => $property->getId()->toString(),
+							],
 						]
 					);
 				}
@@ -238,6 +253,9 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-property-consumer',
+						'device' => [
+							'identifier' => $entity->getDevice(),
+						],
 					]
 				);
 
@@ -252,6 +270,12 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'   => 'device-property-consumer',
+						'device'   => [
+							'identifier' => $entity->getDevice(),
+						],
+						'property' => [
+							'identifier' => $entity->getProperty(),
+						],
 					]
 				);
 
@@ -268,6 +292,18 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 				});
 			}
 		}
+
+		$this->logger->debug(
+			'Consumed channel property message',
+			[
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'device-property-message-consumer',
+				'device' => [
+					'id' => $device->getId()->toString(),
+				],
+				'data'   => $entity->toArray(),
+			]
+		);
 
 		return true;
 	}

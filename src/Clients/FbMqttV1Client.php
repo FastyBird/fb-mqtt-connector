@@ -527,7 +527,7 @@ final class FbMqttV1Client extends Client
 
 			} catch (Exceptions\ParseMessageException $ex) {
 				$this->logger->debug(
-					'Received message could not be successfully parsed to entity.',
+					'Received message could not be successfully parsed to entity',
 					[
 						'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 						'type'      => 'client',

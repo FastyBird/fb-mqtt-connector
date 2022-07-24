@@ -183,7 +183,7 @@ abstract class Client implements IClient
 
 		if ($this->isConnected || $this->isConnecting) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is already connected.'));
+			$promise = Promise\reject(new Exceptions\LogicException('The client is already connected'));
 
 			return $promise;
 		}
@@ -305,7 +305,7 @@ abstract class Client implements IClient
 	{
 		if (!$this->isConnected || $this->isDisconnecting || $this->connection === null) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected.'));
+			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
 
 			return $promise;
 		}
@@ -363,7 +363,7 @@ abstract class Client implements IClient
 	{
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected.'));
+			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
 
 			return $promise;
 		}
@@ -378,7 +378,7 @@ abstract class Client implements IClient
 	{
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected.'));
+			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
 
 			return $promise;
 		}
@@ -412,7 +412,7 @@ abstract class Client implements IClient
 
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected.'));
+			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
 
 			return $promise;
 		}
@@ -636,7 +636,7 @@ abstract class Client implements IClient
 		$timer = $this->eventLoop->addTimer(
 			$timeout,
 			static function () use ($deferred, $timeout, &$future): void {
-				$exception = new Exceptions\RuntimeException(sprintf('Connection timed out after %d seconds.', $timeout));
+				$exception = new Exceptions\RuntimeException(sprintf('Connection timed out after %d seconds', $timeout));
 				$deferred->reject($exception);
 
 				/** @phpstan-ignore-next-line */
@@ -696,7 +696,7 @@ abstract class Client implements IClient
 		$responseTimer = $this->eventLoop->addTimer(
 			$timeout,
 			static function () use ($deferred, $timeout): void {
-				$exception = new Exceptions\RuntimeException(sprintf('No response after %d seconds.', $timeout));
+				$exception = new Exceptions\RuntimeException(sprintf('No response after %d seconds', $timeout));
 				$deferred->reject($exception);
 			}
 		);
@@ -765,7 +765,7 @@ abstract class Client implements IClient
 		switch ($packet->getPacketType()) {
 			case Mqtt\Packet::TYPE_PUBLISH:
 				if (!($packet instanceof Mqtt\Packet\PublishRequestPacket)) {
-					throw new Exceptions\RuntimeException(sprintf('Expected %s but got %s.', Mqtt\Packet\PublishRequestPacket::class, get_class($packet)));
+					throw new Exceptions\RuntimeException(sprintf('Expected %s but got %s', Mqtt\Packet\PublishRequestPacket::class, get_class($packet)));
 				}
 
 				$message = new Mqtt\DefaultMessage(
@@ -802,7 +802,7 @@ abstract class Client implements IClient
 
 				if (!$flowFound) {
 					$this->onWarning(
-						new Exceptions\LogicException(sprintf('Received unexpected packet of type %d.', $packet->getPacketType()))
+						new Exceptions\LogicException(sprintf('Received unexpected packet of type %d', $packet->getPacketType()))
 					);
 				}
 
@@ -810,7 +810,7 @@ abstract class Client implements IClient
 
 			default:
 				$this->onWarning(
-					new Exceptions\LogicException(sprintf('Cannot handle packet of type %d.', $packet->getPacketType()))
+					new Exceptions\LogicException(sprintf('Cannot handle packet of type %d', $packet->getPacketType()))
 				);
 		}
 	}

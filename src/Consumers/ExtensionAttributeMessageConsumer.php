@@ -105,6 +105,9 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'   => 'extension-attribute-message-consumer',
+					'device' => [
+						'identifier' => $entity->getDevice(),
+					],
 				]
 			);
 
@@ -170,6 +173,12 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'   => 'extension-attribute-message-consumer',
+					'device' => [
+						'identifier' => $entity->getDevice(),
+					],
+					'attribute' => [
+						'identifier' => $entity->getParameter(),
+					],
 				]
 			);
 
@@ -183,6 +192,18 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 
 			$this->attributesManager->update($attribute, Utils\ArrayHash::from($toUpdate));
 		});
+
+		$this->logger->debug(
+			'Consumed extension attribute message',
+			[
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'extension-attribute-message-consumer',
+				'device' => [
+					'id' => $device->getId()->toString(),
+				],
+				'data'   => $entity->toArray(),
+			]
+		);
 
 		return true;
 	}

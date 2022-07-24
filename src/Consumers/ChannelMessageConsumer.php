@@ -111,6 +111,9 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'   => 'channel-message-consumer',
+					'device' => [
+						'identifier' => $entity->getDevice(),
+					],
 				]
 			);
 
@@ -125,6 +128,12 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 					'type'   => 'channel-message-consumer',
+					'device' => [
+						'identifier' => $entity->getDevice(),
+					],
+					'channel' => [
+						'identifier' => $entity->getChannel(),
+					],
 				]
 			);
 
@@ -150,6 +159,18 @@ final class ChannelMessageConsumer implements Consumers\IConsumer
 				$this->channelsManager->update($channel, Utils\ArrayHash::from($toUpdate));
 			}
 		});
+
+		$this->logger->debug(
+			'Consumed channel message',
+			[
+				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+				'type'   => 'channel-message-consumer',
+				'device' => [
+					'id' => $device->getId()->toString(),
+				],
+				'data'   => $entity->toArray(),
+			]
+		);
 
 		return true;
 	}
