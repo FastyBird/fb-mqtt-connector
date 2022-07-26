@@ -125,9 +125,9 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 		}
 
 		if ($entity->getAttribute() === Entities\Messages\AttributeEntity::STATE) {
-			$device = $this->deviceDataStorageRepository->findByIdentifier($entity->getConnector(), $entity->getDevice());
+			$deviceItem = $this->deviceDataStorageRepository->findByIdentifier($entity->getConnector(), $entity->getDevice());
 
-			if ($device === null) {
+			if ($deviceItem === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
@@ -144,7 +144,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 
 			if (MetadataTypes\ConnectionStateType::isValidValue($entity->getValue())) {
 				$this->deviceConnectionStateManager->setState(
-					$device,
+					$deviceItem,
 					MetadataTypes\ConnectionStateType::get($entity->getValue())
 				);
 			}
@@ -207,7 +207,7 @@ final class DeviceMessageConsumer implements Consumers\IConsumer
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 				'type'   => 'device-message-consumer',
 				'device' => [
-					'id' => $device->getId()->toString(),
+					'identifier' => $entity->getDevice(),
 				],
 				'data'   => $entity->toArray(),
 			]

@@ -121,12 +121,12 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 		}
 
 		if ($entity->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
-			$device = $this->devicesDataStorageRepository->findByIdentifier(
+			$deviceItem = $this->devicesDataStorageRepository->findByIdentifier(
 				$entity->getConnector(),
 				$entity->getDevice()
 			);
 
-			if ($device === null) {
+			if ($deviceItem === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
@@ -141,17 +141,17 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 				return true;
 			}
 
-			$property = $this->propertiesDataStorageRepository->findByIdentifier(
-				$device->getId(),
+			$propertyItem = $this->propertiesDataStorageRepository->findByIdentifier(
+				$deviceItem->getId(),
 				$entity->getProperty()
 			);
 
-			if ($property instanceof Metadata\Entities\Modules\DevicesModule\IDeviceStaticPropertyEntity) {
+			if ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IDeviceStaticPropertyEntity) {
 				/** @var DevicesModuleEntities\Devices\Properties\IProperty $property */
 				$property = $this->databaseHelper->query(
-					function () use ($property): ?DevicesModuleEntities\Devices\Properties\IProperty {
+					function () use ($propertyItem): ?DevicesModuleEntities\Devices\Properties\IProperty {
 						$findPropertyQuery = new DevicesModuleQueries\FindDevicePropertiesQuery();
-						$findPropertyQuery->byId($property->getId());
+						$findPropertyQuery->byId($propertyItem->getId());
 
 						return $this->propertiesRepository->findOneBy($findPropertyQuery);
 					}
@@ -164,9 +164,9 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 						]));
 					});
 				}
-			} elseif ($property instanceof Metadata\Entities\Modules\DevicesModule\IDeviceDynamicPropertyEntity) {
+			} elseif ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IDeviceDynamicPropertyEntity) {
 				try {
-					$propertyState = $this->propertyStateRepository->findOne($property);
+					$propertyState = $this->propertyStateRepository->findOne($propertyItem);
 
 				} catch (DevicesModuleExceptions\NotImplementedException) {
 					$this->logger->warning(
@@ -175,10 +175,10 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'   => 'device-property-consumer',
 							'device'   => [
-								'identifier' => $entity->getDevice(),
+								'id' => $deviceItem->getId()->toString(),
 							],
 							'property' => [
-								'id' => $property->getId()->toString(),
+								'id' => $propertyItem->getId()->toString(),
 							],
 						]
 					);
@@ -188,10 +188,10 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 
 				$actualValue = DevicesModuleUtilities\ValueHelper::flattenValue(
 					DevicesModuleUtilities\ValueHelper::normalizeValue(
-						$property->getDataType(),
+						$propertyItem->getDataType(),
 						$entity->getValue(),
-						$property->getFormat(),
-						$property->getInvalid()
+						$propertyItem->getFormat(),
+						$propertyItem->getInvalid()
 					)
 				);
 
@@ -200,9 +200,9 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 					if ($propertyState === null) {
 						// ...create state in storage
 						$this->propertiesStatesManager->create(
-							$property,
+							$propertyItem,
 							Utils\ArrayHash::from(array_merge(
-								$property->toArray(),
+								$propertyItem->toArray(),
 								[
 									'actualValue'   => $actualValue,
 									'expectedValue' => null,
@@ -214,7 +214,7 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 
 					} else {
 						$this->propertiesStatesManager->update(
-							$property,
+							$propertyItem,
 							$propertyState,
 							Utils\ArrayHash::from([
 								'actualValue' => $actualValue,
@@ -229,10 +229,10 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'   => 'device-property-consumer',
 							'device'   => [
-								'identifier' => $entity->getDevice(),
+								'id' => $deviceItem->getId()->toString(),
 							],
 							'property' => [
-								'id' => $property->getId()->toString(),
+								'id' => $propertyItem->getId()->toString(),
 							],
 						]
 					);
@@ -299,7 +299,7 @@ final class DevicePropertyMessageConsumer implements Consumers\IConsumer
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 				'type'   => 'device-property-message-consumer',
 				'device' => [
-					'id' => $device->getId()->toString(),
+					'identifier' => $entity->getDevice(),
 				],
 				'data'   => $entity->toArray(),
 			]

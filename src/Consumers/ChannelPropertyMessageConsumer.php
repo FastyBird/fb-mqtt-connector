@@ -127,12 +127,12 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 		}
 
 		if ($entity->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
-			$device = $this->devicesDataStorageRepository->findByIdentifier(
+			$deviceItem = $this->devicesDataStorageRepository->findByIdentifier(
 				$entity->getConnector(),
 				$entity->getDevice()
 			);
 
-			if ($device === null) {
+			if ($deviceItem === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
@@ -147,12 +147,12 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				return true;
 			}
 
-			$channel = $this->channelsDataStorageRepository->findByIdentifier(
-				$device->getId(),
+			$channelItem = $this->channelsDataStorageRepository->findByIdentifier(
+				$deviceItem->getId(),
 				$entity->getChannel()
 			);
 
-			if ($channel === null) {
+			if ($channelItem === null) {
 				$this->logger->error(
 					sprintf('Devices channel "%s" is not registered', $entity->getChannel()),
 					[
@@ -170,17 +170,17 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				return true;
 			}
 
-			$property = $this->propertiesDataStorageRepository->findByIdentifier(
-				$channel->getId(),
+			$propertyItem = $this->propertiesDataStorageRepository->findByIdentifier(
+				$channelItem->getId(),
 				$entity->getProperty()
 			);
 
-			if ($property instanceof Metadata\Entities\Modules\DevicesModule\IChannelStaticPropertyEntity) {
+			if ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IChannelStaticPropertyEntity) {
 				/** @var DevicesModuleEntities\Channels\Properties\IProperty $property */
 				$property = $this->databaseHelper->query(
-					function () use ($property): ?DevicesModuleEntities\Channels\Properties\IProperty {
+					function () use ($propertyItem): ?DevicesModuleEntities\Channels\Properties\IProperty {
 						$findPropertyQuery = new DevicesModuleQueries\FindChannelPropertiesQuery();
-						$findPropertyQuery->byId($property->getId());
+						$findPropertyQuery->byId($propertyItem->getId());
 
 						return $this->propertiesRepository->findOneBy($findPropertyQuery);
 					}
@@ -193,9 +193,9 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 						]));
 					}
 				);
-			} elseif ($property instanceof Metadata\Entities\Modules\DevicesModule\IChannelDynamicPropertyEntity) {
+			} elseif ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IChannelDynamicPropertyEntity) {
 				try {
-					$propertyState = $this->propertyStateRepository->findOne($property);
+					$propertyState = $this->propertyStateRepository->findOne($propertyItem);
 
 				} catch (DevicesModuleExceptions\NotImplementedException) {
 					$this->logger->warning(
@@ -204,13 +204,13 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'     => 'channel-property-message-consumer',
 							'device'   => [
-								'identifier' => $entity->getDevice(),
+								'id' => $deviceItem->getId()->toString(),
 							],
 							'channel'  => [
-								'identifier' => $entity->getChannel(),
+								'id' => $channelItem->getId()->toString(),
 							],
 							'property' => [
-								'id' => $property->getId()->toString(),
+								'id' => $propertyItem->getId()->toString(),
 							],
 						]
 					);
@@ -220,10 +220,10 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 
 				$actualValue = DevicesModuleUtilities\ValueHelper::flattenValue(
 					DevicesModuleUtilities\ValueHelper::normalizeValue(
-						$property->getDataType(),
+						$propertyItem->getDataType(),
 						$entity->getValue(),
-						$property->getFormat(),
-						$property->getInvalid()
+						$propertyItem->getFormat(),
+						$propertyItem->getInvalid()
 					)
 				);
 
@@ -232,9 +232,9 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 					if ($propertyState === null) {
 						// ...create state in storage
 						$this->propertiesStatesManager->create(
-							$property,
+							$propertyItem,
 							Utils\ArrayHash::from(array_merge(
-								$property->toArray(),
+								$propertyItem->toArray(),
 								[
 									'actualValue'   => $actualValue,
 									'expectedValue' => null,
@@ -246,7 +246,7 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 
 					} else {
 						$this->propertiesStatesManager->update(
-							$property,
+							$propertyItem,
 							$propertyState,
 							Utils\ArrayHash::from([
 								'actualValue' => $actualValue,
@@ -261,13 +261,13 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 							'type'     => 'channel-property-message-consumer',
 							'device'   => [
-								'identifier' => $entity->getDevice(),
+								'id' => $deviceItem->getId()->toString(),
 							],
 							'channel'  => [
-								'identifier' => $entity->getChannel(),
+								'id' => $channelItem->getId()->toString(),
 							],
 							'property' => [
-								'id' => $property->getId()->toString(),
+								'id' => $propertyItem->getId()->toString(),
 							],
 						]
 					);
@@ -355,7 +355,7 @@ final class ChannelPropertyMessageConsumer implements Consumers\IConsumer
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
 				'type'   => 'channel-property-message-consumer',
 				'device' => [
-					'id' => $device->getId()->toString(),
+					'identifier' => $entity->getDevice(),
 				],
 				'data'   => $entity->toArray(),
 			]
