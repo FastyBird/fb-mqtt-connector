@@ -129,6 +129,7 @@ final class FbMqttV1Client extends Client
 		API\V1Validator $apiValidator,
 		API\V1Parser $apiParser,
 		API\V1Builder $apiBuilder,
+		Helpers\ConnectorHelper $connectorHelper,
 		Helpers\PropertyHelper $propertyStateHelper,
 		Consumers\Consumer $consumer,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
@@ -149,6 +150,7 @@ final class FbMqttV1Client extends Client
 		parent::__construct(
 			$connector,
 			$connectorPropertiesRepository,
+			$connectorHelper,
 			$consumer,
 			$loop,
 			$identifierGenerator,

@@ -21,6 +21,7 @@ use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
@@ -87,6 +88,9 @@ abstract class Client implements IClient
 	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
 	protected DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
 
+	/** @var Helpers\ConnectorHelper */
+	protected Helpers\ConnectorHelper $connectorHelper;
+
 	/** @var Consumers\Consumer */
 	protected Consumers\Consumer $consumer;
 
@@ -114,6 +118,7 @@ abstract class Client implements IClient
 	/**
 	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
+	 * @param Helpers\ConnectorHelper $connectorHelper
 	 * @param Consumers\Consumer $consumer
 	 * @param EventLoop\LoopInterface $eventLoop
 	 * @param Mqtt\ClientIdentifierGenerator|null $identifierGenerator
@@ -124,6 +129,7 @@ abstract class Client implements IClient
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
+		Helpers\ConnectorHelper $connectorHelper,
 		Consumers\Consumer $consumer,
 		EventLoop\LoopInterface $eventLoop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
@@ -133,6 +139,7 @@ abstract class Client implements IClient
 	) {
 		$this->connector = $connector;
 		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
+		$this->connectorHelper = $connectorHelper;
 		$this->consumer = $consumer;
 		$this->eventLoop = $eventLoop;
 
@@ -193,65 +200,29 @@ abstract class Client implements IClient
 		$this->isConnecting = true;
 		$this->isConnected = false;
 
-		$usernameProperty = $this->connectorPropertiesRepository->findByIdentifier(
+		$username = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::IDENTIFIER_USERNAME
+			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_USERNAME)
 		);
 
-		if (
-			$usernameProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			&& is_string($usernameProperty->getValue())
-		) {
-			$username = $usernameProperty->getValue();
-		} else {
-			$username = '';
-		}
-
-		$passwordProperty = $this->connectorPropertiesRepository->findByIdentifier(
+		$password = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::IDENTIFIER_PASSWORD
+			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PASSWORD)
 		);
 
-		if (
-			$passwordProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			&& is_string($passwordProperty->getValue())
-		) {
-			$password = $passwordProperty->getValue();
-		} else {
-			$password = '';
-		}
-
-		$serverProperty = $this->connectorPropertiesRepository->findByIdentifier(
+		$server = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::IDENTIFIER_SERVER
+			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_SERVER)
 		);
 
-		if (
-			$serverProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			&& is_string($serverProperty->getValue())
-		) {
-			$server = $serverProperty->getValue();
-		} else {
-			$server = FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
-		}
-
-		$portProperty = $this->connectorPropertiesRepository->findByIdentifier(
+		$port = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::IDENTIFIER_PORT
+			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PORT)
 		);
-
-		if (
-			$portProperty instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity
-			&& is_int($portProperty->getValue())
-		) {
-			$port = $portProperty->getValue();
-		} else {
-			$port = FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
-		}
 
 		$connection = new Mqtt\DefaultConnection(
-			$username,
-			$password,
+			is_string($username) ? $username : '',
+			is_string($password) ? $password : '',
 			null,
 			$this->connector->getId()->toString(),
 		);
@@ -260,7 +231,7 @@ abstract class Client implements IClient
 			$connection = $connection->withClientID($this->identifierGenerator->generateClientIdentifier());
 		}
 
-		$this->establishConnection($server, $port, $timeout)
+		$this->establishConnection(strval($server), intval($port), $timeout)
 			->then(function (Stream\DuplexStreamInterface $stream) use ($connection, $deferred, $timeout): void {
 				$this->stream = $stream;
 

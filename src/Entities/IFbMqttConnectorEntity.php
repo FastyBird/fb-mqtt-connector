@@ -16,7 +16,6 @@
 namespace FastyBird\FbMqttConnector\Entities;
 
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
-use FastyBird\FbMqttConnector\Types;
 
 /**
  * FastyBird MQTT connector entity interface
@@ -28,35 +27,5 @@ use FastyBird\FbMqttConnector\Types;
  */
 interface IFbMqttConnectorEntity extends DevicesModuleEntities\Connectors\IConnector
 {
-
-	/**
-	 * @return string
-	 */
-	public function getServer(): string;
-
-	/**
-	 * @return int
-	 */
-	public function getPort(): int;
-
-	/**
-	 * @return int
-	 */
-	public function getSecuredPort(): int;
-
-	/**
-	 * @return string|null
-	 */
-	public function getUsername(): ?string;
-
-	/**
-	 * @return string|null
-	 */
-	public function getPassword(): ?string;
-
-	/**
-	 * @return Types\ProtocolVersionType
-	 */
-	public function getVersion(): Types\ProtocolVersionType;
 
 }
