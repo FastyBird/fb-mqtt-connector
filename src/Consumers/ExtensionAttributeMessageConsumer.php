@@ -44,9 +44,6 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 	/** @var DevicesModuleModels\Devices\IDevicesRepository */
 	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
 
-	/** @var DevicesModuleModels\Devices\Attributes\IAttributesRepository */
-	private DevicesModuleModels\Devices\Attributes\IAttributesRepository $attributesRepository;
-
 	/** @var DevicesModuleModels\Devices\Attributes\IAttributesManager */
 	private DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager;
 
@@ -58,20 +55,17 @@ final class ExtensionAttributeMessageConsumer implements Consumers\IConsumer
 
 	/**
 	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
-	 * @param DevicesModuleModels\Devices\Attributes\IAttributesRepository $attributesRepository
 	 * @param DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager
 	 * @param Helpers\DatabaseHelper $databaseHelper
 	 * @param Log\LoggerInterface|null $logger
 	 */
 	public function __construct(
 		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Devices\Attributes\IAttributesRepository $attributesRepository,
 		DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager,
 		Helpers\DatabaseHelper $databaseHelper,
 		?Log\LoggerInterface $logger = null
 	) {
 		$this->deviceRepository = $deviceRepository;
-		$this->attributesRepository = $attributesRepository;
 		$this->attributesManager = $attributesManager;
 
 		$this->databaseHelper = $databaseHelper;

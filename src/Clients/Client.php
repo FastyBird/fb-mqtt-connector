@@ -119,6 +119,7 @@ abstract class Client implements IClient
 	 * @param Mqtt\ClientIdentifierGenerator|null $identifierGenerator
 	 * @param Mqtt\FlowFactory|null $flowFactory
 	 * @param Mqtt\StreamParser|null $parser
+	 * @param Log\LoggerInterface|null $logger
 	 */
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
@@ -127,7 +128,8 @@ abstract class Client implements IClient
 		EventLoop\LoopInterface $eventLoop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
-		?Mqtt\StreamParser $parser = null
+		?Mqtt\StreamParser $parser = null,
+		?Log\LoggerInterface $logger = null
 	) {
 		$this->connector = $connector;
 		$this->connectorPropertiesRepository = $connectorPropertiesRepository;
@@ -988,27 +990,45 @@ abstract class Client implements IClient
 						break;
 
 					case 'connect':
-						$this->onConnect($flow->getResult());
+						/** @var Mqtt\Connection $result */
+						$result = $flow->getResult();
+
+						$this->onConnect($result);
 						break;
 
 					case 'disconnect':
-						$this->onDisconnect($flow->getResult());
+						/** @var Mqtt\Connection $result */
+						$result = $flow->getResult();
+
+						$this->onDisconnect($result);
 						break;
 
 					case 'message':
-						$this->onMessage($flow->getResult());
+						/** @var Mqtt\Message $result */
+						$result = $flow->getResult();
+
+						$this->onMessage($result);
 						break;
 
 					case 'publish':
-						$this->onPublish($flow->getResult());
+						/** @var Mqtt\Message $result */
+						$result = $flow->getResult();
+
+						$this->onPublish($result);
 						break;
 
 					case 'subscribe':
-						$this->onSubscribe($flow->getResult());
+						/** @var Mqtt\Subscription $result */
+						$result = $flow->getResult();
+
+						$this->onSubscribe($result);
 						break;
 
 					case 'unsubscribe':
-						$this->onUnsubscribe($flow->getResult());
+						/** @var Mqtt\Subscription[] $result */
+						$result = $flow->getResult();
+
+						$this->onUnsubscribe($result);
 						break;
 				}
 			}

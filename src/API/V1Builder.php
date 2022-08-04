@@ -101,13 +101,13 @@ final class V1Builder
 
 	/**
 	 * @param MetadataEntities\Modules\DevicesModule\IDeviceEntity $device
-	 * @param MetadataEntities\Modules\DevicesModule\IDeviceDynamicPropertyEntity|MetadataEntities\Modules\DevicesModule\IDeviceMappedPropertyEntity $property
+	 * @param MetadataEntities\Modules\DevicesModule\IDeviceDynamicPropertyEntity $property
 	 *
 	 * @return string
 	 */
 	public function buildDevicePropertyTopic(
 		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
-		MetadataEntities\Modules\DevicesModule\IDeviceMappedPropertyEntity|MetadataEntities\Modules\DevicesModule\IDeviceDynamicPropertyEntity $property
+		MetadataEntities\Modules\DevicesModule\IDeviceDynamicPropertyEntity $property
 	): string {
 		$topic = self::DEVICE_PROPERTY_TOPIC;
 		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);
@@ -128,14 +128,14 @@ final class V1Builder
 	/**
 	 * @param MetadataEntities\Modules\DevicesModule\IDeviceEntity $device
 	 * @param MetadataEntities\Modules\DevicesModule\IChannelEntity $channel
-	 * @param MetadataEntities\Modules\DevicesModule\IChannelDynamicPropertyEntity|MetadataEntities\Modules\DevicesModule\IChannelMappedPropertyEntity $property
+	 * @param MetadataEntities\Modules\DevicesModule\IChannelDynamicPropertyEntity $property
 	 *
 	 * @return string
 	 */
 	public function buildChannelPropertyTopic(
 		MetadataEntities\Modules\DevicesModule\IDeviceEntity $device,
 		MetadataEntities\Modules\DevicesModule\IChannelEntity $channel,
-		MetadataEntities\Modules\DevicesModule\IChannelMappedPropertyEntity|MetadataEntities\Modules\DevicesModule\IChannelDynamicPropertyEntity $property
+		MetadataEntities\Modules\DevicesModule\IChannelDynamicPropertyEntity $property
 	): string {
 		$topic = self::CHANNEL_PROPERTY_TOPIC;
 		$topic = str_replace(self::DEVICE_REPLACE_STRING, $device->getIdentifier(), $topic);

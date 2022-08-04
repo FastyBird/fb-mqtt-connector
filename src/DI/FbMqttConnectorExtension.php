@@ -147,6 +147,9 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		// Helpers
 		$builder->addDefinition($this->prefix('helpers.database'), new DI\Definitions\ServiceDefinition())
 			->setType(Helpers\DatabaseHelper::class);
+
+		$builder->addDefinition($this->prefix('helpers.property'), new DI\Definitions\ServiceDefinition())
+			->setType(Helpers\PropertyHelper::class);
 	}
 
 	/**
