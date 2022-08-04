@@ -79,7 +79,7 @@ final class ConnectorHelper
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifierType::IDENTIFIER_PROTOCOL_VERSION) {
-				return Types\ProtocolVersionType::isValidValue($type->getValue()) ? $configuration->getValue() : null;
+				return Types\ProtocolVersionType::isValidValue($configuration->getValue()) ? $configuration->getValue() : null;
 			}
 
 			return $configuration->getValue();
