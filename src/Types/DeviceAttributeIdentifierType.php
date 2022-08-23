@@ -32,13 +32,13 @@ class DeviceAttributeIdentifierType extends Consistence\Enum\Enum
 	/**
 	 * Define device states
 	 */
-	public const IDENTIFIER_HARDWARE_MAC_ADDRESS = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MAC_ADDRESS;
-	public const IDENTIFIER_HARDWARE_MANUFACTURER = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MANUFACTURER;
-	public const IDENTIFIER_HARDWARE_MODEL = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_MODEL;
-	public const IDENTIFIER_HARDWARE_VERSION = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_HARDWARE_VERSION;
-	public const IDENTIFIER_FIRMWARE_MANUFACTURER = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_MANUFACTURER;
-	public const IDENTIFIER_FIRMWARE_NAME = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_NAME;
-	public const IDENTIFIER_FIRMWARE_VERSION = MetadataTypes\DeviceAttributeNameType::ATTRIBUTE_FIRMWARE_VERSION;
+	public const IDENTIFIER_HARDWARE_MAC_ADDRESS = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MAC_ADDRESS;
+	public const IDENTIFIER_HARDWARE_MANUFACTURER = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MANUFACTURER;
+	public const IDENTIFIER_HARDWARE_MODEL = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_MODEL;
+	public const IDENTIFIER_HARDWARE_VERSION = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_HARDWARE_VERSION;
+	public const IDENTIFIER_FIRMWARE_MANUFACTURER = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_MANUFACTURER;
+	public const IDENTIFIER_FIRMWARE_NAME = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_NAME;
+	public const IDENTIFIER_FIRMWARE_VERSION = MetadataTypes\DeviceAttributeIdentifierType::IDENTIFIER_FIRMWARE_VERSION;
 
 	/**
 	 * @return string
