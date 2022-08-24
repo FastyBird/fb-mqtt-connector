@@ -107,6 +107,7 @@ final class FbMqttV1Client extends Client
 	 * @param API\V1Validator $apiValidator
 	 * @param API\V1Parser $apiParser
 	 * @param API\V1Builder $apiBuilder
+	 * @param Helpers\ConnectorHelper $connectorHelper
 	 * @param Helpers\PropertyHelper $propertyStateHelper
 	 * @param Consumers\Consumer $consumer
 	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository

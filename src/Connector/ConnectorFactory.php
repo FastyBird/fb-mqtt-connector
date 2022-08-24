@@ -16,7 +16,6 @@
 namespace FastyBird\FbMqttConnector\Connector;
 
 use FastyBird\FbMqttConnector\Clients;
-use FastyBird\Metadata\Entities as MetadataEntities;
 
 /**
  * Connector service factory
@@ -30,13 +29,11 @@ interface ConnectorFactory
 {
 
 	/**
-	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	 * @param Clients\IClient $client
 	 *
 	 * @return Connector
 	 */
 	public function create(
-		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		Clients\IClient $client
 	): Connector;
 
