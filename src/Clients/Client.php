@@ -53,10 +53,12 @@ use Throwable;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-abstract class Client implements IClient
+abstract class Client
 {
 
 	use Nette\SmartObject;
+
+	private const HANDLER_PROCESSING_INTERVAL = 0.01;
 
 	/** @var bool */
 	protected bool $isConnected = false;
@@ -82,17 +84,20 @@ abstract class Client implements IClient
 	/** @var Flow|null */
 	protected ?Flow $writtenFlow = null;
 
+	/** @var EventLoop\TimerInterface|null */
+	protected ?EventLoop\TimerInterface $handlerTimer;
+
 	/** @var MetadataEntities\Modules\DevicesModule\IConnectorEntity */
 	protected MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector;
 
 	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
 	protected DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository;
 
-	/** @var Helpers\ConnectorHelper */
-	protected Helpers\ConnectorHelper $connectorHelper;
+	/** @var Helpers\Connector */
+	protected Helpers\Connector $connectorHelper;
 
-	/** @var Consumers\Consumer */
-	protected Consumers\Consumer $consumer;
+	/** @var Consumers\Messages */
+	protected Consumers\Messages $consumer;
 
 	/** @var EventLoop\LoopInterface */
 	protected EventLoop\LoopInterface $eventLoop;
@@ -118,8 +123,8 @@ abstract class Client implements IClient
 	/**
 	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
-	 * @param Helpers\ConnectorHelper $connectorHelper
-	 * @param Consumers\Consumer $consumer
+	 * @param Helpers\Connector $connectorHelper
+	 * @param Consumers\Messages $consumer
 	 * @param EventLoop\LoopInterface $eventLoop
 	 * @param Mqtt\ClientIdentifierGenerator|null $identifierGenerator
 	 * @param Mqtt\FlowFactory|null $flowFactory
@@ -129,8 +134,8 @@ abstract class Client implements IClient
 	public function __construct(
 		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector,
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
-		Helpers\ConnectorHelper $connectorHelper,
-		Consumers\Consumer $consumer,
+		Helpers\Connector $connectorHelper,
+		Consumers\Messages $consumer,
 		EventLoop\LoopInterface $eventLoop,
 		?Mqtt\ClientIdentifierGenerator $identifierGenerator = null,
 		?Mqtt\FlowFactory $flowFactory = null,
@@ -176,7 +181,7 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return bool
 	 */
 	public function isConnected(): bool
 	{
@@ -184,7 +189,11 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Connects to a broker
+	 *
+	 * @param int $timeout
+	 *
+	 * @return Promise\ExtendedPromiseInterface
 	 */
 	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface
 	{
@@ -192,7 +201,7 @@ abstract class Client implements IClient
 
 		if ($this->isConnected || $this->isConnecting) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is already connected'));
+			$promise = Promise\reject(new Exceptions\Logic('The client is already connected'));
 
 			return $promise;
 		}
@@ -202,22 +211,22 @@ abstract class Client implements IClient
 
 		$username = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_USERNAME)
+			Types\ConnectorPropertyIdentifier::get(Types\ConnectorPropertyIdentifier::IDENTIFIER_USERNAME)
 		);
 
 		$password = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PASSWORD)
+			Types\ConnectorPropertyIdentifier::get(Types\ConnectorPropertyIdentifier::IDENTIFIER_PASSWORD)
 		);
 
 		$server = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_SERVER)
+			Types\ConnectorPropertyIdentifier::get(Types\ConnectorPropertyIdentifier::IDENTIFIER_SERVER)
 		);
 
 		$port = $this->connectorHelper->getConfiguration(
 			$this->connector->getId(),
-			Types\ConnectorPropertyIdentifierType::get(Types\ConnectorPropertyIdentifierType::IDENTIFIER_PORT)
+			Types\ConnectorPropertyIdentifier::get(Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT)
 		);
 
 		$connection = new Mqtt\DefaultConnection(
@@ -272,13 +281,17 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Disconnects from a broker
+	 *
+	 * @param int $timeout
+	 *
+	 * @return Promise\ExtendedPromiseInterface
 	 */
 	public function disconnect(int $timeout = 5): Promise\ExtendedPromiseInterface
 	{
 		if (!$this->isConnected || $this->isDisconnecting || $this->connection === null) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
+			$promise = Promise\reject(new Exceptions\Logic('The client is not connected'));
 
 			return $promise;
 		}
@@ -330,13 +343,17 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Subscribes to a topic filter
+	 *
+	 * @param Mqtt\Subscription $subscription
+	 *
+	 * @return Promise\ExtendedPromiseInterface
 	 */
 	public function subscribe(Mqtt\Subscription $subscription): Promise\ExtendedPromiseInterface
 	{
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
+			$promise = Promise\reject(new Exceptions\Logic('The client is not connected'));
 
 			return $promise;
 		}
@@ -345,13 +362,17 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Unsubscribes from a topic filter
+	 *
+	 * @param Mqtt\Subscription $subscription
+	 *
+	 * @return Promise\ExtendedPromiseInterface
 	 */
 	public function unsubscribe(Mqtt\Subscription $subscription): Promise\ExtendedPromiseInterface
 	{
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
+			$promise = Promise\reject(new Exceptions\Logic('The client is not connected'));
 
 			return $promise;
 		}
@@ -373,7 +394,12 @@ abstract class Client implements IClient
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @param string $topic
+	 * @param string|null $payload
+	 * @param int $qos
+	 * @param bool $retain
+	 *
+	 * @return Promise\ExtendedPromiseInterface
 	 */
 	public function publish(
 		string $topic,
@@ -385,7 +411,7 @@ abstract class Client implements IClient
 
 		if (!$this->isConnected) {
 			/** @var Promise\ExtendedPromiseInterface $promise */
-			$promise = Promise\reject(new Exceptions\LogicException('The client is not connected'));
+			$promise = Promise\reject(new Exceptions\Logic('The client is not connected'));
 
 			return $promise;
 		}
@@ -437,6 +463,10 @@ abstract class Client implements IClient
 			]
 		);
 
+		if ($this->handlerTimer !== null) {
+			$this->eventLoop->cancelTimer($this->handlerTimer);
+		}
+
 		$this->eventLoop->stop();
 	}
 
@@ -459,13 +489,7 @@ abstract class Client implements IClient
 			]
 		);
 
-		$this->eventLoop->addPeriodicTimer(0.01, function (): void {
-			$this->handleCommunication();
-		});
-
-		$this->eventLoop->addPeriodicTimer(0.01, function (): void {
-			$this->consumer->consume();
-		});
+		$this->registerLoopHandler();
 	}
 
 	/**
@@ -592,6 +616,19 @@ abstract class Client implements IClient
 	}
 
 	/**
+	 * @return void
+	 */
+	protected function registerLoopHandler(): void
+	{
+		$this->handlerTimer = $this->eventLoop->addTimer(
+			self::HANDLER_PROCESSING_INTERVAL,
+			function (): void {
+				$this->handleCommunication();
+			}
+		);
+	}
+
+	/**
 	 * Establishes a network connection to a server
 	 *
 	 * @param string $host
@@ -609,7 +646,7 @@ abstract class Client implements IClient
 		$timer = $this->eventLoop->addTimer(
 			$timeout,
 			static function () use ($deferred, $timeout, &$future): void {
-				$exception = new Exceptions\RuntimeException(sprintf('Connection timed out after %d seconds', $timeout));
+				$exception = new Exceptions\Runtime(sprintf('Connection timed out after %d seconds', $timeout));
 				$deferred->reject($exception);
 
 				/** @phpstan-ignore-next-line */
@@ -669,7 +706,7 @@ abstract class Client implements IClient
 		$responseTimer = $this->eventLoop->addTimer(
 			$timeout,
 			static function () use ($deferred, $timeout): void {
-				$exception = new Exceptions\RuntimeException(sprintf('No response after %d seconds', $timeout));
+				$exception = new Exceptions\Runtime(sprintf('No response after %d seconds', $timeout));
 				$deferred->reject($exception);
 			}
 		);
@@ -738,7 +775,7 @@ abstract class Client implements IClient
 		switch ($packet->getPacketType()) {
 			case Mqtt\Packet::TYPE_PUBLISH:
 				if (!($packet instanceof Mqtt\Packet\PublishRequestPacket)) {
-					throw new Exceptions\RuntimeException(sprintf('Expected %s but got %s', Mqtt\Packet\PublishRequestPacket::class, get_class($packet)));
+					throw new Exceptions\Runtime(sprintf('Expected %s but got %s', Mqtt\Packet\PublishRequestPacket::class, get_class($packet)));
 				}
 
 				$message = new Mqtt\DefaultMessage(
@@ -775,7 +812,7 @@ abstract class Client implements IClient
 
 				if (!$flowFound) {
 					$this->onWarning(
-						new Exceptions\LogicException(sprintf('Received unexpected packet of type %d', $packet->getPacketType()))
+						new Exceptions\Logic(sprintf('Received unexpected packet of type %d', $packet->getPacketType()))
 					);
 				}
 
@@ -783,7 +820,7 @@ abstract class Client implements IClient
 
 			default:
 				$this->onWarning(
-					new Exceptions\LogicException(sprintf('Cannot handle packet of type %d', $packet->getPacketType()))
+					new Exceptions\Logic(sprintf('Cannot handle packet of type %d', $packet->getPacketType()))
 				);
 		}
 	}
@@ -1007,7 +1044,7 @@ abstract class Client implements IClient
 			$flow->getDeferred()->resolve($flow->getResult());
 
 		} else {
-			$result = new Exceptions\RuntimeException($flow->getErrorMessage());
+			$result = new Exceptions\Runtime($flow->getErrorMessage());
 
 			$this->onWarning($result);
 

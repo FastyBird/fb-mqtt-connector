@@ -39,7 +39,7 @@ final class Constants
 	/**
 	 * MQTT protocol api prefixes
 	 */
-	public const MQTT_API_V1_VERSION_PREFIX = self::MQTT_TOPIC_DELIMITER . Types\ProtocolVersionType::VERSION_1;
+	public const MQTT_API_V1_VERSION_PREFIX = self::MQTT_TOPIC_DELIMITER . Types\ProtocolVersion::VERSION_1;
 
 	/**
 	 * MQTT message QOS values

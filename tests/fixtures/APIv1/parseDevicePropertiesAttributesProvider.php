@@ -3,34 +3,34 @@
 use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'attr-' . Entities\Messages\PropertyAttributeEntity::NAME            => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttributeEntity::NAME,
+	'attr-' . Entities\Messages\PropertyAttribute::NAME            => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::NAME,
 		'payload',
 		[
 			'device'                                  => 'device-name',
 			'retained'                                => false,
 			'property'                                => 'some-property',
-			Entities\Messages\PropertyAttributeEntity::NAME => 'payload',
+			Entities\Messages\PropertyAttribute::NAME => 'payload',
 		],
 	],
-	'attr-' . Entities\Messages\PropertyAttributeEntity::SETTABLE        => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttributeEntity::SETTABLE,
+	'attr-' . Entities\Messages\PropertyAttribute::SETTABLE        => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::SETTABLE,
 		'true',
 		[
 			'device'                                      => 'device-name',
 			'retained'                                    => false,
 			'property'                                    => 'some-property',
-			Entities\Messages\PropertyAttributeEntity::SETTABLE => true,
+			Entities\Messages\PropertyAttribute::SETTABLE => true,
 		],
 	],
-	'attr-' . Entities\Messages\PropertyAttributeEntity::QUERYABLE       => [
-		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttributeEntity::QUERYABLE,
+	'attr-' . Entities\Messages\PropertyAttribute::QUERYABLE       => [
+		'/fb/v1/device-name/$property/some-property/$' . Entities\Messages\PropertyAttribute::QUERYABLE,
 		'invalid',
 		[
 			'device'                                       => 'device-name',
 			'retained'                                     => false,
 			'property'                                     => 'some-property',
-			Entities\Messages\PropertyAttributeEntity::QUERYABLE => false,
+			Entities\Messages\PropertyAttribute::QUERYABLE => false,
 		],
 	],
 ];

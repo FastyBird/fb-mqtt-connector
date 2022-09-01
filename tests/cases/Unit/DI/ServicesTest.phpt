@@ -22,7 +22,7 @@ final class ServicesTest extends BaseTestCase
 		Assert::notNull($container->getByType(API\V1Parser::class));
 		Assert::notNull($container->getByType(API\V1Validator::class));
 
-		Assert::notNull($container->getByType(Consumers\Consumer::class));
+		Assert::notNull($container->getByType(Consumers\Messages::class));
 	}
 
 }

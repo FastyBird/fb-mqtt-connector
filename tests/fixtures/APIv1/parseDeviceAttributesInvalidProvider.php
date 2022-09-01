@@ -5,7 +5,7 @@ use FastyBird\FbMqttConnector\Exceptions;
 return [
 	'attr-unknown'       => [
 		'/fb/v1/device-name/$unknown',
-		Exceptions\ParseMessageException::class,
+		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',
 	],
 ];

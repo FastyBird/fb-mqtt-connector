@@ -8,137 +8,31 @@
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Consumers
- * @since          0.25.0
+ * @since          0.4.0
  *
- * @date           16.07.22
+ * @date           05.02.22
  */
 
 namespace FastyBird\FbMqttConnector\Consumers;
 
 use FastyBird\FbMqttConnector\Entities;
-use FastyBird\Metadata;
-use Nette;
-use Psr\Log;
-use SplObjectStorage;
-use SplQueue;
 
 /**
- * Clients message consumer proxy
+ * Exchange messages consumer interface
  *
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Consumers
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-final class Consumer
+interface Consumer
 {
 
-	use Nette\SmartObject;
-
-	/** @var SplObjectStorage<IConsumer, null> */
-	private SplObjectStorage $consumers;
-
-	/** @var SplQueue<Entities\Messages\IEntity> */
-	private SplQueue $queue;
-
-	/** @var Log\LoggerInterface */
-	private Log\LoggerInterface $logger;
-
 	/**
-	 * @param IConsumer[] $consumers
-	 * @param Log\LoggerInterface|null $logger
-	 */
-	public function __construct(
-		array $consumers,
-		?Log\LoggerInterface $logger = null
-	) {
-		$this->consumers = new SplObjectStorage();
-		$this->queue = new SplQueue();
-
-		$this->logger = $logger ?? new Log\NullLogger();
-
-		foreach ($consumers as $consumer) {
-			$this->consumers->attach($consumer);
-		}
-
-		$this->logger->debug(
-			sprintf('Registered %d messages consumers', count($this->consumers)),
-			[
-				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'   => 'consumer',
-			]
-		);
-	}
-
-	/**
-	 * @param Entities\Messages\IEntity $entity
+	 * @param Entities\Messages\Entity $entity
 	 *
-	 * @return void
-	 */
-	public function append(Entities\Messages\IEntity $entity): void
-	{
-		$this->queue->enqueue($entity);
-
-		$this->logger->debug(
-			'Appended new message into consumers queue',
-			[
-				'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'    => 'consumer',
-				'message' => $entity->toArray(),
-			]
-		);
-	}
-
-	/**
-	 * @return void
-	 */
-	public function consume(): void
-	{
-		$this->queue->rewind();
-
-		if ($this->queue->isEmpty()) {
-			return;
-		}
-
-		$this->consumers->rewind();
-
-		if ($this->consumers->count() === 0) {
-			$this->logger->error(
-				'No consumer is registered, messages could not be consumed',
-				[
-					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'   => 'consumer',
-				]
-			);
-
-			return;
-		}
-
-		$entity = $this->queue->dequeue();
-
-		/** @var IConsumer $consumer */
-		foreach ($this->consumers as $consumer) {
-			if ($consumer->consume($entity) === true) {
-				return;
-			}
-		}
-
-		$this->logger->error(
-			'Message could not be consumed',
-			[
-				'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'    => 'consumer',
-				'message' => $entity->toArray(),
-			]
-		);
-	}
-
-	/**
 	 * @return bool
 	 */
-	public function isEmpty(): bool
-	{
-		return $this->queue->isEmpty();
-	}
+	public function consume(Entities\Messages\Entity $entity): bool;
 
 }

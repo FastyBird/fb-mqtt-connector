@@ -26,7 +26,7 @@ use Ramsey\Uuid;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-abstract class Entity implements IEntity
+abstract class Entity
 {
 
 	use Nette\SmartObject;
@@ -53,7 +53,7 @@ abstract class Entity implements IEntity
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return Uuid\UuidInterface
 	 */
 	public function getConnector(): Uuid\UuidInterface
 	{
@@ -61,7 +61,7 @@ abstract class Entity implements IEntity
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return string
 	 */
 	public function getDevice(): string
 	{
@@ -69,7 +69,7 @@ abstract class Entity implements IEntity
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return bool
 	 */
 	public function isRetained(): bool
 	{
@@ -77,7 +77,7 @@ abstract class Entity implements IEntity
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @param bool $retained
 	 */
 	public function setRetained(bool $retained): void
 	{
@@ -85,13 +85,13 @@ abstract class Entity implements IEntity
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return mixed[]
 	 */
 	public function toArray(): array
 	{
 		return [
-			'device'    => $this->getDevice(),
-			'retained'  => $this->isRetained(),
+			'device'   => $this->getDevice(),
+			'retained' => $this->isRetained(),
 		];
 	}
 

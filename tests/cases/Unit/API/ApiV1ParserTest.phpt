@@ -37,7 +37,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\DeviceAttributeEntity);
+		Assert::true($entity instanceof Entities\Messages\DeviceAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -62,7 +62,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\ExtensionAttributeEntity);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -87,7 +87,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\ExtensionAttributeEntity);
+		Assert::true($entity instanceof Entities\Messages\ExtensionAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -112,7 +112,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\DevicePropertyEntity);
+		Assert::true($entity instanceof Entities\Messages\DeviceProperty);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -137,7 +137,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\DevicePropertyEntity);
+		Assert::true($entity instanceof Entities\Messages\DeviceProperty);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -234,7 +234,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelAttributeEntity);
+		Assert::true($entity instanceof Entities\Messages\ChannelAttribute);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -259,7 +259,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelPropertyEntity);
+		Assert::true($entity instanceof Entities\Messages\ChannelProperty);
 		Assert::equal($expected, $entity->toArray());
 	}
 
@@ -284,7 +284,7 @@ final class ApiV1ParserTest extends BaseTestCase
 			$payload
 		);
 
-		Assert::true($entity instanceof Entities\Messages\ChannelPropertyEntity);
+		Assert::true($entity instanceof Entities\Messages\ChannelProperty);
 		Assert::equal($expected, $entity->toArray());
 	}
 

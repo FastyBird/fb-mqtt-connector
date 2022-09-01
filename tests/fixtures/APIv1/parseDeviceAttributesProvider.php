@@ -3,40 +3,40 @@
 use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'attr-' . Entities\Messages\AttributeEntity::NAME             => [
-		'/fb/v1/device-name/$' . Entities\Messages\AttributeEntity::NAME,
+	'attr-' . Entities\Messages\Attribute::NAME             => [
+		'/fb/v1/device-name/$' . Entities\Messages\Attribute::NAME,
 		'Some content',
 		[
 			'device'                          => 'device-name',
 			'retained'                        => false,
-			Entities\Messages\AttributeEntity::NAME => 'Some content',
+			Entities\Messages\Attribute::NAME => 'Some content',
 		],
 	],
-	'attr-' . Entities\Messages\AttributeEntity::PROPERTIES       => [
-		'/fb/v1/device-name/$' . Entities\Messages\AttributeEntity::PROPERTIES,
+	'attr-' . Entities\Messages\Attribute::PROPERTIES       => [
+		'/fb/v1/device-name/$' . Entities\Messages\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
 			'device'                                => 'device-name',
 			'retained'                              => false,
-			Entities\Messages\AttributeEntity::PROPERTIES => ['prop1', 'prop2'],
+			Entities\Messages\Attribute::PROPERTIES => ['prop1', 'prop2'],
 		],
 	],
-	'attr-' . Entities\Messages\AttributeEntity::CHANNELS         => [
-		'/fb/v1/device-name/$' . Entities\Messages\AttributeEntity::CHANNELS,
+	'attr-' . Entities\Messages\Attribute::CHANNELS         => [
+		'/fb/v1/device-name/$' . Entities\Messages\Attribute::CHANNELS,
 		'channel-one,channel-two',
 		[
 			'device'                              => 'device-name',
 			'retained'                            => false,
-			Entities\Messages\AttributeEntity::CHANNELS => ['channel-one', 'channel-two'],
+			Entities\Messages\Attribute::CHANNELS => ['channel-one', 'channel-two'],
 		],
 	],
-	'attr-' . Entities\Messages\AttributeEntity::CONTROLS          => [
-		'/fb/v1/device-name/$' . Entities\Messages\AttributeEntity::CONTROLS,
+	'attr-' . Entities\Messages\Attribute::CONTROLS          => [
+		'/fb/v1/device-name/$' . Entities\Messages\Attribute::CONTROLS,
 		'configure,reset',
 		[
 			'device'                             => 'device-name',
 			'retained'                           => false,
-			Entities\Messages\AttributeEntity::CONTROLS => ['configure', 'reset'],
+			Entities\Messages\Attribute::CONTROLS => ['configure', 'reset'],
 		],
 	],
 ];

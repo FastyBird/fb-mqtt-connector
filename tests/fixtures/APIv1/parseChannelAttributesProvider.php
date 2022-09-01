@@ -3,34 +3,34 @@
 use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'attr-' . Entities\Messages\AttributeEntity::NAME             => [
-		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\AttributeEntity::NAME,
+	'attr-' . Entities\Messages\Attribute::NAME             => [
+		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::NAME,
 		'Some content',
 		[
 			'device'                 => 'device-name',
 			'channel'                => 'channel-name',
 			'retained'               => false,
-			Entities\Messages\AttributeEntity::NAME => 'Some content',
+			Entities\Messages\Attribute::NAME => 'Some content',
 		],
 	],
-	'attr-' . Entities\Messages\AttributeEntity::PROPERTIES       => [
-		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\AttributeEntity::PROPERTIES,
+	'attr-' . Entities\Messages\Attribute::PROPERTIES       => [
+		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::PROPERTIES,
 		'prop1,prop2',
 		[
 			'device'                       => 'device-name',
 			'channel'                      => 'channel-name',
 			'retained'                     => false,
-			Entities\Messages\AttributeEntity::PROPERTIES => ['prop1', 'prop2'],
+			Entities\Messages\Attribute::PROPERTIES => ['prop1', 'prop2'],
 		],
 	],
-	'attr-' . Entities\Messages\AttributeEntity::CONTROLS          => [
-		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\AttributeEntity::CONTROLS,
+	'attr-' . Entities\Messages\Attribute::CONTROLS          => [
+		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::CONTROLS,
 		'configure,reset',
 		[
 			'device'                    => 'device-name',
 			'channel'                   => 'channel-name',
 			'retained'                  => false,
-			Entities\Messages\AttributeEntity::CONTROLS => ['configure', 'reset'],
+			Entities\Messages\Attribute::CONTROLS => ['configure', 'reset'],
 		],
 	],
 ];
