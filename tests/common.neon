@@ -29,7 +29,6 @@ extensions:
     ipubDoctrineTimestampable           : IPub\DoctrineTimestampable\DI\DoctrineTimestampableExtension
     ipubPhone                           : IPub\Phone\DI\PhoneExtension
     fbDateTimeFactory                   : FastyBird\DateTimeFactory\DI\DateTimeFactoryExtension
-    fbSocketServerFactory               : FastyBird\SocketServerFactory\DI\SocketServerFactoryExtension
     fbExchange                          : FastyBird\Exchange\DI\ExchangeExtension
     fbJsonApi                           : FastyBird\JsonApi\DI\JsonApiExtension
     fbMetadata                          : FastyBird\Metadata\DI\MetadataExtension
@@ -115,6 +114,3 @@ fbSimpleAuth:
 fbJsonApi:
     meta:
         copyright: FastyBird s.r.o
-
-fbFbMqttConnector:
-    loop: @fbSocketServerFactory.react.eventLoop
