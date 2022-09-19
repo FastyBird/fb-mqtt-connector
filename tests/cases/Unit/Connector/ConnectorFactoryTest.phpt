@@ -4,7 +4,6 @@ namespace Tests\Cases;
 
 use FastyBird\DevicesModule;
 use FastyBird\DevicesModule\DataStorage as DevicesModuleDataStorage;
-use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\Connector;
 use Ramsey\Uuid;
 use Tester\Assert;
@@ -36,8 +35,8 @@ final class ConnectorFactoryTest extends DbTestCase
 		/** @var DevicesModule\Models\DataStorage\IConnectorsRepository $connectorsRepository */
 		$connectorsRepository = $this->getContainer()->getByType(DevicesModule\Models\DataStorage\IConnectorsRepository::class);
 
-		/** @var FbMqttConnector\ConnectorFactory $factory */
-		$factory = $this->getContainer()->getByType(FbMqttConnector\ConnectorFactory::class);
+		/** @var Connector\ConnectorFactory $factory */
+		$factory = $this->getContainer()->getByType(Connector\ConnectorFactory::class);
 
 		$connector = $factory->create($connectorsRepository->findById(Uuid\Uuid::fromString('17c59Dfa-2edd-438e-8c49f-aa4e38e5a5e')));
 
