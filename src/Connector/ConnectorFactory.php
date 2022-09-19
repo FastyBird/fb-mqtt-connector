@@ -10,31 +10,33 @@
  * @subpackage     Connector
  * @since          0.25.0
  *
- * @date           05.07.22
+ * @date           23.07.22
  */
 
 namespace FastyBird\FbMqttConnector\Connector;
 
-use FastyBird\FbMqttConnector\Clients;
+use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
+use FastyBird\FbMqttConnector\Connector;
+use FastyBird\Metadata\Entities as MetadataEntities;
 
 /**
- * Connector service factory
+ * Connector service executor factory
  *
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Connector
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-interface ConnectorFactory
+interface ConnectorFactory extends DevicesModuleConnectors\IConnectorFactory
 {
 
 	/**
-	 * @param Clients\Client $client
+	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
 	 *
-	 * @return Connector
+	 * @return Connector\Connector
 	 */
 	public function create(
-		Clients\Client $client
-	): Connector;
+		MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
+	): Connector\Connector;
 
 }

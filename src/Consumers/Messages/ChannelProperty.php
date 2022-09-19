@@ -137,7 +137,7 @@ final class ChannelProperty implements Consumers\Consumer
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-message-consumer',
+						'type'   => 'channel-property-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
@@ -157,7 +157,7 @@ final class ChannelProperty implements Consumers\Consumer
 					sprintf('Devices channel "%s" is not registered', $entity->getChannel()),
 					[
 						'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'    => 'device-message-consumer',
+						'type'    => 'channel-property-message-consumer',
 						'device'  => [
 							'identifier' => $entity->getDevice(),
 						],

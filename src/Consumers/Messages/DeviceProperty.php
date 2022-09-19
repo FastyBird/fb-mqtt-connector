@@ -131,7 +131,7 @@ final class DeviceProperty implements Consumers\Consumer
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-message-consumer',
+						'type'   => 'device-property-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
@@ -173,7 +173,7 @@ final class DeviceProperty implements Consumers\Consumer
 						'States repository is not configured. State could not be fetched',
 						[
 							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'     => 'device-property-consumer',
+							'type'     => 'device-property-message-consumer',
 							'device'   => [
 								'id' => $deviceItem->getId()->toString(),
 							],
@@ -227,7 +227,7 @@ final class DeviceProperty implements Consumers\Consumer
 						'States manager is not configured. State could not be saved',
 						[
 							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'     => 'device-property-consumer',
+							'type'     => 'device-property-message-consumer',
 							'device'   => [
 								'id' => $deviceItem->getId()->toString(),
 							],
@@ -252,7 +252,7 @@ final class DeviceProperty implements Consumers\Consumer
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-property-consumer',
+						'type'   => 'device-property-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
@@ -269,7 +269,7 @@ final class DeviceProperty implements Consumers\Consumer
 					sprintf('Property "%s" is not registered', $entity->getProperty()),
 					[
 						'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'     => 'device-property-consumer',
+						'type'     => 'device-property-message-consumer',
 						'device'   => [
 							'identifier' => $entity->getDevice(),
 						],

@@ -16,11 +16,12 @@
 namespace FastyBird\FbMqttConnector\DI;
 
 use Doctrine\Persistence;
-use FastyBird\FbMqttConnector;
+use FastyBird\DevicesModule\DI as DevicesModuleDI;
 use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Clients;
 use FastyBird\FbMqttConnector\Connector;
 use FastyBird\FbMqttConnector\Consumers;
+use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Hydrators;
 use FastyBird\FbMqttConnector\Schemas;
@@ -86,14 +87,14 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		}
 
 		// Service factory
-		$builder->addDefinition($this->prefix('service.factory'), new DI\Definitions\ServiceDefinition())
-			->setType(FbMqttConnector\ConnectorFactory::class);
-
-		// Connector
-		$builder->addFactoryDefinition($this->prefix('connector'))
+		$builder->addFactoryDefinition($this->prefix('executor.factory'))
 			->setImplement(Connector\ConnectorFactory::class)
 			->getResultDefinition()
-			->setType(Connector\Connector::class);
+			->setType(Connector\Connector::class)
+			->addTag(
+				DevicesModuleDI\DevicesModuleExtension::CONNECTOR_TYPE_TAG,
+				Entities\FbMqttConnector::CONNECTOR_TYPE
+			);
 
 		// MQTT v1 API client
 		$builder->addFactoryDefinition($this->prefix('client.apiv1'))

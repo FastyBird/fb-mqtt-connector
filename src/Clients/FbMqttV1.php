@@ -84,17 +84,11 @@ final class FbMqttV1 extends Client
 	/** @var DevicesModuleModels\DataStorage\IDevicePropertiesRepository */
 	private DevicesModuleModels\DataStorage\IDevicePropertiesRepository $devicePropertiesRepository;
 
-	/** @var DevicesModuleModels\DataStorage\IDeviceControlsRepository */
-	private DevicesModuleModels\DataStorage\IDeviceControlsRepository $deviceControlsRepository;
-
 	/** @var DevicesModuleModels\DataStorage\IChannelsRepository */
 	private DevicesModuleModels\DataStorage\IChannelsRepository $channelsRepository;
 
 	/** @var DevicesModuleModels\DataStorage\IChannelPropertiesRepository */
 	private DevicesModuleModels\DataStorage\IChannelPropertiesRepository $channelPropertiesRepository;
-
-	/** @var DevicesModuleModels\DataStorage\IChannelControlsRepository */
-	private DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository;
 
 	/** @var DevicesModuleModels\States\DeviceConnectionStateManager */
 	private DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager;
@@ -113,10 +107,8 @@ final class FbMqttV1 extends Client
 	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository
 	 * @param DevicesModuleModels\DataStorage\IDevicesRepository $devicesRepository
 	 * @param DevicesModuleModels\DataStorage\IDevicePropertiesRepository $devicePropertiesRepository
-	 * @param DevicesModuleModels\DataStorage\IDeviceControlsRepository $deviceControlsRepository
 	 * @param DevicesModuleModels\DataStorage\IChannelsRepository $channelsRepository
 	 * @param DevicesModuleModels\DataStorage\IChannelPropertiesRepository $channelPropertiesRepository
-	 * @param DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository
 	 * @param DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager
 	 * @param DateTimeFactory\DateTimeFactory $dateTimeFactory
 	 * @param EventLoop\LoopInterface $loop
@@ -136,10 +128,8 @@ final class FbMqttV1 extends Client
 		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $connectorPropertiesRepository,
 		DevicesModuleModels\DataStorage\IDevicesRepository $devicesRepository,
 		DevicesModuleModels\DataStorage\IDevicePropertiesRepository $devicePropertiesRepository,
-		DevicesModuleModels\DataStorage\IDeviceControlsRepository $deviceControlsRepository,
 		DevicesModuleModels\DataStorage\IChannelsRepository $channelsRepository,
 		DevicesModuleModels\DataStorage\IChannelPropertiesRepository $channelPropertiesRepository,
-		DevicesModuleModels\DataStorage\IChannelControlsRepository $channelControlsRepository,
 		DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager,
 		DateTimeFactory\DateTimeFactory $dateTimeFactory,
 		EventLoop\LoopInterface $loop,
@@ -168,10 +158,8 @@ final class FbMqttV1 extends Client
 
 		$this->devicesRepository = $devicesRepository;
 		$this->devicePropertiesRepository = $devicePropertiesRepository;
-		$this->deviceControlsRepository = $deviceControlsRepository;
 		$this->channelsRepository = $channelsRepository;
 		$this->channelPropertiesRepository = $channelPropertiesRepository;
-		$this->channelControlsRepository = $channelControlsRepository;
 
 		$this->deviceConnectionStateManager = $deviceConnectionStateManager;
 
@@ -184,125 +172,6 @@ final class FbMqttV1 extends Client
 	public function getVersion(): Types\ProtocolVersion
 	{
 		return Types\ProtocolVersion::get(Types\ProtocolVersion::VERSION_1);
-	}
-
-	/**
-	 * @param MetadataEntities\Actions\IActionDeviceControlEntity $action
-	 *
-	 * @return void
-	 */
-	public function writeDeviceControl(MetadataEntities\Actions\IActionDeviceControlEntity $action): void
-	{
-		$control = $this->deviceControlsRepository->findById($action->getControl());
-
-		if ($control === null) {
-			$this->logger->debug(
-				'Controlled device control entity was not found in registry',
-				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'client',
-					'control' => [
-						'device'  => $action->getDevice()->toString(),
-						'control' => $action->getControl()->toString(),
-					],
-				]
-			);
-
-			return;
-		}
-
-		$device = $this->devicesRepository->findById($action->getDevice());
-
-		if ($device === null) {
-			$this->logger->debug(
-				'Controlled device entity was not found in registry',
-				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'client',
-					'control' => [
-						'device'  => $action->getDevice()->toString(),
-						'control' => $action->getControl()->toString(),
-					],
-				]
-			);
-
-			return;
-		}
-
-		$this->publish(
-			$this->apiBuilder->buildDeviceCommandTopic($device, $control),
-			$action->getExpectedValue() !== null ? strval($action->getExpectedValue()) : null
-		);
-	}
-
-	/**
-	 * @param MetadataEntities\Actions\IActionChannelControlEntity $action
-	 *
-	 * @return void
-	 */
-	public function writeChannelControl(MetadataEntities\Actions\IActionChannelControlEntity $action): void
-	{
-		$control = $this->channelControlsRepository->findById($action->getControl());
-
-		if ($control === null) {
-			$this->logger->debug(
-				'Controlled control entity was not found in registry',
-				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'client',
-					'control' => [
-						'device'  => $action->getDevice()->toString(),
-						'channel' => $action->getChannel()->toString(),
-						'control' => $action->getControl()->toString(),
-					],
-				]
-			);
-
-			return;
-		}
-
-		$channel = $this->channelsRepository->findById($action->getChannel());
-
-		if ($channel === null) {
-			$this->logger->debug(
-				'Controlled channel entity was not found in registry',
-				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'client',
-					'control' => [
-						'device'  => $action->getDevice()->toString(),
-						'channel' => $action->getChannel()->toString(),
-						'control' => $action->getControl()->toString(),
-					],
-				]
-			);
-
-			return;
-		}
-
-		$device = $this->devicesRepository->findById($action->getDevice());
-
-		if ($device === null) {
-			$this->logger->debug(
-				'Controlled device entity was not found in registry',
-				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'client',
-					'control' => [
-						'device'  => $action->getDevice()->toString(),
-						'channel' => $action->getChannel()->toString(),
-						'control' => $action->getControl()->toString(),
-					],
-				]
-			);
-
-			return;
-		}
-
-		$this->publish(
-			$this->apiBuilder->buildChannelCommandTopic($device, $channel, $control),
-			$action->getExpectedValue() !== null ? strval($action->getExpectedValue()) : null
-		);
 	}
 
 	/**
@@ -374,7 +243,10 @@ final class FbMqttV1 extends Client
 						sprintf('Subscribed to: %s', $subscription->getFilter()),
 						[
 							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'   => 'client',
+							'type'   => 'fb-mqtt-v1-client',
+							'connector' => [
+								'id' => $this->connector->getId()->toString(),
+							],
 						]
 					);
 				},
@@ -383,10 +255,13 @@ final class FbMqttV1 extends Client
 						$ex->getMessage(),
 						[
 							'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'      => 'client',
+							'type'   => 'fb-mqtt-v1-client',
 							'exception' => [
 								'message' => $ex->getMessage(),
 								'code'    => $ex->getCode(),
+							],
+							'connector' => [
+								'id' => $this->connector->getId()->toString(),
 							],
 						]
 					);
@@ -406,7 +281,10 @@ final class FbMqttV1 extends Client
 							sprintf('Subscribed to: %s', $subscription->getFilter()),
 							[
 								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'   => 'client',
+								'type'   => 'fb-mqtt-v1-client',
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
+								],
 							]
 						);
 					},
@@ -415,10 +293,13 @@ final class FbMqttV1 extends Client
 							$ex->getMessage(),
 							[
 								'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'      => 'client',
+								'type'   => 'fb-mqtt-v1-client',
 								'exception' => [
 									'message' => $ex->getMessage(),
 									'code'    => $ex->getCode(),
+								],
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
 								],
 							]
 						);
@@ -458,7 +339,10 @@ final class FbMqttV1 extends Client
 							$payload,
 							[
 								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'   => 'client',
+								'type'   => 'fb-mqtt-v1-client',
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
+								],
 							]
 						);
 
@@ -503,7 +387,10 @@ final class FbMqttV1 extends Client
 							$payload,
 							[
 								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'   => 'client',
+								'type'   => 'fb-mqtt-v1-client',
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
+								],
 							]
 						);
 						break;
@@ -514,7 +401,10 @@ final class FbMqttV1 extends Client
 							$payload,
 							[
 								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'   => 'client',
+								'type'   => 'fb-mqtt-v1-client',
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
+								],
 							]
 						);
 						break;
@@ -524,7 +414,10 @@ final class FbMqttV1 extends Client
 							$param3 . ': ' . $payload,
 							[
 								'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-								'type'   => 'client',
+								'type'   => 'fb-mqtt-v1-client',
+								'connector' => [
+									'id' => $this->connector->getId()->toString(),
+								],
 							]
 						);
 						break;
@@ -557,10 +450,13 @@ final class FbMqttV1 extends Client
 					'Received message could not be successfully parsed to entity',
 					[
 						'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'      => 'client',
+						'type'   => 'fb-mqtt-v1-client',
 						'exception' => [
 							'message' => $ex->getMessage(),
 							'code'    => $ex->getCode(),
+						],
+						'connector' => [
+							'id' => $this->connector->getId()->toString(),
 						],
 					]
 				);

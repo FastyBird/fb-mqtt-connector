@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Clients;
 
 use BinSoul\Net\Mqtt;
 use Closure;
+use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\Consumers;
@@ -178,14 +179,6 @@ abstract class Client
 		}
 
 		$this->logger = $logger ?? new Log\NullLogger();
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isConnected(): bool
-	{
-		return $this->isConnected;
 	}
 
 	/**
@@ -440,6 +433,9 @@ abstract class Client
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
+				],
 			]
 		);
 	}
@@ -460,14 +456,15 @@ abstract class Client
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
+				],
 			]
 		);
 
 		if ($this->handlerTimer !== null) {
 			$this->eventLoop->cancelTimer($this->handlerTimer);
 		}
-
-		$this->eventLoop->stop();
 	}
 
 	/**
@@ -485,6 +482,9 @@ abstract class Client
 				'type'        => 'client',
 				'credentials' => [
 					'username' => $connection->getUsername(),
+				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
 				],
 			]
 		);
@@ -508,6 +508,9 @@ abstract class Client
 				'credentials' => [
 					'username' => $connection->getUsername(),
 				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
+				],
 			]
 		);
 	}
@@ -516,6 +519,8 @@ abstract class Client
 	 * @param Throwable $ex
 	 *
 	 * @return void
+	 *
+	 * @throws DevicesModuleExceptions\TerminateException
 	 */
 	protected function onWarning(Throwable $ex): void
 	{
@@ -529,16 +534,25 @@ abstract class Client
 					'message' => $ex->getMessage(),
 					'code'    => $ex->getCode(),
 				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
+				],
 			]
 		);
 
-		$this->eventLoop->stop();
+		throw new DevicesModuleExceptions\TerminateException(
+			'There was an error during handling requests',
+			$ex->getCode(),
+			$ex
+		);
 	}
 
 	/**
 	 * @param Throwable $ex
 	 *
 	 * @return void
+	 *
+	 * @throws DevicesModuleExceptions\TerminateException
 	 */
 	protected function onError(Throwable $ex): void
 	{
@@ -552,10 +566,17 @@ abstract class Client
 					'message' => $ex->getMessage(),
 					'code'    => $ex->getCode(),
 				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
+				],
 			]
 		);
 
-		$this->eventLoop->stop();
+		throw new DevicesModuleExceptions\TerminateException(
+			'There was an error during handling requests',
+			$ex->getCode(),
+			$ex
+		);
 	}
 
 	/**
@@ -580,6 +601,9 @@ abstract class Client
 					'payload'    => $message->getPayload(),
 					'isRetained' => $message->isRetained(),
 					'qos'        => $message->getQosLevel(),
+				],
+				'connector' => [
+					'id' => $this->connector->getId()->toString(),
 				],
 			]
 		);

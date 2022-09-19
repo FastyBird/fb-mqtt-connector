@@ -61,14 +61,15 @@ final class Connector
 
 		if ($configuration instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity) {
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SERVER) {
-				return is_string($configuration->getValue()) ? $configuration->getValue() : null;
+				return is_string($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
 			}
 
-			if (
-				$type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT
-				|| $type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SECURED_PORT
-			) {
-				return is_numeric($configuration->getValue()) ? $configuration->getValue() : null;
+			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT) {
+				return is_numeric($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
+			}
+
+			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SECURED_PORT) {
+				return is_numeric($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_SECURED_PORT;
 			}
 
 			if (
