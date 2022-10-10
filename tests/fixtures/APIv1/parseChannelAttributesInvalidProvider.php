@@ -9,7 +9,7 @@ return [
 		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',
 	],
-	'attr-other'                                 => [
+	'attr-other' => [
 		'/fb/v1/device-name/$channel/channel-name/$other',
 		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',

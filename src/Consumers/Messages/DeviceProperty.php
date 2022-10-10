@@ -26,9 +26,15 @@ use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\Metadata;
+use FastyBird\Metadata\Entities as MetadataEntities;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
+use Throwable;
+use function array_merge;
+use function assert;
+use function count;
+use function sprintf;
 
 /**
  * Device property MQTT message consumer
@@ -44,78 +50,30 @@ final class DeviceProperty implements Consumers\Consumer
 	use Nette\SmartObject;
 	use TProperty;
 
-	/** @var DevicesModuleModels\Devices\IDevicesRepository */
-	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
-
-	/** @var DevicesModuleModels\Devices\Properties\IPropertiesRepository */
-	private DevicesModuleModels\Devices\Properties\IPropertiesRepository $propertiesRepository;
-
-	/** @var DevicesModuleModels\Devices\Properties\IPropertiesManager */
-	private DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager;
-
-	/** @var DevicesModuleModels\DataStorage\IDevicesRepository */
-	private DevicesModuleModels\DataStorage\IDevicesRepository $devicesDataStorageRepository;
-
-	/** @var DevicesModuleModels\DataStorage\IDevicePropertiesRepository */
-	private DevicesModuleModels\DataStorage\IDevicePropertiesRepository $propertiesDataStorageRepository;
-
-	/** @var DevicesModuleModels\States\DevicePropertiesRepository */
-	private DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository;
-
-	/** @var DevicesModuleModels\States\DevicePropertiesManager */
-	private DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager;
-
-	/** @var Helpers\Database */
-	private Helpers\Database $databaseHelper;
-
-	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
-	/**
-	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
-	 * @param DevicesModuleModels\Devices\Properties\IPropertiesRepository $propertiesRepository
-	 * @param DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager
-	 * @param DevicesModuleModels\DataStorage\IDevicesRepository $devicesDataStorageRepository
-	 * @param DevicesModuleModels\DataStorage\IDevicePropertiesRepository $propertiesDataStorageRepository
-	 * @param DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository
-	 * @param DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager
-	 * @param Helpers\Database $databaseHelper
-	 * @param Log\LoggerInterface|null $logger
-	 */
 	public function __construct(
-		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Devices\Properties\IPropertiesRepository $propertiesRepository,
-		DevicesModuleModels\Devices\Properties\IPropertiesManager $propertiesManager,
-		DevicesModuleModels\DataStorage\IDevicesRepository $devicesDataStorageRepository,
-		DevicesModuleModels\DataStorage\IDevicePropertiesRepository $propertiesDataStorageRepository,
-		DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository,
-		DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager,
-		Helpers\Database $databaseHelper,
-		?Log\LoggerInterface $logger = null
-	) {
-		$this->deviceRepository = $deviceRepository;
-		$this->propertiesRepository = $propertiesRepository;
-		$this->propertiesManager = $propertiesManager;
-
-		$this->devicesDataStorageRepository = $devicesDataStorageRepository;
-		$this->propertiesDataStorageRepository = $propertiesDataStorageRepository;
-
-		$this->propertiesStatesManager = $propertiesStatesManager;
-		$this->propertyStateRepository = $propertyStateRepository;
-
-		$this->databaseHelper = $databaseHelper;
-
+		private readonly DevicesModuleModels\Devices\DevicesRepository $deviceRepository,
+		private readonly DevicesModuleModels\Devices\Properties\PropertiesRepository $propertiesRepository,
+		private readonly DevicesModuleModels\Devices\Properties\PropertiesManager $propertiesManager,
+		private readonly DevicesModuleModels\DataStorage\DevicesRepository $devicesDataStorageRepository,
+		private readonly DevicesModuleModels\DataStorage\DevicePropertiesRepository $propertiesDataStorageRepository,
+		private readonly DevicesModuleModels\States\DevicePropertiesRepository $propertyStateRepository,
+		private readonly DevicesModuleModels\States\DevicePropertiesManager $propertiesStatesManager,
+		private readonly Helpers\Database $databaseHelper,
+		Log\LoggerInterface|null $logger = null,
+	)
+	{
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
 	 * @throws DBAL\Exception
+	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws Throwable
 	 */
-	public function consume(
-		Entities\Messages\Entity $entity
-	): bool {
+	public function consume(Entities\Messages\Entity $entity): bool
+	{
 		if (!$entity instanceof Entities\Messages\DeviceProperty) {
 			return false;
 		}
@@ -123,7 +81,7 @@ final class DeviceProperty implements Consumers\Consumer
 		if ($entity->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
 			$deviceItem = $this->devicesDataStorageRepository->findByIdentifier(
 				$entity->getConnector(),
-				$entity->getDevice()
+				$entity->getDevice(),
 			);
 
 			if ($deviceItem === null) {
@@ -131,11 +89,11 @@ final class DeviceProperty implements Consumers\Consumer
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-property-message-consumer',
+						'type' => 'device-property-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
-					]
+					],
 				);
 
 				return true;
@@ -143,44 +101,44 @@ final class DeviceProperty implements Consumers\Consumer
 
 			$propertyItem = $this->propertiesDataStorageRepository->findByIdentifier(
 				$deviceItem->getId(),
-				$entity->getProperty()
+				$entity->getProperty(),
 			);
 
-			if ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IDeviceStaticPropertyEntity) {
-				/** @var DevicesModuleEntities\Devices\Properties\IProperty $property */
+			if ($propertyItem instanceof MetadataEntities\DevicesModule\DeviceVariableProperty) {
 				$property = $this->databaseHelper->query(
-					function () use ($propertyItem): ?DevicesModuleEntities\Devices\Properties\IProperty {
-						$findPropertyQuery = new DevicesModuleQueries\FindDevicePropertiesQuery();
+					function () use ($propertyItem): DevicesModuleEntities\Devices\Properties\Property|null {
+						$findPropertyQuery = new DevicesModuleQueries\FindDeviceProperties();
 						$findPropertyQuery->byId($propertyItem->getId());
 
 						return $this->propertiesRepository->findOneBy($findPropertyQuery);
-					}
+					},
 				);
+				assert($property instanceof DevicesModuleEntities\Devices\Properties\Property);
 
-				if ($property instanceof DevicesModuleEntities\Devices\Properties\IStaticProperty) {
+				if ($property instanceof DevicesModuleEntities\Devices\Properties\Variable) {
 					$this->databaseHelper->transaction(function () use ($entity, $property): void {
 						$this->propertiesManager->update($property, Utils\ArrayHash::from([
 							'value' => $entity->getValue(),
 						]));
 					});
 				}
-			} elseif ($propertyItem instanceof Metadata\Entities\Modules\DevicesModule\IDeviceDynamicPropertyEntity) {
+			} elseif ($propertyItem instanceof MetadataEntities\DevicesModule\DeviceDynamicProperty) {
 				try {
 					$propertyState = $this->propertyStateRepository->findOne($propertyItem);
 
-				} catch (DevicesModuleExceptions\NotImplementedException) {
+				} catch (DevicesModuleExceptions\NotImplemented) {
 					$this->logger->warning(
 						'States repository is not configured. State could not be fetched',
 						[
-							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'     => 'device-property-message-consumer',
-							'device'   => [
+							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+							'type' => 'device-property-message-consumer',
+							'device' => [
 								'id' => $deviceItem->getId()->toString(),
 							],
 							'property' => [
 								'id' => $propertyItem->getId()->toString(),
 							],
-						]
+						],
 					);
 
 					return true;
@@ -191,8 +149,8 @@ final class DeviceProperty implements Consumers\Consumer
 						$propertyItem->getDataType(),
 						$entity->getValue(),
 						$propertyItem->getFormat(),
-						$propertyItem->getInvalid()
-					)
+						$propertyItem->getInvalid(),
+					),
 				);
 
 				try {
@@ -204,12 +162,12 @@ final class DeviceProperty implements Consumers\Consumer
 							Utils\ArrayHash::from(array_merge(
 								$propertyItem->toArray(),
 								[
-									'actualValue'   => $actualValue,
+									'actualValue' => $actualValue,
 									'expectedValue' => null,
-									'pending'       => false,
-									'valid'         => true,
-								]
-							))
+									'pending' => false,
+									'valid' => true,
+								],
+							)),
 						);
 
 					} else {
@@ -218,45 +176,48 @@ final class DeviceProperty implements Consumers\Consumer
 							$propertyState,
 							Utils\ArrayHash::from([
 								'actualValue' => $actualValue,
-								'valid'       => true,
-							])
+								'valid' => true,
+							]),
 						);
 					}
-				} catch (DevicesModuleExceptions\NotImplementedException) {
+				} catch (DevicesModuleExceptions\NotImplemented) {
 					$this->logger->warning(
 						'States manager is not configured. State could not be saved',
 						[
-							'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-							'type'     => 'device-property-message-consumer',
-							'device'   => [
+							'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+							'type' => 'device-property-message-consumer',
+							'device' => [
 								'id' => $deviceItem->getId()->toString(),
 							],
 							'property' => [
 								'id' => $propertyItem->getId()->toString(),
 							],
-						]
+						],
 					);
 				}
 			}
 		} else {
-			/** @var DevicesModuleEntities\Devices\IDevice|null $device */
-			$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
-				$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
-				$findDeviceQuery->byIdentifier($entity->getDevice());
+			/** @var mixed $device */
+			$device = $this->databaseHelper->query(
+				function () use ($entity): DevicesModuleEntities\Devices\Device|null {
+					$findDeviceQuery = new DevicesModuleQueries\FindDevices();
+					$findDeviceQuery->byIdentifier($entity->getDevice());
 
-				return $this->deviceRepository->findOneBy($findDeviceQuery);
-			});
+					return $this->deviceRepository->findOneBy($findDeviceQuery);
+				},
+			);
+			assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 			if ($device === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-property-message-consumer',
+						'type' => 'device-property-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
-					]
+					],
 				);
 
 				return true;
@@ -268,15 +229,15 @@ final class DeviceProperty implements Consumers\Consumer
 				$this->logger->error(
 					sprintf('Property "%s" is not registered', $entity->getProperty()),
 					[
-						'source'   => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'     => 'device-property-message-consumer',
-						'device'   => [
+						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+						'type' => 'device-property-message-consumer',
+						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
 						'property' => [
 							'identifier' => $entity->getProperty(),
 						],
-					]
+					],
 				);
 
 				return true;
@@ -297,12 +258,12 @@ final class DeviceProperty implements Consumers\Consumer
 			'Consumed channel property message',
 			[
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'   => 'device-property-message-consumer',
+				'type' => 'device-property-message-consumer',
 				'device' => [
 					'identifier' => $entity->getDevice(),
 				],
-				'data'   => $entity->toArray(),
-			]
+				'data' => $entity->toArray(),
+			],
 		);
 
 		return true;

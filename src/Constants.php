@@ -45,7 +45,9 @@ final class Constants
 	 * MQTT message QOS values
 	 */
 	public const MQTT_API_QOS_0 = 0;
+
 	public const MQTT_API_QOS_1 = 1;
+
 	public const MQTT_API_QOS_2 = 2;
 
 	/**
@@ -53,12 +55,15 @@ final class Constants
 	 */
 
 	public const PAYLOAD_BOOL_TRUE_VALUE = 'true';
+
 	public const PAYLOAD_BOOL_FALSE_VALUE = 'false';
 
-	public const VALUE_NOT_SET = 'none';
+	public const VALUE_NOT_SET = 'noneprivate readonly';
 
 	public const BROKER_LOCALHOST_ADDRESS = '127.0.0.1';
-	public const BROKER_LOCALHOST_PORT = 1883;
-	public const BROKER_LOCALHOST_SECURED_PORT = 8883;
+
+	public const BROKER_LOCALHOST_PORT = 1_883;
+
+	public const BROKER_LOCALHOST_SECURED_PORT = 8_883;
 
 }

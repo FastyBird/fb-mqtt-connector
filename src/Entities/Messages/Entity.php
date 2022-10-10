@@ -31,66 +31,39 @@ abstract class Entity
 
 	use Nette\SmartObject;
 
-	/** @var Uuid\UuidInterface */
-	private Uuid\UuidInterface $connector;
-
-	/** @var string */
-	private string $device;
-
-	/** @var bool */
 	private bool $retained = false;
 
-	/**
-	 * @param Uuid\UuidInterface $connector
-	 * @param string $device
-	 */
-	public function __construct(
-		Uuid\UuidInterface $connector,
-		string $device
-	) {
-		$this->connector = $connector;
-		$this->device = $device;
+	public function __construct(private readonly Uuid\UuidInterface $connector, private readonly string $device)
+	{
 	}
 
-	/**
-	 * @return Uuid\UuidInterface
-	 */
 	public function getConnector(): Uuid\UuidInterface
 	{
 		return $this->connector;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getDevice(): string
 	{
 		return $this->device;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isRetained(): bool
 	{
 		return $this->retained;
 	}
 
-	/**
-	 * @param bool $retained
-	 */
 	public function setRetained(bool $retained): void
 	{
 		$this->retained = $retained;
 	}
 
 	/**
-	 * @return mixed[]
+	 * @return Array<mixed>
 	 */
 	public function toArray(): array
 	{
 		return [
-			'device'   => $this->getDevice(),
+			'device' => $this->getDevice(),
 			'retained' => $this->isRetained(),
 		];
 	}

@@ -27,6 +27,10 @@ use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
+use function assert;
+use function in_array;
+use function is_array;
+use function sprintf;
 
 /**
  * Device channel attributes MQTT message consumer
@@ -41,80 +45,48 @@ final class Channel implements Consumers\Consumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDevicesRepository */
-	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
-
-	/** @var DevicesModuleModels\Channels\IChannelsManager */
-	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
-
-	/** @var DevicesModuleModels\Channels\Properties\IPropertiesManager */
-	private DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager;
-
-	/** @var DevicesModuleModels\Channels\Controls\IControlsManager */
-	private DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager;
-
-	/** @var Helpers\Database */
-	private Helpers\Database $databaseHelper;
-
-	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
-	/**
-	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
-	 * @param DevicesModuleModels\Channels\IChannelsManager $channelsManager
-	 * @param DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager
-	 * @param DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager
-	 * @param Helpers\Database $databaseHelper
-	 * @param Log\LoggerInterface|null $logger
-	 */
 	public function __construct(
-		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
-		DevicesModuleModels\Channels\Properties\IPropertiesManager $channelPropertiesManager,
-		DevicesModuleModels\Channels\Controls\IControlsManager $channelControlManager,
-		Helpers\Database $databaseHelper,
-		?Log\LoggerInterface $logger = null
-	) {
-		$this->deviceRepository = $deviceRepository;
-		$this->channelsManager = $channelsManager;
-		$this->channelPropertiesManager = $channelPropertiesManager;
-		$this->channelControlManager = $channelControlManager;
-
-		$this->databaseHelper = $databaseHelper;
-
+		private readonly DevicesModuleModels\Devices\DevicesRepository $deviceRepository,
+		private readonly DevicesModuleModels\Channels\ChannelsManager $channelsManager,
+		private readonly DevicesModuleModels\Channels\Properties\PropertiesManager $channelPropertiesManager,
+		private readonly DevicesModuleModels\Channels\Controls\ControlsManager $channelControlManager,
+		private readonly Helpers\Database $databaseHelper,
+		Log\LoggerInterface|null $logger = null,
+	)
+	{
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
 	 * @throws DBAL\Exception
 	 */
-	public function consume(
-		Entities\Messages\Entity $entity
-	): bool {
+	public function consume(Entities\Messages\Entity $entity): bool
+	{
 		if (!$entity instanceof Entities\Messages\ChannelAttribute) {
 			return false;
 		}
 
-		/** @var DevicesModuleEntities\Devices\IDevice|null $device */
-		$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
-			$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
+		/** @var mixed $device */
+		$device = $this->databaseHelper->query(function () use ($entity): DevicesModuleEntities\Devices\Device|null {
+			$findDeviceQuery = new DevicesModuleQueries\FindDevices();
 			$findDeviceQuery->byIdentifier($entity->getDevice());
 
 			return $this->deviceRepository->findOneBy($findDeviceQuery);
 		});
+		assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 		if ($device === null) {
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'   => 'channel-message-consumer',
+					'type' => 'channel-message-consumer',
 					'device' => [
 						'identifier' => $entity->getDevice(),
 					],
-				]
+				],
 			);
 
 			return true;
@@ -126,15 +98,15 @@ final class Channel implements Consumers\Consumer
 			$this->logger->error(
 				sprintf('Device channel "%s" is not registered', $entity->getChannel()),
 				[
-					'source'  => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'    => 'channel-message-consumer',
-					'device'  => [
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type' => 'channel-message-consumer',
+					'device' => [
 						'identifier' => $entity->getDevice(),
 					],
 					'channel' => [
 						'identifier' => $entity->getChannel(),
 					],
-				]
+				],
 			);
 
 			return true;
@@ -164,36 +136,34 @@ final class Channel implements Consumers\Consumer
 			'Consumed channel message',
 			[
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'   => 'channel-message-consumer',
+				'type' => 'channel-message-consumer',
 				'device' => [
 					'id' => $device->getId()->toString(),
 				],
-				'data'   => $entity->toArray(),
-			]
+				'data' => $entity->toArray(),
+			],
 		);
 
 		return true;
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Channels\IChannel $channel
-	 * @param Utils\ArrayHash<string> $properties
-	 *
-	 * @return void
+	 * @phpstan-param Utils\ArrayHash<string> $properties
 	 */
 	private function setChannelProperties(
-		DevicesModuleEntities\Channels\IChannel $channel,
-		Utils\ArrayHash $properties
-	): void {
+		DevicesModuleEntities\Channels\Channel $channel,
+		Utils\ArrayHash $properties,
+	): void
+	{
 		foreach ($properties as $propertyName) {
 			if ($channel->findProperty($propertyName) === null) {
 				$this->channelPropertiesManager->create(Utils\ArrayHash::from([
-					'entity'     => DevicesModuleEntities\Channels\Properties\DynamicProperty::class,
-					'channel'    => $channel,
+					'entity' => DevicesModuleEntities\Channels\Properties\Dynamic::class,
+					'channel' => $channel,
 					'identifier' => $propertyName,
-					'settable'   => false,
-					'queryable'  => false,
-					'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_UNKNOWN),
+					'settable' => false,
+					'queryable' => false,
+					'dataType' => MetadataTypes\DataType::get(MetadataTypes\DataType::DATA_TYPE_UNKNOWN),
 				]));
 			}
 		}
@@ -207,20 +177,18 @@ final class Channel implements Consumers\Consumer
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Channels\IChannel $channel
-	 * @param Utils\ArrayHash<string> $controls
-	 *
-	 * @return void
+	 * @phpstan-param Utils\ArrayHash<string> $controls
 	 */
 	private function setChannelControls(
-		DevicesModuleEntities\Channels\IChannel $channel,
-		Utils\ArrayHash $controls
-	): void {
+		DevicesModuleEntities\Channels\Channel $channel,
+		Utils\ArrayHash $controls,
+	): void
+	{
 		foreach ($controls as $controlName) {
 			if ($channel->findControl($controlName) === null) {
 				$this->channelControlManager->create(Utils\ArrayHash::from([
 					'channel' => $channel,
-					'name'    => $controlName,
+					'name' => $controlName,
 				]));
 			}
 		}

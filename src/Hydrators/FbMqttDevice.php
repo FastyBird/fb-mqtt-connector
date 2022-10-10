@@ -21,19 +21,15 @@ use FastyBird\FbMqttConnector\Entities;
 /**
  * FastyBird MQTT device entity hydrator
  *
+ * @phpstan-extends DevicesModuleHydrators\Devices\Device<Entities\FbMqttDevice>
+ *
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Hydrators
- *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
- *
- * @phpstan-extends DevicesModuleHydrators\Devices\DeviceHydrator<Entities\FbMqttDevice>
  */
-final class FbMqttDevice extends DevicesModuleHydrators\Devices\DeviceHydrator
+final class FbMqttDevice extends DevicesModuleHydrators\Devices\Device
 {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function getEntityName(): string
 	{
 		return Entities\FbMqttDevice::class;

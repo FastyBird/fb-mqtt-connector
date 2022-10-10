@@ -28,11 +28,6 @@ use FastyBird\FbMqttConnector\Entities;
 interface Consumer
 {
 
-	/**
-	 * @param Entities\Messages\Entity $entity
-	 *
-	 * @return bool
-	 */
 	public function consume(Entities\Messages\Entity $entity): bool;
 
 }

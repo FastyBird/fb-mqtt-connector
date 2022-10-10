@@ -30,6 +30,8 @@ use Nette\DI;
 use Nette\Schema;
 use React\EventLoop;
 use stdClass;
+use function assert;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * FastyBird MQTT connector
@@ -42,43 +44,37 @@ use stdClass;
 class FbMqttConnectorExtension extends DI\CompilerExtension
 {
 
-	/**
-	 * @param Nette\Configurator $config
-	 * @param string $extensionName
-	 *
-	 * @return void
-	 */
+	public const NAME = 'fbFbMqttConnector';
+
 	public static function register(
 		Nette\Configurator $config,
-		string $extensionName = 'fbFbMqttConnector'
-	): void {
-		$config->onCompile[] = function (
+		string $extensionName = self::NAME,
+	): void
+	{
+		$config->onCompile[] = static function (
 			Nette\Configurator $config,
-			DI\Compiler $compiler
+			DI\Compiler $compiler,
 		) use ($extensionName): void {
 			$compiler->addExtension($extensionName, new FbMqttConnectorExtension());
 		};
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function getConfigSchema(): Schema\Schema
 	{
 		return Schema\Expect::structure([
-			'loop' => Schema\Expect::anyOf(Schema\Expect::string(), Schema\Expect::type(DI\Definitions\Statement::class))
+			'loop' => Schema\Expect::anyOf(
+				Schema\Expect::string(),
+				Schema\Expect::type(DI\Definitions\Statement::class),
+			)
 				->nullable(),
 		]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function loadConfiguration(): void
 	{
 		$builder = $this->getContainerBuilder();
-		/** @var stdClass $configuration */
 		$configuration = $this->getConfig();
+		assert($configuration instanceof stdClass);
 
 		if ($configuration->loop === null && $builder->getByType(EventLoop\LoopInterface::class) === null) {
 			$builder->addDefinition($this->prefix('client.loop'), new DI\Definitions\ServiceDefinition())
@@ -91,10 +87,13 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 			->setImplement(Connector\ConnectorFactory::class)
 			->addTag(
 				DevicesModuleDI\DevicesModuleExtension::CONNECTOR_TYPE_TAG,
-				Entities\FbMqttConnector::CONNECTOR_TYPE
+				Entities\FbMqttConnector::CONNECTOR_TYPE,
 			)
 			->getResultDefinition()
-			->setType(Connector\Connector::class);
+			->setType(Connector\Connector::class)
+			->setArguments([
+				'clientsFactories' => $builder->findByType(Clients\ClientFactory::class),
+			]);
 
 		// MQTT v1 API client
 		$builder->addFactoryDefinition($this->prefix('client.apiv1'))
@@ -114,21 +113,39 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 
 		// Consumers
 		$builder->addDefinition($this->prefix('consumer.proxy'), new DI\Definitions\ServiceDefinition())
-			->setType(Consumers\Messages::class);
+			->setType(Consumers\Messages::class)
+			->setArguments([
+				'consumers' => $builder->findByType(Consumers\Consumer::class),
+			]);
 
-		$builder->addDefinition($this->prefix('consumer.device.attribute.message'), new DI\Definitions\ServiceDefinition())
+		$builder->addDefinition(
+			$this->prefix('consumer.device.attribute.message'),
+			new DI\Definitions\ServiceDefinition(),
+		)
 			->setType(Consumers\Messages\Device::class);
 
-		$builder->addDefinition($this->prefix('consumer.device.extension.message'), new DI\Definitions\ServiceDefinition())
+		$builder->addDefinition(
+			$this->prefix('consumer.device.extension.message'),
+			new DI\Definitions\ServiceDefinition(),
+		)
 			->setType(Consumers\Messages\ExtensionAttribute::class);
 
-		$builder->addDefinition($this->prefix('consumer.device.property.message'), new DI\Definitions\ServiceDefinition())
+		$builder->addDefinition(
+			$this->prefix('consumer.device.property.message'),
+			new DI\Definitions\ServiceDefinition(),
+		)
 			->setType(Consumers\Messages\DeviceProperty::class);
 
-		$builder->addDefinition($this->prefix('consumer.channel.attribute.message'), new DI\Definitions\ServiceDefinition())
+		$builder->addDefinition(
+			$this->prefix('consumer.channel.attribute.message'),
+			new DI\Definitions\ServiceDefinition(),
+		)
 			->setType(Consumers\Messages\Channel::class);
 
-		$builder->addDefinition($this->prefix('consumer.channel.property.message'), new DI\Definitions\ServiceDefinition())
+		$builder->addDefinition(
+			$this->prefix('consumer.channel.property.message'),
+			new DI\Definitions\ServiceDefinition(),
+		)
 			->setType(Consumers\Messages\ChannelProperty::class);
 
 		// API schemas
@@ -156,9 +173,6 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 			->setType(Helpers\Property::class);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function beforeCompile(): void
 	{
 		parent::beforeCompile();
@@ -172,10 +186,15 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		$ormAnnotationDriverService = $builder->getDefinition('nettrineOrmAnnotations.annotationDriver');
 
 		if ($ormAnnotationDriverService instanceof DI\Definitions\ServiceDefinition) {
-			$ormAnnotationDriverService->addSetup('addPaths', [[__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Entities']]);
+			$ormAnnotationDriverService->addSetup(
+				'addPaths',
+				[[__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Entities']],
+			);
 		}
 
-		$ormAnnotationDriverChainService = $builder->getDefinitionByType(Persistence\Mapping\Driver\MappingDriverChain::class);
+		$ormAnnotationDriverChainService = $builder->getDefinitionByType(
+			Persistence\Mapping\Driver\MappingDriverChain::class,
+		);
 
 		if ($ormAnnotationDriverChainService instanceof DI\Definitions\ServiceDefinition) {
 			$ormAnnotationDriverChainService->addSetup('addDriver', [

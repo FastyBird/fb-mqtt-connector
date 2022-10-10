@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Types;
 
 use Consistence;
 use FastyBird\Metadata\Types as MetadataTypes;
+use function strval;
 
 /**
  * Device property identifier types
@@ -32,21 +33,28 @@ class DevicePropertyIdentifier extends Consistence\Enum\Enum
 	/**
 	 * Define device states
 	 */
-	public const IDENTIFIER_STATE = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_STATE;
-	public const IDENTIFIER_IP_ADDRESS = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_IP_ADDRESS;
-	public const IDENTIFIER_STATUS_LED = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_STATUS_LED;
-	public const IDENTIFIER_UPTIME = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_UPTIME;
-	public const IDENTIFIER_FREE_HEAP = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_FREE_HEAP;
-	public const IDENTIFIER_CPU_LOAD = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_CPU_LOAD;
-	public const IDENTIFIER_VCC = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_VCC;
-	public const IDENTIFIER_RSSI = MetadataTypes\DevicePropertyIdentifierType::IDENTIFIER_RSSI;
+	public const IDENTIFIER_STATE = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_STATE;
+
+	public const IDENTIFIER_IP_ADDRESS = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_IP_ADDRESS;
+
+	public const IDENTIFIER_STATUS_LED = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_STATUS_LED;
+
+	public const IDENTIFIER_UPTIME = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_UPTIME;
+
+	public const IDENTIFIER_FREE_HEAP = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_FREE_HEAP;
+
+	public const IDENTIFIER_CPU_LOAD = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_CPU_LOAD;
+
+	public const IDENTIFIER_VCC = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_VCC;
+
+	public const IDENTIFIER_RSSI = MetadataTypes\DevicePropertyIdentifier::IDENTIFIER_RSSI;
+
 	public const IDENTIFIER_USERNAME = 'username';
+
 	public const IDENTIFIER_PASSWORD = 'password';
+
 	public const IDENTIFIER_AUTH_ENABLED = 'auth_enabled';
 
-	/**
-	 * @return string
-	 */
 	public function __toString(): string
 	{
 		return strval(self::getValue());

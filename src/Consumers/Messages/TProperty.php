@@ -17,6 +17,9 @@ namespace FastyBird\FbMqttConnector\Consumers\Messages;
 
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\Metadata\Types as MetadataTypes;
+use function array_merge;
+use function boolval;
+use function strval;
 
 /**
  * Property message consumer
@@ -30,13 +33,12 @@ trait TProperty
 {
 
 	/**
-	 * @param Entities\Messages\Property $entity
-	 *
-	 * @return Array<string, string|string[]|float[]|null[]|bool|MetadataTypes\DataTypeType|null>
+	 * @return Array<string, (string|Array<string>|Array<float>|Array<null>|bool|MetadataTypes\DataType|null)>
 	 */
 	protected function handlePropertyConfiguration(
-		Entities\Messages\Property $entity
-	): array {
+		Entities\Messages\Property $entity,
+	): array
+	{
 		$toUpdate = [];
 
 		foreach ($entity->getAttributes() as $attribute) {
@@ -60,10 +62,10 @@ trait TProperty
 
 			if (
 				$attribute->getAttribute() === Entities\Messages\PropertyAttribute::DATA_TYPE
-				&& MetadataTypes\DataTypeType::isValidValue(strval($attribute->getValue()))
+				&& MetadataTypes\DataType::isValidValue(strval($attribute->getValue()))
 			) {
 				$toUpdate = array_merge($toUpdate, [
-					'dataType' => MetadataTypes\DataTypeType::get(strval($attribute->getValue())),
+					'dataType' => MetadataTypes\DataType::get(strval($attribute->getValue())),
 				]);
 			}
 

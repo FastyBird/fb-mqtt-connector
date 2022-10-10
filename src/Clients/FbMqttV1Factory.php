@@ -31,11 +31,6 @@ interface FbMqttV1Factory extends ClientFactory
 
 	public const VERSION = Types\ProtocolVersion::VERSION_1;
 
-	/**
-	 * @param MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector
-	 *
-	 * @return FbMqttV1
-	 */
-	public function create(MetadataEntities\Modules\DevicesModule\IConnectorEntity $connector): FbMqttV1;
+	public function create(MetadataEntities\DevicesModule\Connector $connector): FbMqttV1;
 
 }

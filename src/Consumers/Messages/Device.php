@@ -28,6 +28,10 @@ use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
+use function assert;
+use function in_array;
+use function is_array;
+use function sprintf;
 
 /**
  * Device attributes MQTT message consumer
@@ -42,131 +46,83 @@ final class Device implements Consumers\Consumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDevicesRepository */
-	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
-
-	/** @var DevicesModuleModels\Devices\IDevicesManager */
-	private DevicesModuleModels\Devices\IDevicesManager $devicesManager;
-
-	/** @var DevicesModuleModels\Devices\Properties\IPropertiesManager */
-	private DevicesModuleModels\Devices\Properties\IPropertiesManager $devicePropertiesManager;
-
-	/** @var DevicesModuleModels\Devices\Controls\IControlsManager */
-	private DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager;
-
-	/** @var DevicesModuleModels\Devices\Attributes\IAttributesManager */
-	private DevicesModuleModels\Devices\Attributes\IAttributesManager $deviceAttributesManager;
-
-	/** @var DevicesModuleModels\Channels\IChannelsManager */
-	private DevicesModuleModels\Channels\IChannelsManager $channelsManager;
-
-	/** @var DevicesModuleModels\DataStorage\IDevicesRepository */
-	private DevicesModuleModels\DataStorage\IDevicesRepository $deviceDataStorageRepository;
-
-	/** @var DevicesModuleModels\States\DeviceConnectionStateManager */
-	private DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager;
-
-	/** @var Helpers\Database */
-	private Helpers\Database $databaseHelper;
-
-	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
-	/**
-	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
-	 * @param DevicesModuleModels\Devices\IDevicesManager $devicesManager
-	 * @param DevicesModuleModels\Devices\Properties\IPropertiesManager $devicePropertiesManager
-	 * @param DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager
-	 * @param DevicesModuleModels\Devices\Attributes\IAttributesManager $deviceAttributesManager
-	 * @param DevicesModuleModels\Channels\IChannelsManager $channelsManager
-	 * @param DevicesModuleModels\DataStorage\IDevicesRepository $deviceDataStorageRepository
-	 * @param DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager
-	 * @param Helpers\Database $databaseHelper
-	 * @param Log\LoggerInterface|null $logger
-	 */
 	public function __construct(
-		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Devices\IDevicesManager $devicesManager,
-		DevicesModuleModels\Devices\Properties\IPropertiesManager $devicePropertiesManager,
-		DevicesModuleModels\Devices\Controls\IControlsManager $deviceControlManager,
-		DevicesModuleModels\Devices\Attributes\IAttributesManager $deviceAttributesManager,
-		DevicesModuleModels\Channels\IChannelsManager $channelsManager,
-		DevicesModuleModels\DataStorage\IDevicesRepository $deviceDataStorageRepository,
-		DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager,
-		Helpers\Database $databaseHelper,
-		?Log\LoggerInterface $logger = null
-	) {
-		$this->deviceRepository = $deviceRepository;
-		$this->devicesManager = $devicesManager;
-		$this->devicePropertiesManager = $devicePropertiesManager;
-		$this->deviceControlManager = $deviceControlManager;
-		$this->deviceAttributesManager = $deviceAttributesManager;
-		$this->channelsManager = $channelsManager;
-
-		$this->deviceDataStorageRepository = $deviceDataStorageRepository;
-
-		$this->deviceConnectionStateManager = $deviceConnectionStateManager;
-
-		$this->databaseHelper = $databaseHelper;
-
+		private readonly DevicesModuleModels\Devices\DevicesRepository $deviceRepository,
+		private readonly DevicesModuleModels\Devices\DevicesManager $devicesManager,
+		private readonly DevicesModuleModels\Devices\Properties\PropertiesManager $devicePropertiesManager,
+		private readonly DevicesModuleModels\Devices\Controls\ControlsManager $deviceControlManager,
+		private readonly DevicesModuleModels\Devices\Attributes\AttributesManager $deviceAttributesManager,
+		private readonly DevicesModuleModels\Channels\ChannelsManager $channelsManager,
+		private readonly DevicesModuleModels\DataStorage\DevicesRepository $deviceDataStorageRepository,
+		private readonly DevicesModuleModels\States\DeviceConnectionStateManager $deviceConnectionStateManager,
+		private readonly Helpers\Database $databaseHelper,
+		Log\LoggerInterface|null $logger = null,
+	)
+	{
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
 	 * @throws DBAL\Exception
+	 * @throws Metadata\Exceptions\FileNotFound
 	 */
-	public function consume(
-		Entities\Messages\Entity $entity
-	): bool {
+	public function consume(Entities\Messages\Entity $entity): bool
+	{
 		if (!$entity instanceof Entities\Messages\DeviceAttribute) {
 			return false;
 		}
 
 		if ($entity->getAttribute() === Entities\Messages\Attribute::STATE) {
-			$deviceItem = $this->deviceDataStorageRepository->findByIdentifier($entity->getConnector(), $entity->getDevice());
+			$deviceItem = $this->deviceDataStorageRepository->findByIdentifier(
+				$entity->getConnector(),
+				$entity->getDevice(),
+			);
 
 			if ($deviceItem === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-message-consumer',
+						'type' => 'device-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
-					]
+					],
 				);
 
 				return true;
 			}
 
-			if (MetadataTypes\ConnectionStateType::isValidValue($entity->getValue())) {
+			if (MetadataTypes\ConnectionState::isValidValue($entity->getValue())) {
 				$this->deviceConnectionStateManager->setState(
 					$deviceItem,
-					MetadataTypes\ConnectionStateType::get($entity->getValue())
+					MetadataTypes\ConnectionState::get($entity->getValue()),
 				);
 			}
 		} else {
-			/** @var DevicesModuleEntities\Devices\IDevice|null $device */
-			$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
-				$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
-				$findDeviceQuery->byIdentifier($entity->getDevice());
+			/** @var mixed $device */
+			$device = $this->databaseHelper->query(
+				function () use ($entity): DevicesModuleEntities\Devices\Device|null {
+					$findDeviceQuery = new DevicesModuleQueries\FindDevices();
+					$findDeviceQuery->byIdentifier($entity->getDevice());
 
-				return $this->deviceRepository->findOneBy($findDeviceQuery);
-			});
+					return $this->deviceRepository->findOneBy($findDeviceQuery);
+				},
+			);
+			assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 			if ($device === null) {
 				$this->logger->error(
 					sprintf('Device "%s" is not registered', $entity->getDevice()),
 					[
 						'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-						'type'   => 'device-message-consumer',
+						'type' => 'device-message-consumer',
 						'device' => [
 							'identifier' => $entity->getDevice(),
 						],
-					]
+					],
 				);
 
 				return true;
@@ -179,19 +135,31 @@ final class Device implements Consumers\Consumer
 					$toUpdate['name'] = $entity->getValue();
 				}
 
-				if ($entity->getAttribute() === Entities\Messages\Attribute::PROPERTIES && is_array($entity->getValue())) {
+				if (
+					$entity->getAttribute() === Entities\Messages\Attribute::PROPERTIES
+					&& is_array($entity->getValue())
+				) {
 					$this->setDeviceProperties($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
-				if ($entity->getAttribute() === Entities\Messages\Attribute::EXTENSIONS && is_array($entity->getValue())) {
+				if (
+					$entity->getAttribute() === Entities\Messages\Attribute::EXTENSIONS
+					&& is_array($entity->getValue())
+				) {
 					$this->setDeviceExtensions($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
-				if ($entity->getAttribute() === Entities\Messages\Attribute::CHANNELS && is_array($entity->getValue())) {
+				if (
+					$entity->getAttribute() === Entities\Messages\Attribute::CHANNELS
+					&& is_array($entity->getValue())
+				) {
 					$this->setDeviceChannels($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
-				if ($entity->getAttribute() === Entities\Messages\Attribute::CONTROLS && is_array($entity->getValue())) {
+				if (
+					$entity->getAttribute() === Entities\Messages\Attribute::CONTROLS
+					&& is_array($entity->getValue())
+				) {
 					$this->setDeviceControls($device, Utils\ArrayHash::from($entity->getValue()));
 				}
 
@@ -205,32 +173,32 @@ final class Device implements Consumers\Consumer
 			'Consumed device message',
 			[
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'   => 'device-message-consumer',
+				'type' => 'device-message-consumer',
 				'device' => [
 					'identifier' => $entity->getDevice(),
 				],
-				'data'   => $entity->toArray(),
-			]
+				'data' => $entity->toArray(),
+			],
 		);
 
 		return true;
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Devices\IDevice $device
-	 * @param Utils\ArrayHash<string> $properties
+	 * @phpstan-param Utils\ArrayHash<string> $properties
 	 *
-	 * @return void
+	 * @throws Metadata\Exceptions\FileNotFound
 	 */
 	private function setDeviceProperties(
-		DevicesModuleEntities\Devices\IDevice $device,
-		Utils\ArrayHash $properties
-	): void {
+		DevicesModuleEntities\Devices\Device $device,
+		Utils\ArrayHash $properties,
+	): void
+	{
 		foreach ($properties as $propertyName) {
 			if ($propertyName === Types\DevicePropertyIdentifier::IDENTIFIER_STATE) {
 				$this->deviceConnectionStateManager->setState(
 					$device,
-					MetadataTypes\ConnectionStateType::get(MetadataTypes\ConnectionStateType::STATE_UNKNOWN)
+					MetadataTypes\ConnectionState::get(MetadataTypes\ConnectionState::STATE_UNKNOWN),
 				);
 			} else {
 				if ($device->findProperty($propertyName) === null) {
@@ -239,13 +207,13 @@ final class Device implements Consumers\Consumer
 						Types\DevicePropertyIdentifier::IDENTIFIER_STATUS_LED,
 					], true)) {
 						$this->devicePropertiesManager->create(Utils\ArrayHash::from([
-							'entity'     => DevicesModuleEntities\Devices\Properties\DynamicProperty::class,
-							'device'     => $device,
+							'entity' => DevicesModuleEntities\Devices\Properties\Dynamic::class,
+							'device' => $device,
 							'identifier' => $propertyName,
-							'name'       => $propertyName,
-							'settable'   => false,
-							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_STRING),
+							'name' => $propertyName,
+							'settable' => false,
+							'queryable' => false,
+							'dataType' => MetadataTypes\DataType::get(MetadataTypes\DataType::DATA_TYPE_STRING),
 						]));
 
 					} elseif (in_array($propertyName, [
@@ -256,23 +224,23 @@ final class Device implements Consumers\Consumer
 						Types\DevicePropertyIdentifier::IDENTIFIER_RSSI,
 					], true)) {
 						$this->devicePropertiesManager->create(Utils\ArrayHash::from([
-							'entity'     => DevicesModuleEntities\Devices\Properties\DynamicProperty::class,
-							'device'     => $device,
+							'entity' => DevicesModuleEntities\Devices\Properties\Dynamic::class,
+							'device' => $device,
 							'identifier' => $propertyName,
-							'name'       => $propertyName,
-							'settable'   => false,
-							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_UINT),
+							'name' => $propertyName,
+							'settable' => false,
+							'queryable' => false,
+							'dataType' => MetadataTypes\DataType::get(MetadataTypes\DataType::DATA_TYPE_UINT),
 						]));
 
 					} else {
 						$this->devicePropertiesManager->create(Utils\ArrayHash::from([
-							'entity'     => DevicesModuleEntities\Devices\Properties\DynamicProperty::class,
-							'device'     => $device,
+							'entity' => DevicesModuleEntities\Devices\Properties\Dynamic::class,
+							'device' => $device,
 							'identifier' => $propertyName,
-							'settable'   => false,
-							'queryable'  => false,
-							'dataType'   => MetadataTypes\DataTypeType::get(MetadataTypes\DataTypeType::DATA_TYPE_UNKNOWN),
+							'settable' => false,
+							'queryable' => false,
+							'dataType' => MetadataTypes\DataType::get(MetadataTypes\DataType::DATA_TYPE_UNKNOWN),
 						]));
 					}
 				}
@@ -288,39 +256,37 @@ final class Device implements Consumers\Consumer
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Devices\IDevice $device
-	 * @param Utils\ArrayHash<string> $extensions
-	 *
-	 * @return void
+	 * @phpstan-param Utils\ArrayHash<string> $extensions
 	 */
 	private function setDeviceExtensions(
-		DevicesModuleEntities\Devices\IDevice $device,
-		Utils\ArrayHash $extensions
-	): void {
+		DevicesModuleEntities\Devices\Device $device,
+		Utils\ArrayHash $extensions,
+	): void
+	{
 		foreach ($extensions as $extensionName) {
 			if ($extensionName === Types\ExtensionType::EXTENSION_TYPE_FASTYBIRD_HARDWARE) {
 				foreach ([
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MAC_ADDRESS,
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MANUFACTURER,
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MODEL,
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_VERSION,
-						 ] as $attributeName) {
+					Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MAC_ADDRESS,
+					Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MANUFACTURER,
+					Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_MODEL,
+					Types\DeviceAttributeIdentifier::IDENTIFIER_HARDWARE_VERSION,
+				] as $attributeName) {
 					if ($device->findAttribute($attributeName) === null) {
 						$this->deviceAttributesManager->create(Utils\ArrayHash::from([
-							'device'     => $device,
+							'device' => $device,
 							'identifier' => $attributeName,
 						]));
 					}
 				}
 			} elseif ($extensionName === Types\ExtensionType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE) {
 				foreach ([
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_MANUFACTURER,
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_NAME,
-							 Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_VERSION,
-						 ] as $attributeName) {
+					Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_MANUFACTURER,
+					Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_NAME,
+					Types\DeviceAttributeIdentifier::IDENTIFIER_FIRMWARE_VERSION,
+				] as $attributeName) {
 					if ($device->findAttribute($attributeName) === null) {
 						$this->deviceAttributesManager->create(Utils\ArrayHash::from([
-							'device'     => $device,
+							'device' => $device,
 							'identifier' => $attributeName,
 						]));
 					}
@@ -330,20 +296,18 @@ final class Device implements Consumers\Consumer
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Devices\IDevice $device
-	 * @param Utils\ArrayHash<string> $controls
-	 *
-	 * @return void
+	 * @phpstan-param Utils\ArrayHash<string> $controls
 	 */
 	private function setDeviceControls(
-		DevicesModuleEntities\Devices\IDevice $device,
-		Utils\ArrayHash $controls
-	): void {
+		DevicesModuleEntities\Devices\Device $device,
+		Utils\ArrayHash $controls,
+	): void
+	{
 		foreach ($controls as $controlName) {
 			if ($device->findControl($controlName) === null) {
 				$this->deviceControlManager->create(Utils\ArrayHash::from([
 					'device' => $device,
-					'name'   => $controlName,
+					'name' => $controlName,
 				]));
 			}
 		}
@@ -357,19 +321,17 @@ final class Device implements Consumers\Consumer
 	}
 
 	/**
-	 * @param DevicesModuleEntities\Devices\IDevice $device
-	 * @param Utils\ArrayHash<string> $channels
-	 *
-	 * @return void
+	 * @phpstan-param Utils\ArrayHash<string> $channels
 	 */
 	private function setDeviceChannels(
-		DevicesModuleEntities\Devices\IDevice $device,
-		Utils\ArrayHash $channels
-	): void {
+		DevicesModuleEntities\Devices\Device $device,
+		Utils\ArrayHash $channels,
+	): void
+	{
 		foreach ($channels as $channelName) {
 			if ($device->findChannel($channelName) === null) {
 				$this->channelsManager->create(Utils\ArrayHash::from([
-					'device'     => $device,
+					'device' => $device,
 					'identifier' => $channelName,
 				]));
 			}

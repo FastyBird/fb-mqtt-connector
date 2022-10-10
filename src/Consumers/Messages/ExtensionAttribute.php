@@ -27,6 +27,8 @@ use FastyBird\Metadata;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
+use function assert;
+use function sprintf;
 
 /**
  * Device extension MQTT message consumer
@@ -41,68 +43,46 @@ final class ExtensionAttribute implements Consumers\Consumer
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\Devices\IDevicesRepository */
-	private DevicesModuleModels\Devices\IDevicesRepository $deviceRepository;
-
-	/** @var DevicesModuleModels\Devices\Attributes\IAttributesManager */
-	private DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager;
-
-	/** @var Helpers\Database */
-	private Helpers\Database $databaseHelper;
-
-	/** @var Log\LoggerInterface */
 	private Log\LoggerInterface $logger;
 
-	/**
-	 * @param DevicesModuleModels\Devices\IDevicesRepository $deviceRepository
-	 * @param DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager
-	 * @param Helpers\Database $databaseHelper
-	 * @param Log\LoggerInterface|null $logger
-	 */
 	public function __construct(
-		DevicesModuleModels\Devices\IDevicesRepository $deviceRepository,
-		DevicesModuleModels\Devices\Attributes\IAttributesManager $attributesManager,
-		Helpers\Database $databaseHelper,
-		?Log\LoggerInterface $logger = null
-	) {
-		$this->deviceRepository = $deviceRepository;
-		$this->attributesManager = $attributesManager;
-
-		$this->databaseHelper = $databaseHelper;
-
+		private readonly DevicesModuleModels\Devices\DevicesRepository $deviceRepository,
+		private readonly DevicesModuleModels\Devices\Attributes\AttributesManager $attributesManager,
+		private readonly Helpers\Database $databaseHelper,
+		Log\LoggerInterface|null $logger = null,
+	)
+	{
 		$this->logger = $logger ?? new Log\NullLogger();
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
 	 * @throws DBAL\Exception
 	 */
-	public function consume(
-		Entities\Messages\Entity $entity
-	): bool {
+	public function consume(Entities\Messages\Entity $entity): bool
+	{
 		if (!$entity instanceof Entities\Messages\ExtensionAttribute) {
 			return false;
 		}
 
-		/** @var DevicesModuleEntities\Devices\IDevice|null $device */
-		$device = $this->databaseHelper->query(function () use ($entity): ?DevicesModuleEntities\Devices\IDevice {
-			$findDeviceQuery = new DevicesModuleQueries\FindDevicesQuery();
+		/** @var mixed $device */
+		$device = $this->databaseHelper->query(function () use ($entity): DevicesModuleEntities\Devices\Device|null {
+			$findDeviceQuery = new DevicesModuleQueries\FindDevices();
 			$findDeviceQuery->byIdentifier($entity->getDevice());
 
 			return $this->deviceRepository->findOneBy($findDeviceQuery);
 		});
+		assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 		if ($device === null) {
 			$this->logger->error(
 				sprintf('Device "%s" is not registered', $entity->getDevice()),
 				[
 					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'   => 'extension-attribute-message-consumer',
+					'type' => 'extension-attribute-message-consumer',
 					'device' => [
 						'identifier' => $entity->getDevice(),
 					],
-				]
+				],
 			);
 
 			return true;
@@ -165,15 +145,15 @@ final class ExtensionAttribute implements Consumers\Consumer
 			$this->logger->error(
 				sprintf('Device attribute "%s" is not registered', $entity->getParameter()),
 				[
-					'source'    => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-					'type'      => 'extension-attribute-message-consumer',
-					'device'    => [
+					'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
+					'type' => 'extension-attribute-message-consumer',
+					'device' => [
 						'identifier' => $entity->getDevice(),
 					],
 					'attribute' => [
 						'identifier' => $entity->getParameter(),
 					],
-				]
+				],
 			);
 
 			return true;
@@ -191,12 +171,12 @@ final class ExtensionAttribute implements Consumers\Consumer
 			'Consumed extension attribute message',
 			[
 				'source' => Metadata\Constants::CONNECTOR_FB_MQTT_SOURCE,
-				'type'   => 'extension-attribute-message-consumer',
+				'type' => 'extension-attribute-message-consumer',
 				'device' => [
 					'id' => $device->getId()->toString(),
 				],
-				'data'   => $entity->toArray(),
-			]
+				'data' => $entity->toArray(),
+			],
 		);
 
 		return true;

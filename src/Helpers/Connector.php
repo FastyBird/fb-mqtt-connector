@@ -19,8 +19,12 @@ use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
+use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use Nette;
 use Ramsey\Uuid;
+use function is_numeric;
+use function is_string;
+use function strval;
 
 /**
  * Useful connector helpers
@@ -35,16 +39,10 @@ final class Connector
 
 	use Nette\SmartObject;
 
-	/** @var DevicesModuleModels\DataStorage\IConnectorPropertiesRepository */
-	private DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $propertiesRepository;
-
-	/**
-	 * @param DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $propertiesRepository
-	 */
 	public function __construct(
-		DevicesModuleModels\DataStorage\IConnectorPropertiesRepository $propertiesRepository
-	) {
-		$this->propertiesRepository = $propertiesRepository;
+		private readonly DevicesModuleModels\DataStorage\ConnectorPropertiesRepository $propertiesRepository,
+	)
+	{
 	}
 
 	/**
@@ -53,23 +51,40 @@ final class Connector
 	 *
 	 * @return float|bool|int|string|null
 	 */
+
+	/**
+	 * @throws MetadataExceptions\FileNotFound
+	 */
 	public function getConfiguration(
 		Uuid\UuidInterface $connectorId,
-		Types\ConnectorPropertyIdentifier $type
-	): float|bool|int|string|null {
+		Types\ConnectorPropertyIdentifier $type,
+	): float|bool|int|string|null
+	{
 		$configuration = $this->propertiesRepository->findByIdentifier($connectorId, strval($type->getValue()));
 
-		if ($configuration instanceof MetadataEntities\Modules\DevicesModule\IConnectorStaticPropertyEntity) {
+		if ($configuration instanceof MetadataEntities\DevicesModule\ConnectorVariableProperty) {
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SERVER) {
-				return is_string($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
+				return is_string(
+					$configuration->getValue(),
+				)
+					? $configuration->getValue()
+					: FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT) {
-				return is_numeric($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
+				return is_numeric(
+					$configuration->getValue(),
+				)
+					? $configuration->getValue()
+					: FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SECURED_PORT) {
-				return is_numeric($configuration->getValue()) ? $configuration->getValue() : FbMqttConnector\Constants::BROKER_LOCALHOST_SECURED_PORT;
+				return is_numeric(
+					$configuration->getValue(),
+				)
+					? $configuration->getValue()
+					: FbMqttConnector\Constants::BROKER_LOCALHOST_SECURED_PORT;
 			}
 
 			if (
@@ -80,7 +95,11 @@ final class Connector
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PROTOCOL_VERSION) {
-				return Types\ProtocolVersion::isValidValue($configuration->getValue()) ? $configuration->getValue() : null;
+				return Types\ProtocolVersion::isValidValue(
+					$configuration->getValue(),
+				)
+					? $configuration->getValue()
+					: null;
 			}
 
 			return $configuration->getValue();

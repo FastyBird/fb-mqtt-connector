@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases;
+namespace Tests\Cases\Unit;
 
 use FastyBird\DevicesModule;
 use FastyBird\DevicesModule\DataStorage as DevicesModuleDataStorage;
@@ -32,8 +32,8 @@ final class ConnectorFactoryTest extends DbTestCase
 
 	public function testCreateConnector(): void
 	{
-		/** @var DevicesModule\Models\DataStorage\IConnectorsRepository $connectorsRepository */
-		$connectorsRepository = $this->getContainer()->getByType(DevicesModule\Models\DataStorage\IConnectorsRepository::class);
+		/** @var DevicesModule\Models\DataStorage\ConnectorsRepository $connectorsRepository */
+		$connectorsRepository = $this->getContainer()->getByType(DevicesModule\Models\DataStorage\ConnectorsRepository::class);
 
 		/** @var Connector\ConnectorFactory $factory */
 		$factory = $this->getContainer()->getByType(Connector\ConnectorFactory::class);

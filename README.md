@@ -1,7 +1,5 @@
 # FastyBird IoT MQTT connector
 
-***
-
 [![Build Status](https://badgen.net/github/checks/FastyBird/fb-mqtt-connector/master?cache=300&style=flast-square)](https://github.com/FastyBird/fb-mqtt-connector/actions)
 [![Licence](https://badgen.net/github/license/FastyBird/fb-mqtt-connector?cache=300&style=flast-square)](https://github.com/FastyBird/fb-mqtt-connector/blob/master/LICENSE.md)
 [![Code coverage](https://badgen.net/coveralls/c/github/FastyBird/fb-mqtt-connector?cache=300&style=flast-square)](https://coveralls.io/r/FastyBird/fb-mqtt-connector)

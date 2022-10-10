@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases;
+namespace Tests\Cases\Unit;
 
 use FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Consumers;

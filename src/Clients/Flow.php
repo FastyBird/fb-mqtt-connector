@@ -29,34 +29,13 @@ use React\Promise;
 class Flow implements Mqtt\Flow
 {
 
-	/** @var Mqtt\Flow */
-	private Mqtt\Flow $decorated;
-
-	/** @var Promise\Deferred */
-	private Promise\Deferred $deferred;
-
-	/** @var Mqtt\Packet|null */
-	private ?Mqtt\Packet $packet;
-
-	/** @var bool */
-	private bool $isSilent;
-
-	/**
-	 * @param Mqtt\Flow $decorated
-	 * @param Promise\Deferred $deferred
-	 * @param Mqtt\Packet|null $packet
-	 * @param bool $isSilent
-	 */
 	public function __construct(
-		Mqtt\Flow $decorated,
-		Promise\Deferred $deferred,
-		?Mqtt\Packet $packet = null,
-		bool $isSilent = false
-	) {
-		$this->decorated = $decorated;
-		$this->deferred = $deferred;
-		$this->packet = $packet;
-		$this->isSilent = $isSilent;
+		private readonly Mqtt\Flow $decorated,
+		private readonly Promise\Deferred $deferred,
+		private Mqtt\Packet|null $packet = null,
+		private readonly bool $isSilent = false,
+	)
+	{
 	}
 
 	public function getCode(): string
@@ -64,7 +43,7 @@ class Flow implements Mqtt\Flow
 		return $this->decorated->getCode();
 	}
 
-	public function start(): ?Mqtt\Packet
+	public function start(): Mqtt\Packet|null
 	{
 		$this->packet = $this->decorated->start();
 
@@ -76,7 +55,7 @@ class Flow implements Mqtt\Flow
 		return $this->decorated->accept($packet);
 	}
 
-	public function next(Mqtt\Packet $packet): ?Mqtt\Packet
+	public function next(Mqtt\Packet $packet): Mqtt\Packet|null
 	{
 		$this->packet = $this->decorated->next($packet);
 
@@ -114,7 +93,7 @@ class Flow implements Mqtt\Flow
 	/**
 	 * Returns the current packet.
 	 */
-	public function getPacket(): ?Mqtt\Packet
+	public function getPacket(): Mqtt\Packet|null
 	{
 		return $this->packet;
 	}
