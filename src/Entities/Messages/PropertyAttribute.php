@@ -21,6 +21,15 @@ use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
+use function array_filter;
+use function array_map;
+use function array_unique;
+use function array_values;
+use function explode;
+use function in_array;
+use function is_numeric;
+use function sprintf;
+use function strtolower;
 
 /**
  * Device or channel property attribute
@@ -36,19 +45,22 @@ final class PropertyAttribute
 	use Nette\SmartObject;
 
 	public const NAME = 'name';
-	public const TYPE = 'type';
+
 	public const SETTABLE = 'settable';
+
 	public const QUERYABLE = 'queryable';
-	public const DATATYPE = 'data-type';
+
+	public const DATA_TYPE = 'data-type';
+
 	public const FORMAT = 'format';
+
 	public const UNIT = 'unit';
 
 	public const ALLOWED_ATTRIBUTES = [
 		self::NAME,
-		self::TYPE,
 		self::SETTABLE,
 		self::QUERYABLE,
-		self::DATATYPE,
+		self::DATA_TYPE,
 		self::FORMAT,
 		self::UNIT,
 	];
@@ -58,37 +70,29 @@ final class PropertyAttribute
 		'hsv',
 	];
 
-	/** @var string */
-	private string $attribute;
+	/** @var string|Array<string>|Array<float>|Array<null>|bool|MetadataTypes\DataType|null */
+	private MetadataTypes\DataType|string|array|bool|null $value = null;
 
-	/** @var string|string[]|float[]|null[]|bool|MetadataTypes\DataTypeType|null */
-	private $value = null;
-
-	public function __construct(
-		string $attribute,
-		string $value
-	) {
+	public function __construct(private readonly string $attribute, string $value)
+	{
 		if (!in_array($attribute, self::ALLOWED_ATTRIBUTES, true)) {
-			throw new Exceptions\InvalidArgumentException(sprintf('Provided property parameter "%s" is not in allowed range', $attribute));
+			throw new Exceptions\InvalidArgument(
+				sprintf('Provided property parameter "%s" is not in allowed range', $attribute),
+			);
 		}
-
-		$this->attribute = $attribute;
 
 		$this->parseValue($value);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getAttribute(): string
 	{
 		return $this->attribute;
 	}
 
 	/**
-	 * @return string|string[]|float[]|null[]|bool|MetadataTypes\DataTypeType|null
+	 * @return string|Array<string>|Array<float>|Array<null>|bool|MetadataTypes\DataType|null
 	 */
-	public function getValue()
+	public function getValue(): string|array|bool|MetadataTypes\DataType|null
 	{
 		if ($this->value === null) {
 			return null;
@@ -105,38 +109,35 @@ final class PropertyAttribute
 	}
 
 	/**
-	 * @return mixed[]
+	 * @return Array<mixed>
 	 */
 	public function toArray(): array
 	{
 		return [
 			'attribute' => $this->getAttribute(),
-			'value'     => $this->getValue(),
+			'value' => $this->getValue(),
 		];
 	}
 
-	/**
-	 * @param string $value
-	 *
-	 * @return void
-	 */
 	private function parseValue(string $value): void
 	{
 		if (
 			$this->getAttribute() === self::SETTABLE
 			|| $this->getAttribute() === self::QUERYABLE
 		) {
-			$this->value = $value === FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE ? FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE : FbMqttConnector\Constants::PAYLOAD_BOOL_FALSE_VALUE;
+			$this->value = $value === FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE
+				? FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE
+				: FbMqttConnector\Constants::PAYLOAD_BOOL_FALSE_VALUE;
 
 		} elseif ($this->getAttribute() === self::NAME) {
-			$this->value = Helpers\PayloadHelper::cleanName($value);
+			$this->value = Helpers\Payload::cleanName($value);
 
-		} elseif ($this->getAttribute() === self::DATATYPE) {
-			if (!MetadataTypes\DataTypeType::isValidValue($value)) {
-				throw new Exceptions\ParseMessageException('Provided payload is not valid');
+		} elseif ($this->getAttribute() === self::DATA_TYPE) {
+			if (!MetadataTypes\DataType::isValidValue($value)) {
+				throw new Exceptions\ParseMessage('Provided payload is not valid');
 			}
 
-			$this->value = MetadataTypes\DataTypeType::get($value);
+			$this->value = MetadataTypes\DataType::get($value);
 
 		} elseif ($this->getAttribute() === self::FORMAT) {
 			if (Utils\Strings::contains($value, ':')) {
@@ -146,11 +147,11 @@ final class PropertyAttribute
 				$end = $end === '' ? null : $end;
 
 				if ($start !== null && is_numeric($start) === false) {
-					throw new Exceptions\ParseMessageException('Provided payload is not valid');
+					throw new Exceptions\ParseMessage('Provided payload is not valid');
 				}
 
 				if ($end !== null && is_numeric($end) === false) {
-					throw new Exceptions\ParseMessageException('Provided payload is not valid');
+					throw new Exceptions\ParseMessage('Provided payload is not valid');
 				}
 
 				if ($start !== null) {
@@ -162,7 +163,7 @@ final class PropertyAttribute
 				}
 
 				if ($start !== null && $end !== null && $start > $end) {
-					throw new Exceptions\ParseMessageException('Provided payload is not valid');
+					throw new Exceptions\ParseMessage('Provided payload is not valid');
 				}
 
 				$this->value = [$start, $end];
@@ -170,9 +171,7 @@ final class PropertyAttribute
 			} elseif (Utils\Strings::contains($value, ',')) {
 				$value = array_filter(
 					array_map('trim', explode(',', strtolower($value))),
-					function ($item): bool {
-						return $item !== '';
-					}
+					static fn ($item): bool => $item !== '',
 				);
 
 				$value = array_values($value);
@@ -183,7 +182,7 @@ final class PropertyAttribute
 				$this->value = null;
 
 			} elseif (!in_array($value, self::FORMAT_ALLOWED_PAYLOADS, true)) {
-				throw new Exceptions\ParseMessageException('Provided payload is not valid');
+				throw new Exceptions\ParseMessage('Provided payload is not valid');
 			}
 		} else {
 			$this->value = $value === FbMqttConnector\Constants::VALUE_NOT_SET || $value === '' ? null : $value;

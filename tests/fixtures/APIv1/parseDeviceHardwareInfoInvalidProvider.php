@@ -3,9 +3,9 @@
 use FastyBird\FbMqttConnector\Exceptions;
 
 return [
-	'hw-not-valid'       => [
+	'hw-not-valid' => [
 		'/fb/v1/device-name/$hw/not-valid',
-		Exceptions\ParseMessageException::class,
+		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',
 	],
 ];

@@ -16,6 +16,7 @@
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
 use Nette;
+use Ramsey\Uuid;
 
 /**
  * Base data entity
@@ -25,54 +26,45 @@ use Nette;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-abstract class Entity implements IEntity
+abstract class Entity
 {
 
 	use Nette\SmartObject;
 
-	/** @var string */
-	private string $device;
-
-	/** @var bool */
 	private bool $retained = false;
 
-	public function __construct(string $device)
+	public function __construct(private readonly Uuid\UuidInterface $connector, private readonly string $device)
 	{
-		$this->device = $device;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	public function getConnector(): Uuid\UuidInterface
+	{
+		return $this->connector;
+	}
+
 	public function getDevice(): string
 	{
 		return $this->device;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function isRetained(): bool
 	{
 		return $this->retained;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public function setRetained(bool $retained): void
 	{
 		$this->retained = $retained;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return Array<mixed>
 	 */
 	public function toArray(): array
 	{
 		return [
-			'device'    => $this->getDevice(),
-			'retained'  => $this->isRetained(),
+			'device' => $this->getDevice(),
+			'retained' => $this->isRetained(),
 		];
 	}
 

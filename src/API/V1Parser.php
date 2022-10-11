@@ -18,7 +18,11 @@ namespace FastyBird\FbMqttConnector\API;
 use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Helpers;
+use FastyBird\FbMqttConnector\Types;
 use Nette;
+use Ramsey\Uuid;
+use function preg_match;
+use function strtolower;
 
 /**
  * API v1 topic parser
@@ -33,54 +37,44 @@ final class V1Parser
 
 	use Nette\SmartObject;
 
-	/** @var V1Validator */
-	private V1Validator $validator;
-
-	public function __construct(
-		V1Validator $validator
-	) {
-		$this->validator = $validator;
+	public function __construct(private readonly V1Validator $validator)
+	{
 	}
 
-	/**
-	 * @param string $topic
-	 * @param string $payload
-	 * @param bool $retained
-	 *
-	 * @return Entities\Messages\IEntity
-	 */
 	public function parse(
+		Uuid\UuidInterface $connector,
 		string $topic,
 		string $payload,
-		bool $retained = false
-	): Entities\Messages\IEntity {
+		bool $retained = false,
+	): Entities\Messages\Entity
+	{
 		if (!$this->validator->validate($topic)) {
-			throw new Exceptions\ParseMessageException('Provided topic is not valid');
+			throw new Exceptions\ParseMessage('Provided topic is not valid');
 		}
 
 		if ($this->validator->validateDeviceAttribute($topic)) {
-			$entity = $this->parseDeviceAttribute($topic, $payload);
+			$entity = $this->parseDeviceAttribute($connector, $topic, $payload);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceHardwareInfo($topic)) {
-			$entity = $this->parseDeviceHardwareInfo($topic, $payload);
+			$entity = $this->parseDeviceHardwareInfo($connector, $topic, $payload);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceFirmwareInfo($topic)) {
-			$entity = $this->parseDeviceFirmwareInfo($topic, $payload);
+			$entity = $this->parseDeviceFirmwareInfo($connector, $topic, $payload);
 			$entity->setRetained($retained);
 
 			return $entity;
 		}
 
 		if ($this->validator->validateDeviceProperty($topic)) {
-			$entity = $this->parseDeviceProperty($topic, $payload);
+			$entity = $this->parseDeviceProperty($connector, $topic, $payload);
 			$entity->setRetained($retained);
 
 			return $entity;
@@ -91,93 +85,90 @@ final class V1Parser
 			[, $device] = $matches;
 
 			if ($this->validator->validateChannelAttribute($topic)) {
-				$entity = $this->parseChannelAttribute($device, $topic, $payload);
+				$entity = $this->parseChannelAttribute($connector, $device, $topic, $payload);
 				$entity->setRetained($retained);
 
 				return $entity;
 			}
 
 			if ($this->validator->validateChannelProperty($topic)) {
-				$entity = $this->parseChannelProperty($device, $topic, $payload);
+				$entity = $this->parseChannelProperty($connector, $device, $topic, $payload);
 				$entity->setRetained($retained);
 
 				return $entity;
 			}
 		}
 
-		throw new Exceptions\ParseMessageException('Provided topic is not valid');
+		throw new Exceptions\ParseMessage('Provided topic is not valid');
 	}
 
-	/**
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\DeviceAttribute
-	 */
 	private function parseDeviceAttribute(
+		Uuid\UuidInterface $connector,
 		string $topic,
-		string $payload
-	): Entities\Messages\DeviceAttribute {
+		string $payload,
+	): Entities\Messages\DeviceAttribute
+	{
 		preg_match(V1Validator::DEVICE_ATTRIBUTE_REGEXP, $topic, $matches);
 		[, $device, $attribute] = $matches;
 
 		return new Entities\Messages\DeviceAttribute(
+			$connector,
 			$device,
 			$attribute,
-			$payload
+			$payload,
 		);
 	}
 
-	/**
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\Hardware
-	 */
 	private function parseDeviceHardwareInfo(
+		Uuid\UuidInterface $connector,
 		string $topic,
-		string $payload
-	): Entities\Messages\Hardware {
+		string $payload,
+	): Entities\Messages\ExtensionAttribute
+	{
 		preg_match(V1Validator::DEVICE_HW_INFO_REGEXP, $topic, $matches);
 		[, $device, $hardware] = $matches;
 
-		return new Entities\Messages\Hardware($device, $hardware, Helpers\PayloadHelper::cleanName(strtolower($payload)));
+		return new Entities\Messages\ExtensionAttribute(
+			$connector,
+			$device,
+			Types\ExtensionType::get(Types\ExtensionType::EXTENSION_TYPE_FASTYBIRD_HARDWARE),
+			$hardware,
+			Helpers\Payload::cleanName(strtolower($payload)),
+		);
 	}
 
-	/**
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\Firmware
-	 */
 	private function parseDeviceFirmwareInfo(
+		Uuid\UuidInterface $connector,
 		string $topic,
-		string $payload
-	): Entities\Messages\Firmware {
+		string $payload,
+	): Entities\Messages\ExtensionAttribute
+	{
 		preg_match(V1Validator::DEVICE_FW_INFO_REGEXP, $topic, $matches);
 		[, $device, $firmware] = $matches;
 
-		return new Entities\Messages\Firmware($device, $firmware, Helpers\PayloadHelper::cleanName(strtolower($payload)));
+		return new Entities\Messages\ExtensionAttribute(
+			$connector,
+			$device,
+			Types\ExtensionType::get(Types\ExtensionType::EXTENSION_TYPE_FASTYBIRD_FIRMWARE),
+			$firmware,
+			Helpers\Payload::cleanName(strtolower($payload)),
+		);
 	}
 
-	/**
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\DeviceProperty
-	 */
 	private function parseDeviceProperty(
+		Uuid\UuidInterface $connector,
 		string $topic,
-		string $payload
-	): Entities\Messages\DeviceProperty {
+		string $payload,
+	): Entities\Messages\DeviceProperty
+	{
 		preg_match(V1Validator::DEVICE_PROPERTY_REGEXP, $topic, $matches);
 		[, $device, $property, , , $attribute] = $matches + [null, null, null, null, null, null];
 
-		$entity = new Entities\Messages\DeviceProperty((string) $device, (string) $property);
+		$entity = new Entities\Messages\DeviceProperty($connector, (string) $device, (string) $property);
 
 		if ($attribute !== null) {
 			$entity->addAttribute(
-				new Entities\Messages\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
+				new Entities\Messages\PropertyAttribute($attribute, Helpers\Payload::cleanPayload($payload)),
 			);
 
 		} else {
@@ -187,22 +178,18 @@ final class V1Parser
 		return $entity;
 	}
 
-	/**
-	 * @param string $device
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\ChannelAttribute
-	 */
 	private function parseChannelAttribute(
+		Uuid\UuidInterface $connector,
 		string $device,
 		string $topic,
-		string $payload
-	): Entities\Messages\ChannelAttribute {
+		string $payload,
+	): Entities\Messages\ChannelAttribute
+	{
 		preg_match(V1Validator::CHANNEL_ATTRIBUTE_REGEXP, $topic, $matches);
 		[, , $channel, $attribute] = $matches;
 
 		return new Entities\Messages\ChannelAttribute(
+			$connector,
 			$device,
 			$channel,
 			$attribute,
@@ -210,26 +197,26 @@ final class V1Parser
 		);
 	}
 
-	/**
-	 * @param string $device
-	 * @param string $topic
-	 * @param string $payload
-	 *
-	 * @return Entities\Messages\ChannelProperty
-	 */
 	private function parseChannelProperty(
+		Uuid\UuidInterface $connector,
 		string $device,
 		string $topic,
-		string $payload
-	): Entities\Messages\ChannelProperty {
+		string $payload,
+	): Entities\Messages\ChannelProperty
+	{
 		preg_match(V1Validator::CHANNEL_PROPERTY_REGEXP, $topic, $matches);
 		[, , $channel, $property, , , $attribute] = $matches + [null, null, null, null, null, null, null];
 
-		$entity = new Entities\Messages\ChannelProperty($device, (string) $channel, (string) $property);
+		$entity = new Entities\Messages\ChannelProperty(
+			$connector,
+			$device,
+			(string) $channel,
+			(string) $property,
+		);
 
 		if ($attribute !== null) {
 			$entity->addAttribute(
-				new Entities\Messages\PropertyAttribute($attribute, Helpers\PayloadHelper::cleanPayload($payload))
+				new Entities\Messages\PropertyAttribute($attribute, Helpers\Payload::cleanPayload($payload)),
 			);
 
 		} else {

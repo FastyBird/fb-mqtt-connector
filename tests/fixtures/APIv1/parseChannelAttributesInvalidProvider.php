@@ -4,14 +4,14 @@ use FastyBird\FbMqttConnector\Entities;
 use FastyBird\FbMqttConnector\Exceptions;
 
 return [
-	'attr-' . Entities\Messages\Attribute::CHANNELS       => [
+	'attr-' . Entities\Messages\Attribute::CHANNELS => [
 		'/fb/v1/device-name/$channel/channel-name/$' . Entities\Messages\Attribute::CHANNELS,
-		Exceptions\ParseMessageException::class,
+		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',
 	],
-	'attr-other'                                 => [
+	'attr-other' => [
 		'/fb/v1/device-name/$channel/channel-name/$other',
-		Exceptions\ParseMessageException::class,
+		Exceptions\ParseMessage::class,
 		'Provided topic is not valid',
 	],
 ];

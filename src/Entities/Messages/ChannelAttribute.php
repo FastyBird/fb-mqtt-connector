@@ -15,6 +15,9 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use Ramsey\Uuid;
+use function array_merge;
+
 /**
  * Channel attribute
  *
@@ -29,32 +32,20 @@ final class ChannelAttribute extends Attribute
 	public const ALLOWED_ATTRIBUTES = [
 		self::NAME,
 		self::PROPERTIES,
-		self::CONTROL,
+		self::CONTROLS,
 	];
 
-	/** @var string */
-	private string $channel;
-
-	/**
-	 * @param string $device
-	 * @param string $channel
-	 * @param string $attribute
-	 * @param string $value
-	 */
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
-		string $channel,
+		private readonly string $channel,
 		string $attribute,
-		string $value
-	) {
-		parent::__construct($device, $attribute, $value);
-
-		$this->channel = $channel;
+		string $value,
+	)
+	{
+		parent::__construct($connector, $device, $attribute, $value);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getChannel(): string
 	{
 		return $this->channel;

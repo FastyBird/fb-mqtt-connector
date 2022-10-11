@@ -15,7 +15,11 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use FastyBird\FbMqttConnector;
+use Ramsey\Uuid;
 use SplObjectStorage;
+use function array_merge;
+use function assert;
 
 /**
  * Device or channel property
@@ -28,31 +32,22 @@ use SplObjectStorage;
 abstract class Property extends Entity
 {
 
-	/** @var string */
-	private string $property;
-
-	/** @var string|null */
-	private ?string $value = null;
+	private string|null $value = FbMqttConnector\Constants::VALUE_NOT_SET;
 
 	/** @var SplObjectStorage<PropertyAttribute, null> */
 	private SplObjectStorage $attributes;
 
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
-		string $property
-	) {
-		parent::__construct($device);
-
-		$this->property = $property;
+		private readonly string $property,
+	)
+	{
+		parent::__construct($connector, $device);
 
 		$this->attributes = new SplObjectStorage();
 	}
 
-	/**
-	 * @param PropertyAttribute $attribute
-	 *
-	 * @return void
-	 */
 	public function addAttribute(PropertyAttribute $attribute): void
 	{
 		if (!$this->attributes->contains($attribute)) {
@@ -60,42 +55,31 @@ abstract class Property extends Entity
 		}
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getProperty(): string
 	{
 		return $this->property;
 	}
 
 	/**
-	 * @return PropertyAttribute[]
+	 * @return Array<PropertyAttribute>
 	 */
 	public function getAttributes(): array
 	{
 		$data = [];
 
-		/** @var PropertyAttribute $item */
 		foreach ($this->attributes as $item) {
+			assert($item instanceof PropertyAttribute);
 			$data[] = $item;
 		}
 
 		return $data;
 	}
 
-	/**
-	 * @return string|null
-	 */
-	public function getValue(): ?string
+	public function getValue(): string|null
 	{
 		return $this->value;
 	}
 
-	/**
-	 * @param string $value
-	 *
-	 * @return void
-	 */
 	public function setValue(string $value): void
 	{
 		$this->value = $value;
@@ -114,7 +98,7 @@ abstract class Property extends Entity
 			$return[$attribute->getAttribute()] = $attribute->getValue();
 		}
 
-		if ($this->getValue() !== null) {
+		if ($this->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
 			$return['value'] = $this->getValue();
 		}
 

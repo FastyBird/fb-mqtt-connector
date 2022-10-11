@@ -17,6 +17,9 @@ namespace FastyBird\FbMqttConnector\API;
 
 use FastyBird\FbMqttConnector;
 use Nette;
+use function preg_match;
+use function str_contains;
+use function trim;
 
 /**
  * API v1 topic validator
@@ -40,34 +43,33 @@ final class V1Validator
 	// TOPIC: /fb/v1/<device>/$channel/<channel>/*
 	public const CHANNEL_PARTIAL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$channel\/([a-z0-9-]+)\/.*$/';
 
-	// TOPIC: /fb/v1/<device>/<$name|$properties|$control|$channels|$extensions>
-	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|control|channels|extensions)$/';
+	// TOPIC: /fb/v1/<device>/<$state|$name|$properties|$controls|$channels|$extensions>
+	public const DEVICE_ATTRIBUTE_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$(state|name|properties|controls|channels|extensions)$/';
 
 	// TOPIC: /fb/v1/<device>/$hw/<mac-address|manufacturer|model|version>
 	public const DEVICE_HW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$hw\/(mac-address|manufacturer|model|version)$/';
+
 	// TOPIC: /fb/v1/<device>/$fw/<manufacturer|name|version>
 	public const DEVICE_FW_INFO_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$fw\/(manufacturer|name|version)$/';
 
-	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
+	// TOPIC: /fb/v1/<device>/$property/<property-name>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
+	// phpcs:ignore SlevomatCodingStandard.Files.LineLength.LineTooLong
+	public const DEVICE_PROPERTY_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
-	// TOPIC: /fb/v1/<device>/$control/<configure|reset|reconnect|factory-reset|ota>[/$schema]
-	public const DEVICE_CONTROL_REGEXP = '/^\/fb\/v1\/([a-z0-9-]+)\/\$control\/(configure|reset|reconnect|factory-reset|ota)((\/\$)(schema))?$/';
+	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$controls>
+	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|controls)$/';
 
-	// TOPIC: /fb/v1/*/$channel/<channel>/<$name|$properties|$control>
-	public const CHANNEL_ATTRIBUTE_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$(name|properties|control)$/';
-	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$type|$settable|$queryable|$data-type|$format|$unit>]
-	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|type|settable|queryable|data-type|format|unit))?$/';
+	// TOPIC: /fb/v1/*/$channel/<channel>/$property/<property-name>[/<$name|$settable|$queryable|$data-type|$format|$unit>]
+	// phpcs:ignore SlevomatCodingStandard.Files.LineLength.LineTooLong
+	public const CHANNEL_PROPERTY_REGEXP = '/\/(.*)\/\$channel\/([a-z0-9-]+)\/\$property\/([a-z0-9-]+)((\/\$)(name|settable|queryable|data-type|format|unit))?$/';
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validate(string $topic): bool
 	{
 		// Check if message is sent from broker
-		if (strpos(trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER), FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set') !== false) {
+		if (str_contains(
+			trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER),
+			FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set',
+		)) {
 			return false;
 		}
 
@@ -111,91 +113,46 @@ final class V1Validator
 		return false;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateConvention(string $topic): bool
 	{
 		return preg_match(self::CONVENTION_PREFIX_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateVersion(string $topic): bool
 	{
 		return preg_match(self::API_VERSION_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateDeviceAttribute(string $topic): bool
 	{
 		return preg_match(self::DEVICE_ATTRIBUTE_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateDeviceHardwareInfo(string $topic): bool
 	{
 		return preg_match(self::DEVICE_HW_INFO_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateDeviceFirmwareInfo(string $topic): bool
 	{
 		return preg_match(self::DEVICE_FW_INFO_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateDeviceProperty(string $topic): bool
 	{
 		return preg_match(self::DEVICE_PROPERTY_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateChannelPart(string $topic): bool
 	{
 		return preg_match(self::CHANNEL_PARTIAL_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateChannelAttribute(string $topic): bool
 	{
 		return $this->validateChannelPart($topic) && preg_match(self::CHANNEL_ATTRIBUTE_REGEXP, $topic) === 1;
 	}
 
-	/**
-	 * @param string $topic
-	 *
-	 * @return bool
-	 */
 	public function validateChannelProperty(string $topic): bool
 	{
 		return $this->validateChannelPart($topic) && preg_match(self::CHANNEL_PROPERTY_REGEXP, $topic) === 1;

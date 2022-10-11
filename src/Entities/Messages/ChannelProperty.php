@@ -15,6 +15,9 @@
 
 namespace FastyBird\FbMqttConnector\Entities\Messages;
 
+use Ramsey\Uuid;
+use function array_merge;
+
 /**
  * Device or channel property
  *
@@ -26,17 +29,14 @@ namespace FastyBird\FbMqttConnector\Entities\Messages;
 final class ChannelProperty extends Property
 {
 
-	/** @var string */
-	private string $channel;
-
 	public function __construct(
+		Uuid\UuidInterface $connector,
 		string $device,
-		string $channel,
-		string $property
-	) {
-		parent::__construct($device, $property);
-
-		$this->channel = $channel;
+		private readonly string $channel,
+		string $property,
+	)
+	{
+		parent::__construct($connector, $device, $property);
 	}
 
 	/**
@@ -49,9 +49,6 @@ final class ChannelProperty extends Property
 		], parent::toArray());
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getChannel(): string
 	{
 		return $this->channel;

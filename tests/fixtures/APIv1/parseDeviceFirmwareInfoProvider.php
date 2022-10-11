@@ -3,22 +3,22 @@
 use FastyBird\FbMqttConnector\Entities;
 
 return [
-	'fw-' . Entities\Messages\Firmware::MANUFACTURER       => [
-		'/fb/v1/device-name/$fw/' . Entities\Messages\Firmware::MANUFACTURER,
+	'fw-' . Entities\Messages\ExtensionAttribute::MANUFACTURER => [
+		'/fb/v1/device-name/$fw/' . Entities\Messages\ExtensionAttribute::MANUFACTURER,
 		'value-content',
 		[
-			'device'                                 => 'device-name',
-			'retained'                               => false,
-			Entities\Messages\Firmware::MANUFACTURER => 'value-content',
+			'device' => 'device-name',
+			'retained' => false,
+			Entities\Messages\ExtensionAttribute::MANUFACTURER => 'value-content',
 		],
 	],
-	'fw-' . Entities\Messages\Firmware::VERSION            => [
-		'/fb/v1/device-name/$fw/' . Entities\Messages\Firmware::VERSION,
+	'fw-' . Entities\Messages\ExtensionAttribute::VERSION => [
+		'/fb/v1/device-name/$fw/' . Entities\Messages\ExtensionAttribute::VERSION,
 		'value-content',
 		[
-			'device'                            => 'device-name',
-			'retained'                          => false,
-			Entities\Messages\Firmware::VERSION => 'value-content',
+			'device' => 'device-name',
+			'retained' => false,
+			Entities\Messages\ExtensionAttribute::VERSION => 'value-content',
 		],
 	],
 ];
