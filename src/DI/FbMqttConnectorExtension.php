@@ -82,19 +82,6 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 				->setFactory('React\EventLoop\Factory::create');
 		}
 
-		// Service factory
-		$builder->addFactoryDefinition($this->prefix('executor.factory'))
-			->setImplement(Connector\ConnectorFactory::class)
-			->addTag(
-				DevicesModuleDI\DevicesModuleExtension::CONNECTOR_TYPE_TAG,
-				Entities\FbMqttConnector::CONNECTOR_TYPE,
-			)
-			->getResultDefinition()
-			->setType(Connector\Connector::class)
-			->setArguments([
-				'clientsFactories' => $builder->findByType(Clients\ClientFactory::class),
-			]);
-
 		// MQTT v1 API client
 		$builder->addFactoryDefinition($this->prefix('client.apiv1'))
 			->setImplement(Clients\FbMqttV1Factory::class)
@@ -112,12 +99,6 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 			->setType(API\V1Builder::class);
 
 		// Consumers
-		$builder->addDefinition($this->prefix('consumer.proxy'), new DI\Definitions\ServiceDefinition())
-			->setType(Consumers\Messages::class)
-			->setArguments([
-				'consumers' => $builder->findByType(Consumers\Consumer::class),
-			]);
-
 		$builder->addDefinition(
 			$this->prefix('consumer.device.attribute.message'),
 			new DI\Definitions\ServiceDefinition(),
@@ -148,6 +129,12 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		)
 			->setType(Consumers\Messages\ChannelProperty::class);
 
+		$builder->addDefinition($this->prefix('consumer.proxy'), new DI\Definitions\ServiceDefinition())
+			->setType(Consumers\Messages::class)
+			->setArguments([
+				'consumers' => $builder->findByType(Consumers\Consumer::class),
+			]);
+
 		// API schemas
 		$builder->addDefinition($this->prefix('schemas.connector.fbMqtt'), new DI\Definitions\ServiceDefinition())
 			->setType(Schemas\FbMqttConnector::class);
@@ -171,6 +158,19 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 
 		$builder->addDefinition($this->prefix('helpers.property'), new DI\Definitions\ServiceDefinition())
 			->setType(Helpers\Property::class);
+
+		// Service factory
+		$builder->addFactoryDefinition($this->prefix('executor.factory'))
+			->setImplement(Connector\ConnectorFactory::class)
+			->addTag(
+				DevicesModuleDI\DevicesModuleExtension::CONNECTOR_TYPE_TAG,
+				Entities\FbMqttConnector::CONNECTOR_TYPE,
+			)
+			->getResultDefinition()
+			->setType(Connector\Connector::class)
+			->setArguments([
+				'clientsFactories' => $builder->findByType(Clients\ClientFactory::class),
+			]);
 	}
 
 	public function beforeCompile(): void
