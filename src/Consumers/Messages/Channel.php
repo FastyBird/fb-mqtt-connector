@@ -27,7 +27,6 @@ use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
-use function assert;
 use function in_array;
 use function is_array;
 use function sprintf;
@@ -68,14 +67,12 @@ final class Channel implements Consumers\Consumer
 			return false;
 		}
 
-		/** @var mixed $device */
 		$device = $this->databaseHelper->query(function () use ($entity): DevicesModuleEntities\Devices\Device|null {
 			$findDeviceQuery = new DevicesModuleQueries\FindDevices();
 			$findDeviceQuery->byIdentifier($entity->getDevice());
 
 			return $this->deviceRepository->findOneBy($findDeviceQuery);
 		});
-		assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 		if ($device === null) {
 			$this->logger->error(

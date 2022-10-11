@@ -228,7 +228,6 @@ final class ChannelProperty implements Consumers\Consumer
 				}
 			}
 		} else {
-			/** @var mixed $device */
 			$device = $this->databaseHelper->query(
 				function () use ($entity): DevicesModuleEntities\Devices\Device|null {
 					$findDeviceQuery = new DevicesModuleQueries\FindDevices();
@@ -237,7 +236,6 @@ final class ChannelProperty implements Consumers\Consumer
 					return $this->deviceRepository->findOneBy($findDeviceQuery);
 				},
 			);
-			assert($device instanceof DevicesModuleEntities\Devices\Device || $device === null);
 
 			if ($device === null) {
 				$this->logger->error(
