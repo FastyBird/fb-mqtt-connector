@@ -295,7 +295,7 @@ final class ChannelProperty implements Consumers\Consumer
 				return true;
 			}
 
-			if (count($entity->getAttributes())) {
+			if (count($entity->getAttributes()) > 0) {
 				$this->databaseHelper->transaction(function () use ($entity, $property): void {
 					$toUpdate = $this->handlePropertyConfiguration($entity);
 

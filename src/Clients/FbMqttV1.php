@@ -440,7 +440,7 @@ final class FbMqttV1 extends Client
 			if (
 				$property->isSettable()
 				&& $property->getExpectedValue() !== null
-				&& $property->isPending()
+				&& $property->isPending() === true
 			) {
 				$pending = is_string($property->getPending())
 					? Utils\DateTime::createFromFormat(
@@ -506,7 +506,7 @@ final class FbMqttV1 extends Client
 				if (
 					$property->isSettable()
 					&& $property->getExpectedValue() !== null
-					&& $property->isPending()
+					&& $property->isPending() === true
 				) {
 					$pending = is_string($property->getPending())
 						? Utils\DateTime::createFromFormat(

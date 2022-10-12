@@ -19,7 +19,6 @@ use FastyBird\FbMqttConnector;
 use Ramsey\Uuid;
 use SplObjectStorage;
 use function array_merge;
-use function assert;
 
 /**
  * Device or channel property
@@ -68,7 +67,6 @@ abstract class Property extends Entity
 		$data = [];
 
 		foreach ($this->attributes as $item) {
-			assert($item instanceof PropertyAttribute);
 			$data[] = $item;
 		}
 
