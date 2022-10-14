@@ -51,6 +51,9 @@ final class ExtensionAttribute extends Entity
 		self::NAME,
 	];
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	public function __construct(
 		Uuid\UuidInterface $connector,
 		string $device,

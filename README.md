@@ -3,6 +3,7 @@
 [![Build Status](https://badgen.net/github/checks/FastyBird/fb-mqtt-connector/master?cache=300&style=flast-square)](https://github.com/FastyBird/fb-mqtt-connector/actions)
 [![Licence](https://badgen.net/github/license/FastyBird/fb-mqtt-connector?cache=300&style=flast-square)](https://github.com/FastyBird/fb-mqtt-connector/blob/master/LICENSE.md)
 [![Code coverage](https://badgen.net/coveralls/c/github/FastyBird/fb-mqtt-connector?cache=300&style=flast-square)](https://coveralls.io/r/FastyBird/fb-mqtt-connector)
+[![Mutation testing](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FFastyBird%2Ffb-mqtt-connector%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/FastyBird/fb-mqtt-connector/main)
 
 ![PHP](https://badgen.net/packagist/php/FastyBird/fb-mqtt-connector?cache=300&style=flast-square)
 [![Latest stable](https://badgen.net/packagist/v/FastyBird/fb-mqtt-connector/latest?cache=300&style=flast-square)](https://packagist.org/packages/FastyBird/fb-mqtt-connector)

@@ -23,6 +23,7 @@ use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Exceptions as MetadataExceptions;
+use InvalidArgumentException;
 use Nette;
 use React\EventLoop;
 use ReflectionClass;
@@ -63,6 +64,7 @@ final class Connector implements DevicesModuleConnectors\Connector
 
 	/**
 	 * @throws DevicesModuleExceptions\Terminate
+	 * @throws InvalidArgumentException
 	 * @throws MetadataExceptions\FileNotFound
 	 */
 	public function execute(): void

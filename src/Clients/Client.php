@@ -26,6 +26,7 @@ use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
+use InvalidArgumentException;
 use Nette;
 use Psr\Log;
 use React\EventLoop;
@@ -77,6 +78,7 @@ abstract class Client
 
 	protected bool $isDisconnecting = false;
 
+	/** @var Closure(Mqtt\Connection $connection): void|null */
 	protected Closure|null $onCloseCallback = null;
 
 	/** @var Array<EventLoop\TimerInterface> */
@@ -136,7 +138,7 @@ abstract class Client
 	/**
 	 * Connects to a broker
 	 *
-	 * @throws DevicesModuleExceptions\Terminate
+	 * @throws InvalidArgumentException
 	 * @throws Metadata\Exceptions\FileNotFound
 	 */
 	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface
@@ -546,6 +548,8 @@ abstract class Client
 
 	/**
 	 * Establishes a network connection to a server
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	private function establishConnection(string $host, int $port, int $timeout): Promise\ExtendedPromiseInterface
 	{
@@ -646,6 +650,7 @@ abstract class Client
 	 * Handles incoming data
 	 *
 	 * @throws DevicesModuleExceptions\Terminate
+	 * @throws Exceptions\Runtime
 	 */
 	private function handleReceive(string $data): void
 	{
@@ -672,6 +677,7 @@ abstract class Client
 	 * Handles an incoming packet
 	 *
 	 * @throws DevicesModuleExceptions\Terminate
+	 * @throws Exceptions\Runtime
 	 */
 	private function handlePacket(Mqtt\Packet $packet): void
 	{
@@ -944,6 +950,9 @@ abstract class Client
 		}
 	}
 
+	/**
+	 * @throws InvalidArgumentException
+	 */
 	private function getConnector(): Socket\ConnectorInterface
 	{
 		return new Socket\Connector($this->eventLoop);

@@ -21,6 +21,7 @@ use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\FbMqttConnector\Consumers;
 use FastyBird\FbMqttConnector\Entities;
+use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
@@ -56,6 +57,8 @@ final class ExtensionAttribute implements Consumers\Consumer
 
 	/**
 	 * @throws DBAL\Exception
+	 * @throws Exceptions\InvalidState
+	 * @throws Exceptions\Runtime
 	 */
 	public function consume(Entities\Messages\Entity $entity): bool
 	{

@@ -251,6 +251,9 @@ final class FbMqttV1 extends Client
 		}
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	protected function onMessage(Mqtt\Message $message): void
 	{
 		parent::onMessage($message);

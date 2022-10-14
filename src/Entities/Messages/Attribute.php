@@ -54,6 +54,9 @@ abstract class Attribute extends Entity
 	/** @var string|Array<string> */
 	private string|array $value;
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	public function __construct(
 		Uuid\UuidInterface $connector,
 		string $device,

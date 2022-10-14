@@ -41,6 +41,10 @@ final class V1Parser
 	{
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 * @throws Exceptions\ParseMessage
+	 */
 	public function parse(
 		Uuid\UuidInterface $connector,
 		string $topic,
@@ -102,6 +106,9 @@ final class V1Parser
 		throw new Exceptions\ParseMessage('Provided topic is not valid');
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	private function parseDeviceAttribute(
 		Uuid\UuidInterface $connector,
 		string $topic,
@@ -119,6 +126,9 @@ final class V1Parser
 		);
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	private function parseDeviceHardwareInfo(
 		Uuid\UuidInterface $connector,
 		string $topic,
@@ -137,6 +147,9 @@ final class V1Parser
 		);
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	private function parseDeviceFirmwareInfo(
 		Uuid\UuidInterface $connector,
 		string $topic,
@@ -155,6 +168,10 @@ final class V1Parser
 		);
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 * @throws Exceptions\ParseMessage
+	 */
 	private function parseDeviceProperty(
 		Uuid\UuidInterface $connector,
 		string $topic,
@@ -178,6 +195,9 @@ final class V1Parser
 		return $entity;
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 */
 	private function parseChannelAttribute(
 		Uuid\UuidInterface $connector,
 		string $device,
@@ -197,6 +217,10 @@ final class V1Parser
 		);
 	}
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 * @throws Exceptions\ParseMessage
+	 */
 	private function parseChannelProperty(
 		Uuid\UuidInterface $connector,
 		string $device,

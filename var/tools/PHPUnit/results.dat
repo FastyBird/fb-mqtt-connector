@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Tests\\Cases\\Unit\\DI\\ServicesTest::testServicesRegistration":4},"times":{"Tests\\Cases\\Unit\\DI\\ServicesTest::testServicesRegistration":0.217,"Tests\\Cases\\Unit\\Connector\\ConnectorFactoryTest::testCreateConnector":0.565}}

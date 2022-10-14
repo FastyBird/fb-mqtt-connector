@@ -73,6 +73,10 @@ final class PropertyAttribute
 	/** @var string|Array<string>|Array<float>|Array<null>|bool|MetadataTypes\DataType|null */
 	private MetadataTypes\DataType|string|array|bool|null $value = null;
 
+	/**
+	 * @throws Exceptions\InvalidArgument
+	 * @throws Exceptions\ParseMessage
+	 */
 	public function __construct(private readonly string $attribute, string $value)
 	{
 		if (!in_array($attribute, self::ALLOWED_ATTRIBUTES, true)) {
@@ -119,6 +123,9 @@ final class PropertyAttribute
 		];
 	}
 
+	/**
+	 * @throws Exceptions\ParseMessage
+	 */
 	private function parseValue(string $value): void
 	{
 		if (
