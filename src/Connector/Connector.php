@@ -63,6 +63,7 @@ final class Connector implements DevicesModuleConnectors\Connector
 	}
 
 	/**
+	 * @throws DevicesModuleExceptions\InvalidState
 	 * @throws DevicesModuleExceptions\Terminate
 	 * @throws InvalidArgumentException
 	 * @throws MetadataExceptions\FileNotFound

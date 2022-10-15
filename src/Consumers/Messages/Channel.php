@@ -25,6 +25,7 @@ use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Types as MetadataTypes;
+use IPub\DoctrineCrud\Exceptions as DoctrineCrudExceptions;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
@@ -149,6 +150,8 @@ final class Channel implements Consumers\Consumer
 
 	/**
 	 * @phpstan-param Utils\ArrayHash<string> $properties
+	 *
+	 * @throws DoctrineCrudExceptions\InvalidArgumentException
 	 */
 	private function setChannelProperties(
 		DevicesModuleEntities\Channels\Channel $channel,
@@ -178,6 +181,8 @@ final class Channel implements Consumers\Consumer
 
 	/**
 	 * @phpstan-param Utils\ArrayHash<string> $controls
+	 *
+	 * @throws DoctrineCrudExceptions\InvalidArgumentException
 	 */
 	private function setChannelControls(
 		DevicesModuleEntities\Channels\Channel $channel,

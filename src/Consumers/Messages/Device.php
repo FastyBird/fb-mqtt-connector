@@ -17,6 +17,7 @@ namespace FastyBird\FbMqttConnector\Consumers\Messages;
 
 use Doctrine\DBAL;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
+use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\FbMqttConnector\Consumers;
@@ -26,6 +27,8 @@ use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Types as MetadataTypes;
+use IPub\DoctrineCrud\Exceptions as DoctrineCrudExceptions;
+use IPub\DoctrineOrmQuery\Exceptions as DoctrineOrmQueryExceptions;
 use Nette;
 use Nette\Utils;
 use Psr\Log;
@@ -66,6 +69,9 @@ final class Device implements Consumers\Consumer
 
 	/**
 	 * @throws DBAL\Exception
+	 * @throws DevicesModuleExceptions\InvalidState
+	 * @throws DoctrineOrmQueryExceptions\InvalidStateException
+	 * @throws DoctrineOrmQueryExceptions\QueryException
 	 * @throws Exceptions\InvalidState
 	 * @throws Exceptions\Runtime
 	 * @throws Metadata\Exceptions\FileNotFound
@@ -187,6 +193,10 @@ final class Device implements Consumers\Consumer
 	/**
 	 * @phpstan-param Utils\ArrayHash<string> $properties
 	 *
+	 * @throws DevicesModuleExceptions\InvalidState
+	 * @throws DoctrineCrudExceptions\InvalidArgumentException
+	 * @throws DoctrineOrmQueryExceptions\InvalidStateException
+	 * @throws DoctrineOrmQueryExceptions\QueryException
 	 * @throws Metadata\Exceptions\FileNotFound
 	 */
 	private function setDeviceProperties(
@@ -297,6 +307,8 @@ final class Device implements Consumers\Consumer
 
 	/**
 	 * @phpstan-param Utils\ArrayHash<string> $controls
+	 *
+	 * @throws DoctrineCrudExceptions\InvalidArgumentException
 	 */
 	private function setDeviceControls(
 		DevicesModuleEntities\Devices\Device $device,
@@ -322,6 +334,8 @@ final class Device implements Consumers\Consumer
 
 	/**
 	 * @phpstan-param Utils\ArrayHash<string> $channels
+	 *
+	 * @throws DoctrineCrudExceptions\InvalidArgumentException
 	 */
 	private function setDeviceChannels(
 		DevicesModuleEntities\Devices\Device $device,

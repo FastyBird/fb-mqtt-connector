@@ -139,6 +139,7 @@ abstract class Client
 	 * Connects to a broker
 	 *
 	 * @throws InvalidArgumentException
+	 * @throws DevicesModuleExceptions\InvalidState
 	 * @throws Metadata\Exceptions\FileNotFound
 	 */
 	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface

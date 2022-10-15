@@ -30,6 +30,7 @@ use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Types as MetadataTypes;
+use IPub\DoctrineOrmQuery\Exceptions as DoctrineOrmQueryExceptions;
 use Nette\Utils;
 use Psr\Log;
 use React\EventLoop;
@@ -151,6 +152,9 @@ final class FbMqttV1 extends Client
 	}
 
 	/**
+	 * @throws DevicesModuleExceptions\InvalidState
+	 * @throws DoctrineOrmQueryExceptions\InvalidStateException
+	 * @throws DoctrineOrmQueryExceptions\QueryException
 	 * @throws Metadata\Exceptions\FileNotFound
 	 */
 	protected function onClose(Mqtt\Connection $connection): void
