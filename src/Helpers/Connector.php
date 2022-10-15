@@ -15,6 +15,7 @@
 
 namespace FastyBird\FbMqttConnector\Helpers;
 
+use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\FbMqttConnector;
 use FastyBird\FbMqttConnector\Types;
@@ -53,6 +54,7 @@ final class Connector
 	 */
 
 	/**
+	 * @throws DevicesModuleExceptions\InvalidState
 	 * @throws MetadataExceptions\FileNotFound
 	 */
 	public function getConfiguration(
