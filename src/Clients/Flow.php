@@ -13,7 +13,7 @@
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Clients;
+namespace FastyBird\Connector\FbMqtt\Clients;
 
 use BinSoul\Net\Mqtt;
 use React\Promise;

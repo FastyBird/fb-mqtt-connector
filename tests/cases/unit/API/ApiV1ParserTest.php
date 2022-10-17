@@ -1,13 +1,13 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Unit\API;
+namespace FastyBird\Connector\FbMqtt\Tests\Cases\Unit\API;
 
-use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\Connector\FbMqtt\API;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Tests\Cases\Unit\BaseTestCase;
 use Nette;
 use Ramsey\Uuid;
-use Tests\Cases\Unit\BaseTestCase;
 use Throwable;
 
 final class ApiV1ParserTest extends BaseTestCase

@@ -13,12 +13,12 @@
  * @date           24.02.20
  */
 
-namespace FastyBird\FbMqttConnector\API;
+namespace FastyBird\Connector\FbMqtt\API;
 
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Helpers;
-use FastyBird\FbMqttConnector\Types;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Helpers;
+use FastyBird\Connector\FbMqtt\Types;
 use Nette;
 use Ramsey\Uuid;
 use function preg_match;

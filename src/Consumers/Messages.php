@@ -13,9 +13,9 @@
  * @date           16.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Consumers;
+namespace FastyBird\Connector\FbMqtt\Consumers;
 
-use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\Metadata;
 use Nette;
 use Psr\Log;

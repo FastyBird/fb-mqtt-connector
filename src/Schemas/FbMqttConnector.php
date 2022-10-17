@@ -13,10 +13,10 @@
  * @date           20.02.21
  */
 
-namespace FastyBird\FbMqttConnector\Schemas;
+namespace FastyBird\Connector\FbMqtt\Schemas;
 
+use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\DevicesModule\Schemas as DevicesModuleSchemas;
-use FastyBird\FbMqttConnector\Entities;
 use FastyBird\Metadata\Types as MetadataTypes;
 
 /**

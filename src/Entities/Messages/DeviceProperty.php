@@ -13,7 +13,7 @@
  * @date           05.03.20
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\Connector\FbMqtt\Entities\Messages;
 
 /**
  * Device property

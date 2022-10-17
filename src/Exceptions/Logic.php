@@ -13,7 +13,7 @@
  * @date           15.10.21
  */
 
-namespace FastyBird\FbMqttConnector\Exceptions;
+namespace FastyBird\Connector\FbMqtt\Exceptions;
 
 use LogicException as PHPLogicException;
 

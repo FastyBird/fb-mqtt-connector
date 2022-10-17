@@ -1,13 +1,13 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Unit\DI;
+namespace FastyBird\Connector\FbMqtt\Tests\Cases\Unit\DI;
 
-use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Consumers;
+use FastyBird\Connector\FbMqtt\API;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Tests\Cases\Unit\BaseTestCase;
 use Nette;
-use Tests\Cases\Unit\BaseTestCase;
 
-final class ServicesTest extends BaseTestCase
+final class FbMqttExtensionTest extends BaseTestCase
 {
 
 	/**

@@ -13,9 +13,9 @@
  * @date           24.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\Connector\FbMqtt\Entities\Messages;
 
-use FastyBird\FbMqttConnector;
+use FastyBird\Connector\FbMqtt;
 use Ramsey\Uuid;
 use SplObjectStorage;
 use function array_merge;
@@ -31,7 +31,7 @@ use function array_merge;
 abstract class Property extends Entity
 {
 
-	private string|null $value = FbMqttConnector\Constants::VALUE_NOT_SET;
+	private string|null $value = FbMqtt\Constants::VALUE_NOT_SET;
 
 	/** @var SplObjectStorage<PropertyAttribute, null> */
 	private SplObjectStorage $attributes;
@@ -96,7 +96,7 @@ abstract class Property extends Entity
 			$return[$attribute->getAttribute()] = $attribute->getValue();
 		}
 
-		if ($this->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
+		if ($this->getValue() !== FbMqtt\Constants::VALUE_NOT_SET) {
 			$return['value'] = $this->getValue();
 		}
 

@@ -1,18 +1,18 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Unit\Connector;
+namespace FastyBird\Connector\FbMqtt\Tests\Cases\Unit\Connector;
 
+use FastyBird\Connector\FbMqtt\Connector;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Tests\Cases\Unit\DbTestCase;
 use FastyBird\DevicesModule;
 use FastyBird\DevicesModule\DataStorage as DevicesModuleDataStorage;
-use FastyBird\FbMqttConnector\Connector;
-use FastyBird\FbMqttConnector\Exceptions;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use League\Flysystem;
 use Nette;
 use Ramsey\Uuid;
 use RuntimeException;
-use Tests\Cases\Unit\DbTestCase;
 use function assert;
 
 final class ConnectorFactoryTest extends DbTestCase
@@ -39,6 +39,8 @@ final class ConnectorFactoryTest extends DbTestCase
 	/**
 	 * @throws Exceptions\InvalidArgument
 	 * @throws MetadataExceptions\FileNotFound
+	 * @throws MetadataExceptions\InvalidArgument
+	 * @throws MetadataExceptions\Logic
 	 * @throws Nette\DI\MissingServiceException
 	 * @throws RuntimeException
 	 */

@@ -13,16 +13,16 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Consumers\Messages;
+namespace FastyBird\Connector\FbMqtt\Consumers\Messages;
 
 use Doctrine\DBAL;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Helpers;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Types as MetadataTypes;
 use IPub\DoctrineCrud\Exceptions as DoctrineCrudExceptions;

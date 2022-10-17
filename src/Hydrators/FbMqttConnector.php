@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * FbMqttConnector.php
+ * FbMqtt.php
  *
  * @license        More in LICENSE.md
  * @copyright      https://www.fastybird.com
@@ -13,10 +13,10 @@
  * @date           07.12.21
  */
 
-namespace FastyBird\FbMqttConnector\Hydrators;
+namespace FastyBird\Connector\FbMqtt\Hydrators;
 
+use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\DevicesModule\Hydrators as DevicesModuleHydrators;
-use FastyBird\FbMqttConnector\Entities;
 
 /**
  * FastyBird MQTT Connector entity hydrator

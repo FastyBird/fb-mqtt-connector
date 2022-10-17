@@ -13,7 +13,7 @@
  * @date           25.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Exceptions;
+namespace FastyBird\Connector\FbMqtt\Exceptions;
 
 use RuntimeException;
 

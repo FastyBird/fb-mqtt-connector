@@ -13,19 +13,20 @@
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Clients;
+namespace FastyBird\Connector\FbMqtt\Clients;
 
 use BinSoul\Net\Mqtt;
 use Closure;
+use FastyBird\Connector\FbMqtt;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Helpers;
+use FastyBird\Connector\FbMqtt\Types;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
-use FastyBird\FbMqttConnector;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Helpers;
-use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
+use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use InvalidArgumentException;
 use Nette;
 use Psr\Log;
@@ -140,7 +141,12 @@ abstract class Client
 	 *
 	 * @throws InvalidArgumentException
 	 * @throws DevicesModuleExceptions\InvalidState
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
+	 * @throws MetadataExceptions\InvalidArgument
+	 * @throws MetadataExceptions\InvalidData
+	 * @throws MetadataExceptions\InvalidState
+	 * @throws MetadataExceptions\Logic
+	 * @throws MetadataExceptions\MalformedInput
 	 */
 	public function connect(int $timeout = 5): Promise\ExtendedPromiseInterface
 	{
@@ -342,7 +348,7 @@ abstract class Client
 	public function publish(
 		string $topic,
 		string|null $payload,
-		int $qos = FbMqttConnector\Constants::MQTT_API_QOS_0,
+		int $qos = FbMqtt\Constants::MQTT_API_QOS_0,
 		bool $retain = false,
 	): Promise\ExtendedPromiseInterface
 	{

@@ -13,9 +13,9 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Consumers\Messages;
+namespace FastyBird\Connector\FbMqtt\Consumers\Messages;
 
-use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\Metadata\Types as MetadataTypes;
 use function array_merge;
 use function boolval;

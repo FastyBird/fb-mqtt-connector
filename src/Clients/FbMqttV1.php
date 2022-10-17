@@ -13,22 +13,23 @@
  * @date           23.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Clients;
+namespace FastyBird\Connector\FbMqtt\Clients;
 
 use BinSoul\Net\Mqtt;
 use DateTimeInterface;
+use FastyBird\Connector\FbMqtt;
+use FastyBird\Connector\FbMqtt\API;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Helpers;
+use FastyBird\Connector\FbMqtt\Types;
 use FastyBird\DateTimeFactory;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
-use FastyBird\FbMqttConnector;
-use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Helpers;
-use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
+use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use FastyBird\Metadata\Types as MetadataTypes;
 use IPub\DoctrineOrmQuery\Exceptions as DoctrineOrmQueryExceptions;
 use Nette\Utils;
@@ -58,12 +59,12 @@ final class FbMqttV1 extends Client
 
 	// MQTT api topics subscribe format
 	public const DEVICES_TOPICS = [
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+',
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+',
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+',
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+',
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+/+',
-		FbMqttConnector\Constants::MQTT_API_PREFIX . FbMqttConnector\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+/+',
+		FbMqtt\Constants::MQTT_API_PREFIX . FbMqtt\Constants::MQTT_API_V1_VERSION_PREFIX . '/+/+/+/+/+/+/+',
 	];
 
 	// When new client is connected, broker send specific payload
@@ -117,7 +118,7 @@ final class FbMqttV1 extends Client
 
 	/**
 	 * @throws DevicesModuleExceptions\Terminate
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
 	 * @throws Throwable
 	 */
 	protected function handleCommunication(): void
@@ -155,7 +156,12 @@ final class FbMqttV1 extends Client
 	 * @throws DevicesModuleExceptions\InvalidState
 	 * @throws DoctrineOrmQueryExceptions\InvalidStateException
 	 * @throws DoctrineOrmQueryExceptions\QueryException
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
+	 * @throws MetadataExceptions\InvalidArgument
+	 * @throws MetadataExceptions\InvalidData
+	 * @throws MetadataExceptions\InvalidState
+	 * @throws MetadataExceptions\Logic
+	 * @throws MetadataExceptions\MalformedInput
 	 */
 	protected function onClose(Mqtt\Connection $connection): void
 	{
@@ -268,7 +274,7 @@ final class FbMqttV1 extends Client
 				$param1,
 				$param2,
 				$param3,
-			] = explode(FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER, $message->getTopic()) + [
+			] = explode(FbMqtt\Constants::MQTT_TOPIC_DELIMITER, $message->getTopic()) + [
 				null,
 				null,
 				null,
@@ -419,7 +425,7 @@ final class FbMqttV1 extends Client
 
 	/**
 	 * @throws DevicesModuleExceptions\Terminate
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
 	 * @throws Throwable
 	 */
 	private function processDevice(MetadataEntities\DevicesModule\Device $device): bool
@@ -433,7 +439,7 @@ final class FbMqttV1 extends Client
 
 	/**
 	 * @throws DevicesModuleExceptions\Terminate
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
 	 * @throws Throwable
 	 */
 	private function writeDeviceProperty(MetadataEntities\DevicesModule\Device $device): bool
@@ -498,7 +504,7 @@ final class FbMqttV1 extends Client
 
 	/**
 	 * @throws DevicesModuleExceptions\Terminate
-	 * @throws Metadata\Exceptions\FileNotFound
+	 * @throws MetadataExceptions\FileNotFound
 	 * @throws Throwable
 	 */
 	private function writeChannelsProperty(MetadataEntities\DevicesModule\Device $device): bool

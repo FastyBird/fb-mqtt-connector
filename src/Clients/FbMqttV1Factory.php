@@ -13,9 +13,9 @@
  * @date           05.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Clients;
+namespace FastyBird\Connector\FbMqtt\Clients;
 
-use FastyBird\FbMqttConnector\Types;
+use FastyBird\Connector\FbMqtt\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
 
 /**

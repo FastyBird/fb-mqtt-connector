@@ -13,7 +13,7 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Types;
+namespace FastyBird\Connector\FbMqtt\Types;
 
 use Consistence;
 use function strval;

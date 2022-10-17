@@ -13,10 +13,10 @@
  * @date           05.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\Connector\FbMqtt\Entities\Messages;
 
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Types;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Types;
 use Ramsey\Uuid;
 use function array_merge;
 use function in_array;

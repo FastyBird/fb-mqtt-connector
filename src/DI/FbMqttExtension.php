@@ -1,7 +1,7 @@
 <?php declare(strict_types = 1);
 
 /**
- * FbMqttConnectorExtension.php
+ * FbMqttExtension.php
  *
  * @license        More in license.md
  * @copyright      https://www.fastybird.com
@@ -13,18 +13,18 @@
  * @date           03.12.20
  */
 
-namespace FastyBird\FbMqttConnector\DI;
+namespace FastyBird\Connector\FbMqtt\DI;
 
 use Doctrine\Persistence;
+use FastyBird\Connector\FbMqtt\API;
+use FastyBird\Connector\FbMqtt\Clients;
+use FastyBird\Connector\FbMqtt\Connector;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Helpers;
+use FastyBird\Connector\FbMqtt\Hydrators;
+use FastyBird\Connector\FbMqtt\Schemas;
 use FastyBird\DevicesModule\DI as DevicesModuleDI;
-use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Clients;
-use FastyBird\FbMqttConnector\Connector;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Helpers;
-use FastyBird\FbMqttConnector\Hydrators;
-use FastyBird\FbMqttConnector\Schemas;
 use Nette;
 use Nette\DI;
 use const DIRECTORY_SEPARATOR;
@@ -37,7 +37,7 @@ use const DIRECTORY_SEPARATOR;
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-class FbMqttConnectorExtension extends DI\CompilerExtension
+class FbMqttExtension extends DI\CompilerExtension
 {
 
 	public const NAME = 'fbFbMqttConnector';
@@ -51,7 +51,7 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 			Nette\Configurator $config,
 			DI\Compiler $compiler,
 		) use ($extensionName): void {
-			$compiler->addExtension($extensionName, new FbMqttConnectorExtension());
+			$compiler->addExtension($extensionName, new FbMqttExtension());
 		};
 	}
 
@@ -179,7 +179,7 @@ class FbMqttConnectorExtension extends DI\CompilerExtension
 		if ($ormAnnotationDriverChainService instanceof DI\Definitions\ServiceDefinition) {
 			$ormAnnotationDriverChainService->addSetup('addDriver', [
 				$ormAnnotationDriverService,
-				'FastyBird\FbMqttConnector\Entities',
+				'FastyBird\Connector\FbMqtt\Entities',
 			]);
 		}
 	}

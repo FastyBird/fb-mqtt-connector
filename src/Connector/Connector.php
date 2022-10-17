@@ -13,14 +13,14 @@
  * @date           23.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Connector;
+namespace FastyBird\Connector\FbMqtt\Connector;
 
+use FastyBird\Connector\FbMqtt\Clients;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Helpers;
+use FastyBird\Connector\FbMqtt\Types;
 use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
-use FastyBird\FbMqttConnector\Clients;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Helpers;
-use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use InvalidArgumentException;
@@ -67,6 +67,11 @@ final class Connector implements DevicesModuleConnectors\Connector
 	 * @throws DevicesModuleExceptions\Terminate
 	 * @throws InvalidArgumentException
 	 * @throws MetadataExceptions\FileNotFound
+	 * @throws MetadataExceptions\InvalidArgument
+	 * @throws MetadataExceptions\InvalidData
+	 * @throws MetadataExceptions\InvalidState
+	 * @throws MetadataExceptions\Logic
+	 * @throws MetadataExceptions\MalformedInput
 	 */
 	public function execute(): void
 	{

@@ -13,12 +13,12 @@
  * @date           23.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Helpers;
+namespace FastyBird\Connector\FbMqtt\Helpers;
 
 use Doctrine\DBAL;
 use Doctrine\ORM;
 use Doctrine\Persistence;
-use FastyBird\FbMqttConnector\Exceptions;
+use FastyBird\Connector\FbMqtt\Exceptions;
 use Nette;
 use Throwable;
 use function gc_collect_cycles;

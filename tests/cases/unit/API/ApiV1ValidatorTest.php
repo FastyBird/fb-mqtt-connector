@@ -1,10 +1,10 @@
 <?php declare(strict_types = 1);
 
-namespace Tests\Cases\Unit\API;
+namespace FastyBird\Connector\FbMqtt\Tests\Cases\Unit\API;
 
-use FastyBird\FbMqttConnector\API;
-use FastyBird\FbMqttConnector\Entities;
-use Tests\Cases\Unit\BaseTestCase;
+use FastyBird\Connector\FbMqtt\API;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Tests\Cases\Unit\BaseTestCase;
 
 final class ApiV1ValidatorTest extends BaseTestCase
 {

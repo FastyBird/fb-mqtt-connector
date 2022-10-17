@@ -13,7 +13,7 @@
  * @date           23.01.22
  */
 
-namespace FastyBird\FbMqttConnector\Entities;
+namespace FastyBird\Connector\FbMqtt\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;

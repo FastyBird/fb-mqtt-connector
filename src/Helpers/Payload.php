@@ -13,7 +13,7 @@
  * @date           21.11.21
  */
 
-namespace FastyBird\FbMqttConnector\Helpers;
+namespace FastyBird\Connector\FbMqtt\Helpers;
 
 use function is_string;
 use function preg_replace;

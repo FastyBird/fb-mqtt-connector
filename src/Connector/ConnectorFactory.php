@@ -13,10 +13,10 @@
  * @date           23.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Connector;
+namespace FastyBird\Connector\FbMqtt\Connector;
 
+use FastyBird\Connector\FbMqtt\Connector;
 use FastyBird\DevicesModule\Connectors as DevicesModuleConnectors;
-use FastyBird\FbMqttConnector\Connector;
 use FastyBird\Metadata\Entities as MetadataEntities;
 
 /**

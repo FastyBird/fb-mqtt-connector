@@ -13,7 +13,7 @@
  * @date           23.07.22
  */
 
-namespace FastyBird\FbMqttConnector\Types;
+namespace FastyBird\Connector\FbMqtt\Types;
 
 use Consistence;
 use FastyBird\Metadata\Types as MetadataTypes;

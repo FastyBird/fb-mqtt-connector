@@ -13,10 +13,10 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Hydrators;
+namespace FastyBird\Connector\FbMqtt\Hydrators;
 
+use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\DevicesModule\Hydrators as DevicesModuleHydrators;
-use FastyBird\FbMqttConnector\Entities;
 
 /**
  * FastyBird MQTT device entity hydrator

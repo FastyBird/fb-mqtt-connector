@@ -13,18 +13,18 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Consumers\Messages;
+namespace FastyBird\Connector\FbMqtt\Consumers\Messages;
 
 use Doctrine\DBAL;
+use FastyBird\Connector\FbMqtt;
+use FastyBird\Connector\FbMqtt\Consumers;
+use FastyBird\Connector\FbMqtt\Entities;
+use FastyBird\Connector\FbMqtt\Helpers;
 use FastyBird\DevicesModule\Entities as DevicesModuleEntities;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
 use FastyBird\DevicesModule\Queries as DevicesModuleQueries;
 use FastyBird\DevicesModule\Utilities as DevicesModuleUtilities;
-use FastyBird\FbMqttConnector;
-use FastyBird\FbMqttConnector\Consumers;
-use FastyBird\FbMqttConnector\Entities;
-use FastyBird\FbMqttConnector\Helpers;
 use FastyBird\Metadata;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use Nette;
@@ -79,7 +79,7 @@ final class ChannelProperty implements Consumers\Consumer
 			return false;
 		}
 
-		if ($entity->getValue() !== FbMqttConnector\Constants::VALUE_NOT_SET) {
+		if ($entity->getValue() !== FbMqtt\Constants::VALUE_NOT_SET) {
 			$deviceItem = $this->devicesDataStorageRepository->findByIdentifier(
 				$entity->getConnector(),
 				$entity->getDevice(),

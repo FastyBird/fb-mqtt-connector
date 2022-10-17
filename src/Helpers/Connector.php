@@ -13,12 +13,12 @@
  * @date           04.08.22
  */
 
-namespace FastyBird\FbMqttConnector\Helpers;
+namespace FastyBird\Connector\FbMqtt\Helpers;
 
+use FastyBird\Connector\FbMqtt;
+use FastyBird\Connector\FbMqtt\Types;
 use FastyBird\DevicesModule\Exceptions as DevicesModuleExceptions;
 use FastyBird\DevicesModule\Models as DevicesModuleModels;
-use FastyBird\FbMqttConnector;
-use FastyBird\FbMqttConnector\Types;
 use FastyBird\Metadata\Entities as MetadataEntities;
 use FastyBird\Metadata\Exceptions as MetadataExceptions;
 use Nette;
@@ -56,6 +56,11 @@ final class Connector
 	/**
 	 * @throws DevicesModuleExceptions\InvalidState
 	 * @throws MetadataExceptions\FileNotFound
+	 * @throws MetadataExceptions\InvalidArgument
+	 * @throws MetadataExceptions\InvalidData
+	 * @throws MetadataExceptions\InvalidState
+	 * @throws MetadataExceptions\Logic
+	 * @throws MetadataExceptions\MalformedInput
 	 */
 	public function getConfiguration(
 		Uuid\UuidInterface $connectorId,
@@ -70,7 +75,7 @@ final class Connector
 					$configuration->getValue(),
 				)
 					? $configuration->getValue()
-					: FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
+					: FbMqtt\Constants::BROKER_LOCALHOST_ADDRESS;
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT) {
@@ -78,7 +83,7 @@ final class Connector
 					$configuration->getValue(),
 				)
 					? $configuration->getValue()
-					: FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
+					: FbMqtt\Constants::BROKER_LOCALHOST_PORT;
 			}
 
 			if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SECURED_PORT) {
@@ -86,7 +91,7 @@ final class Connector
 					$configuration->getValue(),
 				)
 					? $configuration->getValue()
-					: FbMqttConnector\Constants::BROKER_LOCALHOST_SECURED_PORT;
+					: FbMqtt\Constants::BROKER_LOCALHOST_SECURED_PORT;
 			}
 
 			if (
@@ -108,15 +113,15 @@ final class Connector
 		}
 
 		if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SERVER) {
-			return FbMqttConnector\Constants::BROKER_LOCALHOST_ADDRESS;
+			return FbMqtt\Constants::BROKER_LOCALHOST_ADDRESS;
 		}
 
 		if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_PORT) {
-			return FbMqttConnector\Constants::BROKER_LOCALHOST_PORT;
+			return FbMqtt\Constants::BROKER_LOCALHOST_PORT;
 		}
 
 		if ($type->getValue() === Types\ConnectorPropertyIdentifier::IDENTIFIER_SECURED_PORT) {
-			return FbMqttConnector\Constants::BROKER_LOCALHOST_SECURED_PORT;
+			return FbMqtt\Constants::BROKER_LOCALHOST_SECURED_PORT;
 		}
 
 		return null;

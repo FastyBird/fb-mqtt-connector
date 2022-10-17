@@ -13,9 +13,9 @@
  * @date           05.02.22
  */
 
-namespace FastyBird\FbMqttConnector\Consumers;
+namespace FastyBird\Connector\FbMqtt\Consumers;
 
-use FastyBird\FbMqttConnector\Entities;
+use FastyBird\Connector\FbMqtt\Entities;
 
 /**
  * Exchange messages consumer interface

@@ -13,9 +13,9 @@
  * @date           24.02.20
  */
 
-namespace FastyBird\FbMqttConnector\API;
+namespace FastyBird\Connector\FbMqtt\API;
 
-use FastyBird\FbMqttConnector;
+use FastyBird\Connector\FbMqtt;
 use Nette;
 use function preg_match;
 use function str_contains;
@@ -67,8 +67,8 @@ final class V1Validator
 	{
 		// Check if message is sent from broker
 		if (str_contains(
-			trim($topic, FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER),
-			FbMqttConnector\Constants::MQTT_TOPIC_DELIMITER . 'set',
+			trim($topic, FbMqtt\Constants::MQTT_TOPIC_DELIMITER),
+			FbMqtt\Constants::MQTT_TOPIC_DELIMITER . 'set',
 		)) {
 			return false;
 		}

@@ -13,7 +13,7 @@
  * @date           24.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\Connector\FbMqtt\Entities\Messages;
 
 use Nette;
 use Ramsey\Uuid;

@@ -13,11 +13,11 @@
  * @date           24.02.20
  */
 
-namespace FastyBird\FbMqttConnector\Entities\Messages;
+namespace FastyBird\Connector\FbMqtt\Entities\Messages;
 
-use FastyBird\FbMqttConnector;
-use FastyBird\FbMqttConnector\Exceptions;
-use FastyBird\FbMqttConnector\Helpers;
+use FastyBird\Connector\FbMqtt;
+use FastyBird\Connector\FbMqtt\Exceptions;
+use FastyBird\Connector\FbMqtt\Helpers;
 use FastyBird\Metadata\Types as MetadataTypes;
 use Nette;
 use Nette\Utils;
@@ -106,7 +106,7 @@ final class PropertyAttribute
 			$this->attribute === self::SETTABLE
 			|| $this->attribute === self::QUERYABLE
 		) {
-			return $this->value === FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE;
+			return $this->value === FbMqtt\Constants::PAYLOAD_BOOL_TRUE_VALUE;
 		}
 
 		return $this->value;
@@ -132,9 +132,9 @@ final class PropertyAttribute
 			$this->getAttribute() === self::SETTABLE
 			|| $this->getAttribute() === self::QUERYABLE
 		) {
-			$this->value = $value === FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE
-				? FbMqttConnector\Constants::PAYLOAD_BOOL_TRUE_VALUE
-				: FbMqttConnector\Constants::PAYLOAD_BOOL_FALSE_VALUE;
+			$this->value = $value === FbMqtt\Constants::PAYLOAD_BOOL_TRUE_VALUE
+				? FbMqtt\Constants::PAYLOAD_BOOL_TRUE_VALUE
+				: FbMqtt\Constants::PAYLOAD_BOOL_FALSE_VALUE;
 
 		} elseif ($this->getAttribute() === self::NAME) {
 			$this->value = Helpers\Payload::cleanName($value);
@@ -185,14 +185,14 @@ final class PropertyAttribute
 
 				$this->value = array_unique($value);
 
-			} elseif ($value === FbMqttConnector\Constants::VALUE_NOT_SET || $value === '') {
+			} elseif ($value === FbMqtt\Constants::VALUE_NOT_SET || $value === '') {
 				$this->value = null;
 
 			} elseif (!in_array($value, self::FORMAT_ALLOWED_PAYLOADS, true)) {
 				throw new Exceptions\ParseMessage('Provided payload is not valid');
 			}
 		} else {
-			$this->value = $value === FbMqttConnector\Constants::VALUE_NOT_SET || $value === '' ? null : $value;
+			$this->value = $value === FbMqtt\Constants::VALUE_NOT_SET || $value === '' ? null : $value;
 		}
 	}
 
