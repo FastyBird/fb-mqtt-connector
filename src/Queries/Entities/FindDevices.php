@@ -13,7 +13,7 @@
  * @date           29.07.23
  */
 
-namespace FastyBird\Connector\FbMqtt\Queries;
+namespace FastyBird\Connector\FbMqtt\Queries\Entities;
 
 use FastyBird\Connector\FbMqtt\Entities;
 use FastyBird\Module\Devices\Queries as DevicesQueries;
@@ -22,14 +22,14 @@ use FastyBird\Module\Devices\Queries as DevicesQueries;
  * Find devices entities query
  *
  * @template T of Entities\FbMqttDevice
- * @extends  DevicesQueries\FindDevices<T>
+ * @extends  DevicesQueries\Entities\FindDevices<T>
  *
  * @package        FastyBird:FbMqttConnector!
  * @subpackage     Queries
  *
  * @author         Adam Kadlec <adam.kadlec@fastybird.com>
  */
-class FindDevices extends DevicesQueries\FindDevices
+class FindDevices extends DevicesQueries\Entities\FindDevices
 {
 
 }
